@@ -347,7 +347,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
     TRY.
 
-        DATA(comp) = z2ui5_cl_util_api=>rtti_get_t_attri_by_any( mr_tab ).
+        DATA(comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( mr_tab ).
 
         IF xsdbool( line_exists( comp[ name = 'ZZROW_ID' ] ) ) = abap_false.
           APPEND LINES OF VALUE cl_abap_structdescr=>component_table(

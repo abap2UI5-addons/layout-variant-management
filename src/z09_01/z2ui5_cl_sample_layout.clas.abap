@@ -6,7 +6,7 @@ CLASS z2ui5_cl_sample_layout DEFINITION
     INTERFACES z2ui5_if_app.
 
     DATA mt_table  TYPE REF TO data.
-    DATA ms_layout TYPE z2ui5_cl_pop_layout_v2=>ty_s_layout.
+    DATA ms_layout TYPE z2ui5_cl_pop_display_layout=>ty_s_layout.
 
     TYPES:
       BEGIN OF ty_s_tab,
@@ -46,7 +46,7 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
       WHEN OTHERS.
 
-        client = z2ui5_cl_pop_layout_v2=>on_event_layout( client = client
+        client = z2ui5_cl_pop_display_layout=>on_event_layout( client = client
                                                           layout = ms_layout ).
 
     ENDCASE.
@@ -86,7 +86,7 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
                )->overflow_toolbar(
                  )->toolbar_spacer( ).
 
-    headder = z2ui5_cl_pop_layout_v2=>render_layout_function( xml    = headder
+    headder = z2ui5_cl_pop_display_layout=>render_layout_function( xml    = headder
                                                               client = client ).
 
     DATA(columns) = table->columns( ).
@@ -196,7 +196,7 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
     DATA(class) = cl_abap_classdescr=>get_class_name( me ).
     SHIFT class LEFT DELETING LEADING '\CLASS='.
 
-    ms_layout = z2ui5_cl_pop_layout_v2=>init_layout( control  = z2ui5_cl_pop_layout_v2=>m_table
+    ms_layout = z2ui5_cl_pop_display_layout=>init_layout( control  = z2ui5_cl_pop_display_layout=>m_table
                                                      data     = mt_table
                                                      handle01 = CONV #( class )
                                                      handle02 = CONV #( 'z2ui5_t_01' )
@@ -213,7 +213,7 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
     TRY.
 
-        DATA(app) = CAST z2ui5_cl_pop_layout_v2( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+        DATA(app) = CAST z2ui5_cl_pop_display_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
 
         ms_layout = app->ms_layout.
 

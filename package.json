@@ -1,0 +1,28 @@
+{
+    "name": "abap2ui5-layout_management",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Layout Management for abap2UI5.",
+    "scripts": {
+      "syfixes": "find . -type f -name '*.abap' -exec sed -i -e 's/ RAISE EXCEPTION TYPE cx_sy_itab_line_not_found/ ASSERT 1 = 0/g' {} + ",
+      "downport": "rm -rf downport && cp -r src downport && abaplint --fix ./ci/abaplint-downport.jsonc && npm run syfixes"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/abap2UI5-addons/layout-management.git"
+    },
+    "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/abap2UI5-addons/layout-management.git"
+    },
+    "homepage": "https://github.com/abap2UI5-addons/layout-management#readme",
+    "devDependencies": {
+      "@abaplint/cli": "^2.106.9",
+      "@abaplint/database-sqlite": "^2.8.0",
+      "@abaplint/runtime": "^2.8.24",
+      "@abaplint/transpiler-cli": "^2.8.24"
+    },
+    "dependencies": {
+      "npm-check-updates": "^16.14.18"
+    }
+  }

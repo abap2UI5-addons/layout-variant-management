@@ -1197,10 +1197,10 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
   METHOD set_text.
     IF layout-alternative_text IS INITIAL.
 *      result = z2ui5_cl_stmpncfctn_api=>rtti_get_data_element_texts( CONV #( layout-rollname ) )-long.
-      result = z2ui5_cl_stmpncfctn_api=>rtti_get_data_element_texts( CONV #( layout-rollname ) )-short.
+      result = z2ui5_cl_util=>rtti_get_data_element_texts( CONV #( layout-rollname ) )-short.
     ELSE.
 *      result = z2ui5_cl_stmpncfctn_api=>rtti_get_data_element_texts( CONV #( layout-alternative_text ) )-long.
-      result = z2ui5_cl_stmpncfctn_api=>rtti_get_data_element_texts( CONV #( layout-alternative_text ) )-short.
+      result = z2ui5_cl_util=>rtti_get_data_element_texts( CONV #( layout-alternative_text ) )-short.
     ENDIF.
 
     IF result IS INITIAL.

@@ -373,7 +373,7 @@ CLASS z2ui5_cl_pop_display_f4_help IMPLEMENTATION.
 
   METHOD get_txt.
 
-    result = z2ui5_cl_stmpncfctn_api=>rtti_get_data_element_texts( roll )-long.
+    result = z2ui5_cl_util=>rtti_get_data_element_texts( roll )-long.
 
   ENDMETHOD.
 

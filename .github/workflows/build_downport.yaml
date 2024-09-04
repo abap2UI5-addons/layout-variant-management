@@ -21,7 +21,7 @@ jobs:
     - name: send to downport repository
       uses: peaceiris/actions-gh-pages@v3
       with:
-        external_repository: abap2UI5-downports/addon-layout-management
+        external_repository: abap2UI5-downports/addon-layout-variant-management
         user_name: 'github-actions[bot]'
         user_email: 'github-actions[bot]@users.noreply.github.com'
         publish_branch: main

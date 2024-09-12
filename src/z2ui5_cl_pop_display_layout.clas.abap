@@ -611,15 +611,15 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
     ENDIF.
 
     DATA(Head) = VALUE z2ui5_layo_t_01( guid     = ms_layout-s_head-guid
-                                   layout   = mv_layout
-                                   control  = ms_layout-s_head-control
-                                   handle01 = ms_layout-s_head-handle01
-                                   handle02 = ms_layout-s_head-handle02
-                                   handle03 = ms_layout-s_head-handle03
-                                   handle04 = ms_layout-s_head-handle04
-                                   descr    = mv_descr
-                                   def      = mv_def
-                                   uname    = user ).
+                                        layout   = mv_layout
+                                        control  = ms_layout-s_head-control
+                                        handle01 = ms_layout-s_head-handle01
+                                        handle02 = ms_layout-s_head-handle02
+                                        handle03 = ms_layout-s_head-handle03
+                                        handle04 = ms_layout-s_head-handle04
+                                        descr    = mv_descr
+                                        def      = mv_def
+                                        uname    = user ).
 
     LOOP AT ms_layout-t_layout INTO DATA(layout).
 
@@ -881,6 +881,12 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
     " create the tab first if the db fields were added/deleted
     DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
+
+    LOOP AT t_comp INTO DATA(comp).
+      IF   comp-type->type_kind = cl_abap_elemdescr=>typekind_oref.
+        DELETE t_comp.
+      ENDIF.
+    ENDLOOP.
 
     LOOP AT t_comp REFERENCE INTO DATA(lr_comp).
 

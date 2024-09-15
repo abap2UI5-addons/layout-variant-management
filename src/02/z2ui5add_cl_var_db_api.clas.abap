@@ -1,4 +1,4 @@
-CLASS z2ui5add_cl_var_management DEFINITION
+CLASS z2ui5add_cl_var_db_api DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC .
@@ -10,7 +10,7 @@ CLASS z2ui5add_cl_var_management DEFINITION
         name          TYPE string
         object        TYPE REF TO object
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5add_cl_var_management.
+        VALUE(result) TYPE REF TO z2ui5add_cl_var_db_api.
 
     METHODS db_read.
     METHODS db_save.
@@ -37,7 +37,7 @@ ENDCLASS.
 
 
 
-CLASS z2ui5add_cl_var_management IMPLEMENTATION.
+CLASS z2ui5add_cl_var_db_api IMPLEMENTATION.
 
   METHOD obj_to_filter.
 

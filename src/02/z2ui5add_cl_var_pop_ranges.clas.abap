@@ -1,4 +1,4 @@
-CLASS z2uiadd_cl_var_management_pop DEFINITION
+CLASS z2ui5add_cl_var_pop_ranges DEFINITION
   PUBLIC FINAL
   CREATE PUBLIC.
 
@@ -38,7 +38,7 @@ CLASS z2uiadd_cl_var_management_pop DEFINITION
         var_handle2     TYPE clike OPTIONAL
         var_handle3     TYPE clike OPTIONAL
       RETURNING
-        VALUE(r_result) TYPE REF TO z2uiadd_cl_var_management_pop.
+        VALUE(r_result) TYPE REF TO z2ui5add_cl_var_pop_ranges.
 
     TYPES:
       BEGIN OF ty_s_result,
@@ -71,7 +71,7 @@ ENDCLASS.
 
 
 
-CLASS z2uiadd_cl_var_management_pop IMPLEMENTATION.
+CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
 
   METHOD db_read.

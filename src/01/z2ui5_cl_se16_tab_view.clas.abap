@@ -13,9 +13,10 @@
      DATA client TYPE REF TO z2ui5_if_client.
      DATA mv_check_initialized TYPE abap_bool.
      METHODS on_event.
+
      METHODS z_build_where_clause
        IMPORTING
-         it_range_table TYPE rs_t_rscedst
+         it_range_table TYPE  z2ui5_cl_util=>ty_t_filter_multi
        RETURNING
          VALUE(result)  TYPE string.
      METHODS view_display.
@@ -48,70 +49,70 @@
    ENDMETHOD.
 
    METHOD z_build_where_clause.
-     "*"----------------------------------------------------------------------
-     "*" Importing parameters:
-     "*"  IT_RANGE_TABLE: Internal table of ranges with the structure:
-     "*"    - fnam: Field name (char30)
-     "*"    - sign: Sign (I or E)
-     "*"    - option: Option (EQ, NE, GT, LT, LE, GE, BT, etc.)
-     "*"    - low: Low value (char45)
-     "*"    - high: High value (char45)
-     "*" Exporting:
-     "*"  ET_WHERE_CLAUSE: Exporting final SQL where clause string
-     "*----------------------------------------------------------------------
-
-     DATA: lt_where_clause TYPE TABLE OF string,
-           lv_where_clause TYPE string,
-           lv_temp_clause  TYPE string,
-           lv_operator     TYPE string.
-
-     LOOP AT it_range_table INTO DATA(ls_range).
-
-       CLEAR: lv_temp_clause, lv_operator.
-
-       " Determine the SQL operator based on the 'option' field
-       CASE ls_range-option.
-         WHEN 'EQ'. lv_operator = ' = '.
-         WHEN 'NE'. lv_operator = ' <> '.
-         WHEN 'GT'. lv_operator = ' > '.
-         WHEN 'LT'. lv_operator = ' < '.
-         WHEN 'GE'. lv_operator = ' >= '.
-         WHEN 'LE'. lv_operator = ' <= '.
-         WHEN 'BT'. lv_operator = ' BETWEEN '.
-         WHEN 'NB'. lv_operator = ' NOT BETWEEN '.
-           " Add more options if necessary
-         WHEN OTHERS.
-           CONTINUE. " Skip unsupported options
-       ENDCASE.
-
-       " Build clause based on 'sign'
-       IF ls_range-sign = 'I'.
-         IF ls_range-option = 'BT' OR ls_range-option = 'NB'.
-           lv_temp_clause = |{ ls_range-fnam } { lv_operator } '{ ls_range-low }' AND '{ ls_range-high }'|.
-         ELSE.
-           lv_temp_clause = |{ ls_range-fnam } { lv_operator } '{ ls_range-low }'|.
-         ENDIF.
-       ELSEIF ls_range-sign = 'E'.
-         " Exclude condition (Negate the condition)
-         IF ls_range-option = 'BT' OR ls_range-option = 'NB'.
-           lv_temp_clause = |{ ls_range-fnam } NOT { lv_operator } '{ ls_range-low }' AND '{ ls_range-high }'|.
-         ELSE.
-           lv_temp_clause = |{ ls_range-fnam } NOT { lv_operator } '{ ls_range-low }'|.
-         ENDIF.
-       ENDIF.
-
-       " Append to the where clause table
-       APPEND lv_temp_clause TO lt_where_clause.
-
-     ENDLOOP.
-
-     " Join the WHERE conditions with 'AND' to create the full clause
-     lv_where_clause = REDUCE string( INIT x = ''
-                            FOR wa IN lt_where_clause
-                            NEXT x = x && COND string( WHEN x IS NOT INITIAL THEN ' AND ' ELSE '' ) && wa ).
-
-     " Export the final WHERE clause
-     result = lv_where_clause.
+*     "*"----------------------------------------------------------------------
+*     "*" Importing parameters:
+*     "*"  IT_RANGE_TABLE: Internal table of ranges with the structure:
+*     "*"    - fnam: Field name (char30)
+*     "*"    - sign: Sign (I or E)
+*     "*"    - option: Option (EQ, NE, GT, LT, LE, GE, BT, etc.)
+*     "*"    - low: Low value (char45)
+*     "*"    - high: High value (char45)
+*     "*" Exporting:
+*     "*"  ET_WHERE_CLAUSE: Exporting final SQL where clause string
+*     "*----------------------------------------------------------------------
+*
+*     DATA: lt_where_clause TYPE TABLE OF string,
+*           lv_where_clause TYPE string,
+*           lv_temp_clause  TYPE string,
+*           lv_operator     TYPE string.
+*
+*     LOOP AT it_range_table INTO DATA(ls_range).
+*
+*       CLEAR: lv_temp_clause, lv_operator.
+*
+*       " Determine the SQL operator based on the 'option' field
+*       CASE ls_range-option.
+*         WHEN 'EQ'. lv_operator = ' = '.
+*         WHEN 'NE'. lv_operator = ' <> '.
+*         WHEN 'GT'. lv_operator = ' > '.
+*         WHEN 'LT'. lv_operator = ' < '.
+*         WHEN 'GE'. lv_operator = ' >= '.
+*         WHEN 'LE'. lv_operator = ' <= '.
+*         WHEN 'BT'. lv_operator = ' BETWEEN '.
+*         WHEN 'NB'. lv_operator = ' NOT BETWEEN '.
+*           " Add more options if necessary
+*         WHEN OTHERS.
+*           CONTINUE. " Skip unsupported options
+*       ENDCASE.
+*
+*       " Build clause based on 'sign'
+*       IF ls_range-sign = 'I'.
+*         IF ls_range-option = 'BT' OR ls_range-option = 'NB'.
+*           lv_temp_clause = |{ ls_range-fnam } { lv_operator } '{ ls_range-low }' AND '{ ls_range-high }'|.
+*         ELSE.
+*           lv_temp_clause = |{ ls_range-fnam } { lv_operator } '{ ls_range-low }'|.
+*         ENDIF.
+*       ELSEIF ls_range-sign = 'E'.
+*         " Exclude condition (Negate the condition)
+*         IF ls_range-option = 'BT' OR ls_range-option = 'NB'.
+*           lv_temp_clause = |{ ls_range-fnam } NOT { lv_operator } '{ ls_range-low }' AND '{ ls_range-high }'|.
+*         ELSE.
+*           lv_temp_clause = |{ ls_range-fnam } NOT { lv_operator } '{ ls_range-low }'|.
+*         ENDIF.
+*       ENDIF.
+*
+*       " Append to the where clause table
+*       APPEND lv_temp_clause TO lt_where_clause.
+*
+*     ENDLOOP.
+*
+*     " Join the WHERE conditions with 'AND' to create the full clause
+*     lv_where_clause = REDUCE string( INIT x = ''
+*                            FOR wa IN lt_where_clause
+*                            NEXT x = x && COND string( WHEN x IS NOT INITIAL THEN ' AND ' ELSE '' ) && wa ).
+*
+*     " Export the final WHERE clause
+*     result = lv_where_clause.
 
    ENDMETHOD.
 
@@ -136,7 +137,7 @@
 
      DATA lv_result TYPE string.
 
-     lv_result = z_build_where_clause( lt_range ).
+*     lv_result = z_build_where_clause( lt_range ).
 *     data lt_where type rsdmd_t_where.
 *     CALL FUNCTION 'RSDS_RANGE_TO_WHERE'
 *       EXPORTING

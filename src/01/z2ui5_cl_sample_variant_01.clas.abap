@@ -66,43 +66,43 @@
 
    METHOD set_data.
 
-     DATA lt_range TYPE rs_t_rscedst.
+*     DATA lt_range TYPE rs_t_rscedst.
+*
+*     LOOP AT mt_filter INTO DATA(ls_filter).
+*       LOOP AT ls_filter-t_range INTO DATA(ls_range).
+*
+*         INSERT VALUE #(
+*             fnam = ls_filter-name
+*             sign = ls_range-sign
+*             option = ls_range-option
+*             low = ls_range-low
+*             high = ls_range-high
+*          ) INTO TABLE lt_range.
+*
+*       ENDLOOP.
+*     ENDLOOP.
+*
+*     DATA lv_result TYPE string.
+**     data lt_where type rsdmd_t_where.
+*     CALL FUNCTION 'RSDS_RANGE_TO_WHERE'
+*       EXPORTING
+*         i_t_range = lt_range
+**        i_th_range     =
+**        i_r_renderer   =
+*       IMPORTING
+*         e_where   = lv_result
+**        e_t_where = lt_where
+**  EXCEPTIONS
+**        internal_error = 1
+**        others    = 2
+*       .
 
-     LOOP AT mt_filter INTO DATA(ls_filter).
-       LOOP AT ls_filter-t_range INTO DATA(ls_range).
 
-         INSERT VALUE #(
-             fnam = ls_filter-name
-             sign = ls_range-sign
-             option = ls_range-option
-             low = ls_range-low
-             high = ls_range-high
-          ) INTO TABLE lt_range.
-
-       ENDLOOP.
-     ENDLOOP.
-
-     DATA lv_result TYPE string.
-*     data lt_where type rsdmd_t_where.
-     CALL FUNCTION 'RSDS_RANGE_TO_WHERE'
-       EXPORTING
-         i_t_range = lt_range
-*        i_th_range     =
-*        i_r_renderer   =
-       IMPORTING
-         e_where   = lv_result
-*        e_t_where = lt_where
-*  EXCEPTIONS
-*        internal_error = 1
-*        others    = 2
-       .
-
-
-    select from (mv_tabname)
-     fields
-     *
-     where (lv_result)
-     into table @mr_table->*.
+*    select from (mv_tabname)
+*     fields
+*     *
+*     where (lv_result)
+*     into table @mr_table->*.
 
 *     mt_table = VALUE #(
 *         ( product = 'table'    create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )

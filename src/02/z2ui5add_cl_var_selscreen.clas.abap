@@ -5,6 +5,8 @@ CLASS z2ui5add_cl_var_selscreen DEFINITION
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
+    DATA mv_tabname TYPE string.
+
     CLASS-METHODS factory
       IMPORTING
         val             TYPE z2ui5_cl_util=>ty_t_filter_multi
@@ -165,30 +167,88 @@ CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
 *    DATA(vbox) = view->vbox( height         = `100%`
 *                                 justifycontent = 'SpaceBetween' ).
 
-    DATA(item) = view->list( nodata          = `no conditions defined`
+*    DATA(item) = view->list( "nodata          = `no conditions defined`
+*                             items           = client2->_bind( t_filter )
+*                             selectionchange = client2->_event( 'SELCHANGE' )
+*                )->custom_list_item( ).
+
+    DATA(tab) = view->table( "nodata          = `no conditions defined`
                              items           = client2->_bind( t_filter )
                              selectionchange = client2->_event( 'SELCHANGE' )
-                )->custom_list_item( ).
+                ).
+*                ->custom_list_item( ).
+*    tab->header_toolbar(
+*         )->toolbar(
+*             )->input(
+*         value = client->_bind_edit( mv_tabname )
+*         description = `Tablename`
+*      )->button(
+*                 text  = 'letf side button'
+*                 icon  = 'sap-icon://account'
+*                 press = client->_event( 'BUTTON_SORT' )
 
-    DATA(grid) = item->grid( class = `sapUiSmallMarginTop sapUiSmallMarginBottom sapUiSmallMarginBegin` ).
-    grid->text( `{NAME}` ).
+*         ).
 
-    grid->multi_input( tokens = `{T_TOKEN}`
-        enabled               = abap_false
-             valuehelprequest = client2->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) )
-            )->tokens(
-                 )->token( key      = `{KEY}`
-                           text     = `{TEXT}`
-                           visible  = `{VISIBLE}`
-                           selected = `{SELKZ}`
-                           editable = `{EDITABLE}` ).
+    tab->columns(
+         )->column(
+             )->text( 'Name' )->get_parent(
+         )->column(
+             )->text( 'Options' )->get_parent(
+         )->column(
+             )->text( 'Select' )->get_parent(
+         )->column(
+             )->text( 'Clear' )->get_parent(
+              ).
+  data(cells) =  tab->items( )->column_list_item( )->cells( ).
+cells->text( text = `{NAME}` ).
+cells->multi_input( tokens = `{T_TOKEN}`
+ enabled               = abap_false
+      valuehelprequest = client2->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) )
+     )->tokens(
+          )->token( key      = `{KEY}`
+                    text     = `{TEXT}`
+                    visible  = `{VISIBLE}`
+                    selected = `{SELKZ}`
+                    editable = `{EDITABLE}` ).
+cells->button( text  = `Select`
+           press = client2->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) ) ).
+cells->button( icon  = 'sap-icon://delete'
+           type  = `Transparent`
+           text  = `Clear`
+           press = client2->_event( val = `LIST_DELETE` t_arg = VALUE #( ( `${NAME}` ) ) )
+ ).
 
-    grid->button( text  = `Select`
-                  press = client2->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) ) ).
-    grid->button( icon  = 'sap-icon://delete'
-                  type  = `Transparent`
-                  text  = `Clear`
-                  press = client2->_event( val = `LIST_DELETE` t_arg = VALUE #( ( `${NAME}` ) ) ) ).
+
+*    data(vl) = item->horizontal_layout(
+*      EXPORTING
+*        class   = 'sapUiContentPadding equalColumns'
+*        width   = '100%'
+*        enabled =
+*        visible =
+*        id      =
+*      RECEIVING
+*        result  =
+*    ).
+*    DATA(grid) = item->grid( class = `sapUiSmallMarginTop sapUiSmallMarginBottom sapUiSmallMarginBegin` ).
+*    DATA(grid) = item. "->hbox( ). "->flex_box( alignItems = 'Start' ). "( class = `sapUiSmallMarginTop sapUiSmallMarginBottom sapUiSmallMarginBegin` ).
+*    grid->text( text = `{NAME}` width = `20%` ).
+
+*    grid->multi_input( tokens = `{T_TOKEN}`
+*        enabled               = abap_false
+*             valuehelprequest = client2->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) )
+*            )->tokens(
+*                 )->token( key      = `{KEY}`
+*                           text     = `{TEXT}`
+*                           visible  = `{VISIBLE}`
+*                           selected = `{SELKZ}`
+*                           editable = `{EDITABLE}` ).
+*
+*    grid->button( text  = `Select`
+*                  press = client2->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) ) ).
+*    grid->button( icon  = 'sap-icon://delete'
+*                  type  = `Transparent`
+*                  text  = `Clear`
+*                  press = client2->_event( val = `LIST_DELETE` t_arg = VALUE #( ( `${NAME}` ) ) ) ).
 
     view->hbox(
         )->button( text  = `Clear All`

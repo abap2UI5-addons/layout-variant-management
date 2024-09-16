@@ -1,23 +1,11 @@
- CLASS z2ui5_cl_se16 DEFINITION PUBLIC.
+ CLASS z2ui5_cl_se16_tab_view DEFINITION PUBLIC.
 
    PUBLIC SECTION.
 
      INTERFACES z2ui5_if_app.
 
-     TYPES:
-       BEGIN OF ty_s_tab,
-         selkz            TYPE abap_bool,
-         product          TYPE string,
-         create_date      TYPE string,
-         create_by        TYPE string,
-         storage_location TYPE string,
-         quantity         TYPE i,
-       END OF ty_s_tab.
-     TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
-
      DATA ms_layout TYPE z2ui5_cl_pop_display_layout=>ty_s_layout.
-
-     DATA mv_tabname TYPE string.
+     DATA mv_tabname TYPE string VALUE 'T100'.
      DATA mr_table TYPE REF TO data.
      DATA mt_filter TYPE z2ui5_cl_util=>ty_t_filter_multi.
 
@@ -26,10 +14,10 @@
      DATA mv_check_initialized TYPE abap_bool.
      METHODS on_event.
      METHODS z_build_where_clause
-        importing
-        it_range_table type rs_t_rscedst
-        returning
-        value(result) type string.
+       IMPORTING
+         it_range_table TYPE rs_t_rscedst
+       RETURNING
+         VALUE(result)  TYPE string.
      METHODS view_display.
      METHODS set_data.
 
@@ -39,23 +27,12 @@
 
 
 
- CLASS z2ui5_cl_se16 IMPLEMENTATION.
+ CLASS z2ui5_cl_se16_tab_view IMPLEMENTATION.
 
 
    METHOD on_event.
 
-
-     IF sy-subrc <> 0.
-* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
-*   WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
-     ENDIF.
-
      CASE client->get( )-event.
-
-       WHEN 'LIST_OPEN'.
-         mo_multiselect = z2ui5add_cl_var_selscreen=>factory( mt_filter ).
-         mo_multiselect->on_event( client ).
-         RETURN.
 
        WHEN `BUTTON_START`.
          set_data( ).
@@ -70,73 +47,73 @@
 
    ENDMETHOD.
 
-method z_build_where_clause.
-  "*"----------------------------------------------------------------------
-  "*" Importing parameters:
-  "*"  IT_RANGE_TABLE: Internal table of ranges with the structure:
-  "*"    - fnam: Field name (char30)
-  "*"    - sign: Sign (I or E)
-  "*"    - option: Option (EQ, NE, GT, LT, LE, GE, BT, etc.)
-  "*"    - low: Low value (char45)
-  "*"    - high: High value (char45)
-  "*" Exporting:
-  "*"  ET_WHERE_CLAUSE: Exporting final SQL where clause string
-  "*----------------------------------------------------------------------
+   METHOD z_build_where_clause.
+     "*"----------------------------------------------------------------------
+     "*" Importing parameters:
+     "*"  IT_RANGE_TABLE: Internal table of ranges with the structure:
+     "*"    - fnam: Field name (char30)
+     "*"    - sign: Sign (I or E)
+     "*"    - option: Option (EQ, NE, GT, LT, LE, GE, BT, etc.)
+     "*"    - low: Low value (char45)
+     "*"    - high: High value (char45)
+     "*" Exporting:
+     "*"  ET_WHERE_CLAUSE: Exporting final SQL where clause string
+     "*----------------------------------------------------------------------
 
-  DATA: lt_where_clause TYPE TABLE OF string,
-        lv_where_clause TYPE string,
-        lv_temp_clause TYPE string,
-        lv_operator TYPE string.
+     DATA: lt_where_clause TYPE TABLE OF string,
+           lv_where_clause TYPE string,
+           lv_temp_clause  TYPE string,
+           lv_operator     TYPE string.
 
-  LOOP AT it_range_table INTO DATA(ls_range).
+     LOOP AT it_range_table INTO DATA(ls_range).
 
-    CLEAR: lv_temp_clause, lv_operator.
+       CLEAR: lv_temp_clause, lv_operator.
 
-    " Determine the SQL operator based on the 'option' field
-    CASE ls_range-option.
-      WHEN 'EQ'. lv_operator = ' = '.
-      WHEN 'NE'. lv_operator = ' <> '.
-      WHEN 'GT'. lv_operator = ' > '.
-      WHEN 'LT'. lv_operator = ' < '.
-      WHEN 'GE'. lv_operator = ' >= '.
-      WHEN 'LE'. lv_operator = ' <= '.
-      WHEN 'BT'. lv_operator = ' BETWEEN '.
-      WHEN 'NB'. lv_operator = ' NOT BETWEEN '.
-      " Add more options if necessary
-      WHEN OTHERS.
-        CONTINUE. " Skip unsupported options
-    ENDCASE.
+       " Determine the SQL operator based on the 'option' field
+       CASE ls_range-option.
+         WHEN 'EQ'. lv_operator = ' = '.
+         WHEN 'NE'. lv_operator = ' <> '.
+         WHEN 'GT'. lv_operator = ' > '.
+         WHEN 'LT'. lv_operator = ' < '.
+         WHEN 'GE'. lv_operator = ' >= '.
+         WHEN 'LE'. lv_operator = ' <= '.
+         WHEN 'BT'. lv_operator = ' BETWEEN '.
+         WHEN 'NB'. lv_operator = ' NOT BETWEEN '.
+           " Add more options if necessary
+         WHEN OTHERS.
+           CONTINUE. " Skip unsupported options
+       ENDCASE.
 
-    " Build clause based on 'sign'
-    IF ls_range-sign = 'I'.
-      IF ls_range-option = 'BT' OR ls_range-option = 'NB'.
-        lv_temp_clause = |{ ls_range-fnam } { lv_operator } '{ ls_range-low }' AND '{ ls_range-high }'|.
-      ELSE.
-        lv_temp_clause = |{ ls_range-fnam } { lv_operator } '{ ls_range-low }'|.
-      ENDIF.
-    ELSEIF ls_range-sign = 'E'.
-      " Exclude condition (Negate the condition)
-      IF ls_range-option = 'BT' OR ls_range-option = 'NB'.
-        lv_temp_clause = |{ ls_range-fnam } NOT { lv_operator } '{ ls_range-low }' AND '{ ls_range-high }'|.
-      ELSE.
-        lv_temp_clause = |{ ls_range-fnam } NOT { lv_operator } '{ ls_range-low }'|.
-      ENDIF.
-    ENDIF.
+       " Build clause based on 'sign'
+       IF ls_range-sign = 'I'.
+         IF ls_range-option = 'BT' OR ls_range-option = 'NB'.
+           lv_temp_clause = |{ ls_range-fnam } { lv_operator } '{ ls_range-low }' AND '{ ls_range-high }'|.
+         ELSE.
+           lv_temp_clause = |{ ls_range-fnam } { lv_operator } '{ ls_range-low }'|.
+         ENDIF.
+       ELSEIF ls_range-sign = 'E'.
+         " Exclude condition (Negate the condition)
+         IF ls_range-option = 'BT' OR ls_range-option = 'NB'.
+           lv_temp_clause = |{ ls_range-fnam } NOT { lv_operator } '{ ls_range-low }' AND '{ ls_range-high }'|.
+         ELSE.
+           lv_temp_clause = |{ ls_range-fnam } NOT { lv_operator } '{ ls_range-low }'|.
+         ENDIF.
+       ENDIF.
 
-    " Append to the where clause table
-    APPEND lv_temp_clause TO lt_where_clause.
+       " Append to the where clause table
+       APPEND lv_temp_clause TO lt_where_clause.
 
-  ENDLOOP.
+     ENDLOOP.
 
-  " Join the WHERE conditions with 'AND' to create the full clause
-  lv_where_clause = REDUCE string( INIT x = ''
-                         FOR wa IN lt_where_clause
-                         NEXT x = x && COND string( WHEN x IS NOT INITIAL THEN ' AND ' ELSE '' ) && wa ).
+     " Join the WHERE conditions with 'AND' to create the full clause
+     lv_where_clause = REDUCE string( INIT x = ''
+                            FOR wa IN lt_where_clause
+                            NEXT x = x && COND string( WHEN x IS NOT INITIAL THEN ' AND ' ELSE '' ) && wa ).
 
-  " Export the final WHERE clause
-  result = lv_where_clause.
+     " Export the final WHERE clause
+     result = lv_where_clause.
 
-endmethod.
+   ENDMETHOD.
 
 
    METHOD set_data.
@@ -206,50 +183,20 @@ endmethod.
      DATA(view) = z2ui5_cl_xml_view=>factory( ).
 
      view = view->shell( )->page( id = `page_main`
-              title          = 'abap2UI5 - Select-Options'
+              title          = 'abap2UI5 - SE16-CLOUD - ' && mv_tabname
               navbuttonpress = client->_event( 'BACK' )
+              floatingfooter = abap_true
               shownavbutton = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL )
            ).
-
-*     DATA(vbox) = view->vbox( )->input(
-*        value = client->_bind_edit( mv_tabname )
-*        description = `Tablename`
-*     ).
-
-*     vbox->button( text = `GO` press = client->_event( 'TAB' ) ).
-
-    data(cont) = view->scroll_container( height   = '30%'
-                                              vertical = abap_true
-                                               ).
-
-     DATA(lo_multiselect) = z2ui5add_cl_var_selscreen=>factory( mt_filter ).
-
-     lo_multiselect->set_output2(
-         t_filter = mt_filter
-       client2 = client
-       view    = cont
-     ).
-
-*     DATA(tab) = vbox->table(
-*         items = client->_bind( val = mr_table->* )
-*            )->header_toolbar(
-*              )->overflow_toolbar(
-*                  )->toolbar_spacer(
-**                 )->button( text = `Filter` press = client->_event( `PREVIEW_FILTER` ) icon = `sap-icon://filter`
-*            )->button(  text = `Go` press = client->_event( `BUTTON_START` ) type = `Emphasized`
-*             )->get_parent( )->get_parent( ).
 
      FIELD-SYMBOLS <tab> TYPE data.
      ASSIGN mr_table->* TO <tab>.
 
-* data(cont2) = vbox->scroll_container( height   = '30%'
-*                                               vertical = abap_true ).
 
-     DATA(table) = view->table( growing = 'true'
+     DATA(table) = view->table( "growing = 'true'
                                 width   = 'auto'
                                 items   = client->_bind_edit( val = <tab> ) ).
 
-     " TODO: variable is assigned but never used (ABAP cleaner)
      DATA(headder) = table->header_toolbar(
                 )->overflow_toolbar(
                   )->toolbar_spacer(
@@ -260,15 +207,15 @@ endmethod.
 
      DATA(columns) = table->columns( ).
 
-    if <tab> is not initial.
-         ms_layout = z2ui5_cl_pop_display_layout=>init_layout( control  = z2ui5_cl_pop_display_layout=>m_table
-                                                     data     = mr_table
+     IF <tab> IS NOT INITIAL.
+       ms_layout = z2ui5_cl_pop_display_layout=>init_layout( control  = z2ui5_cl_pop_display_layout=>m_table
+                                                   data     = mr_table
 *                                                     handle01 = CONV #( class )
 *                                                     handle02 = CONV #( 'z2ui5_t_01' )
 *                                                     handle03 = ''
 *                                                     handle04 = ''
-                                                      ).
-    endif.
+                                                    ).
+     ENDIF.
 
      LOOP AT ms_layout-t_layout REFERENCE INTO DATA(layout).
        DATA(lv_index) = sy-tabix.
@@ -328,6 +275,11 @@ endmethod.
        ENDIF.
      ENDLOOP.
 
+    view->footer( )->overflow_toolbar(
+        )->button( text = `Back` press = client->_event( `BACK` )
+        )->toolbar_spacer(
+        )->button( text = `Refresh` press = client->_event( `REFRESH` ) ).
+
      client->view_display( view->stringify( ) ).
 
    ENDMETHOD.
@@ -339,13 +291,12 @@ endmethod.
 
      IF mv_check_initialized = abap_false.
        mv_check_initialized = abap_true.
-       mv_tabname = `USR01`.
-
        CREATE DATA mr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
        mt_filter = z2ui5_cl_util=>filter_get_multi_by_data( mr_table->* ).
-*       DELETE mt_filter WHERE name = `SELKZ`.
+       set_data( ).
        view_display( ).
        RETURN.
+
      ENDIF.
 
      IF client->get( )-check_on_navigated = abap_true.

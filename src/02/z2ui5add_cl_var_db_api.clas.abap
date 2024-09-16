@@ -7,10 +7,28 @@ CLASS z2ui5add_cl_var_db_api DEFINITION
 
     CLASS-METHODS factory
       IMPORTING
-        name          TYPE string
-        object        TYPE REF TO object
+        report        TYPE string
       RETURNING
         VALUE(result) TYPE REF TO z2ui5add_cl_var_db_api.
+
+    TYPES ty_s_head TYPE z2ui5_t_var_01.
+    TYPES ty_s_pos TYPE z2ui5_t_var_02.
+
+    DATA mt_variant TYPE STANDARD TABLE OF ty_S_head WITH EMPTY KEY.
+    METHODS check_default.
+    METHODS get_default.
+
+    METHODS db_variant_read
+      IMPORTING
+        name          TYPE string
+      RETURNING
+        VALUE(result) TYPE z2ui5_cl_util=>ty_t_filter_multi.
+
+    METHODS db_variant_save
+      IMPORTING
+        name          TYPE string
+      RETURNING
+        VALUE(result) TYPE z2ui5_cl_util=>ty_t_filter_multi.
 
     METHODS db_read.
     METHODS db_save.
@@ -56,6 +74,29 @@ CLASS z2ui5add_cl_var_db_api IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD factory.
+
+    CREATE OBJECT result.
+
+    SELECT FROM z2ui5_t_var_01
+        FIELDS *
+        WHERE report = @report
+        INTO TABLE @result->mt_variant.
+
+  ENDMETHOD.
+
+  METHOD check_default.
+
+  ENDMETHOD.
+
+  METHOD db_variant_read.
+
+  ENDMETHOD.
+
+  METHOD get_default.
+
+  ENDMETHOD.
+
+  METHOD db_variant_save.
 
   ENDMETHOD.
 

@@ -15,7 +15,8 @@
        END OF ty_s_tab.
      TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
 
-     DATA mt_table TYPE ty_t_table.
+     DATA mv_tabname TYPE string.
+     DATA mr_table TYPE REF TO data.
      DATA mt_filter TYPE z2ui5_cl_util=>ty_t_filter_multi.
 
    PROTECTED SECTION.
@@ -35,6 +36,12 @@
 
 
    METHOD on_event.
+
+
+     IF sy-subrc <> 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*   WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+     ENDIF.
 
      CASE client->get( )-event.
 
@@ -59,21 +66,59 @@
 
    METHOD set_data.
 
-     mt_table = VALUE #(
-         ( product = 'table'    create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
-         ( product = 'chair'    create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
-         ( product = 'sofa'     create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
-         ( product = 'computer' create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
-         ( product = 'oven'     create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
-         ( product = 'table2'   create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
-     ).
+*     DATA lt_range TYPE rs_t_rscedst.
+*
+*     LOOP AT mt_filter INTO DATA(ls_filter).
+*       LOOP AT ls_filter-t_range INTO DATA(ls_range).
+*
+*         INSERT VALUE #(
+*             fnam = ls_filter-name
+*             sign = ls_range-sign
+*             option = ls_range-option
+*             low = ls_range-low
+*             high = ls_range-high
+*          ) INTO TABLE lt_range.
+*
+*       ENDLOOP.
+*     ENDLOOP.
+*
+*     DATA lv_result TYPE string.
+**     data lt_where type rsdmd_t_where.
+*     CALL FUNCTION 'RSDS_RANGE_TO_WHERE'
+*       EXPORTING
+*         i_t_range = lt_range
+**        i_th_range     =
+**        i_r_renderer   =
+*       IMPORTING
+*         e_where   = lv_result
+**        e_t_where = lt_where
+**  EXCEPTIONS
+**        internal_error = 1
+**        others    = 2
+*       .
 
-     z2ui5_cl_util=>filter_itab(
-       EXPORTING
-         filter = mt_filter
-       CHANGING
-         val    = mt_table
-     ).
+
+*    select from (mv_tabname)
+*     fields
+*     *
+*     where (lv_result)
+*     into table @mr_table->*.
+
+*     mt_table = VALUE #(
+*         ( product = 'table'    create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
+*         ( product = 'chair'    create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
+*         ( product = 'sofa'     create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
+*         ( product = 'computer' create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
+*         ( product = 'oven'     create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
+*         ( product = 'table2'   create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
+*     ).
+
+*     z2ui5_cl_util=>filter_itab(
+*       EXPORTING
+*         filter = mt_filter
+*       CHANGING
+*         val    = mt_table
+*     ).
 
    ENDMETHOD.
 
@@ -88,7 +133,12 @@
               shownavbutton = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL )
            ).
 
-     DATA(vbox) = view->vbox( ).
+     DATA(vbox) = view->vbox( )->input(
+        value = client->_bind_edit( mv_tabname )
+        description = `Tablename`
+     ).
+
+     vbox->button( text = `GO` press = client->_event( 'TAB' ) ).
 
      DATA(lo_multiselect) = z2ui5add_cl_var_selscreen=>factory( mt_filter ).
 
@@ -99,7 +149,7 @@
      ).
 
      DATA(tab) = vbox->table(
-         items = client->_bind( val = mt_table )
+         items = client->_bind( val = mr_table->* )
             )->header_toolbar(
               )->overflow_toolbar(
                   )->toolbar_spacer(
@@ -132,8 +182,11 @@
 
      IF mv_check_initialized = abap_false.
        mv_check_initialized = abap_true.
-       mt_filter = z2ui5_cl_util=>filter_get_multi_by_data( mt_table ).
-       DELETE mt_filter WHERE name = `SELKZ`.
+       mv_tabname = `T100`.
+
+       CREATE DATA mr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
+       mt_filter = z2ui5_cl_util=>filter_get_multi_by_data( mr_table->* ).
+*       DELETE mt_filter WHERE name = `SELKZ`.
        view_display( ).
        RETURN.
      ENDIF.

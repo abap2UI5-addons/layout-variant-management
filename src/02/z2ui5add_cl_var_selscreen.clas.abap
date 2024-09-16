@@ -162,10 +162,10 @@ CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
 
   METHOD set_output2.
 
-    DATA(vbox) = view->vbox( height         = `100%`
-                                 justifycontent = 'SpaceBetween' ).
+*    DATA(vbox) = view->vbox( height         = `100%`
+*                                 justifycontent = 'SpaceBetween' ).
 
-    DATA(item) = vbox->list( nodata          = `no conditions defined`
+    DATA(item) = view->list( nodata          = `no conditions defined`
                              items           = client2->_bind( t_filter )
                              selectionchange = client2->_event( 'SELCHANGE' )
                 )->custom_list_item( ).

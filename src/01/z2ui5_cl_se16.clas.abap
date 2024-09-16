@@ -1,4 +1,4 @@
- CLASS z2ui5_cl_sample_variant_01 DEFINITION PUBLIC.
+ CLASS z2ui5_cl_se16 DEFINITION PUBLIC.
 
    PUBLIC SECTION.
 
@@ -14,6 +14,8 @@
          quantity         TYPE i,
        END OF ty_s_tab.
      TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
+
+     DATA ms_layout TYPE z2ui5_cl_pop_display_layout=>ty_s_layout.
 
      DATA mv_tabname TYPE string.
      DATA mr_table TYPE REF TO data.
@@ -32,7 +34,7 @@
 
 
 
- CLASS z2ui5_cl_sample_variant_01 IMPLEMENTATION.
+ CLASS z2ui5_cl_se16 IMPLEMENTATION.
 
 
    METHOD on_event.
@@ -52,7 +54,7 @@
 
        WHEN `BUTTON_START`.
          set_data( ).
-         client->view_model_update( ).
+         view_display( ).
 
        WHEN `PREVIEW_FILTER`.
          client->nav_app_call( z2ui5_cl_pop_get_range_m=>factory( mt_filter ) ).
@@ -98,11 +100,12 @@
        .
 
 
-    select from (mv_tabname)
-     fields
-     *
-     where (lv_result)
-     into table @mr_table->*.
+     SELECT FROM (mv_tabname)
+      FIELDS
+      *
+      WHERE (lv_result)
+      INTO TABLE @mr_table->*
+      UP TO 100 ROWS.
 
 *     mt_table = VALUE #(
 *         ( product = 'table'    create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
@@ -140,36 +143,115 @@
 
      vbox->button( text = `GO` press = client->_event( 'TAB' ) ).
 
+    data(cont) = vbox->scroll_container( height   = '30%'
+                                              vertical = abap_true
+                                               ).
+
      DATA(lo_multiselect) = z2ui5add_cl_var_selscreen=>factory( mt_filter ).
 
      lo_multiselect->set_output2(
          t_filter = mt_filter
        client2 = client
-       view    = vbox
+       view    = cont
      ).
 
-     DATA(tab) = vbox->table(
-         items = client->_bind( val = mr_table->* )
-            )->header_toolbar(
-              )->overflow_toolbar(
+*     DATA(tab) = vbox->table(
+*         items = client->_bind( val = mr_table->* )
+*            )->header_toolbar(
+*              )->overflow_toolbar(
+*                  )->toolbar_spacer(
+**                 )->button( text = `Filter` press = client->_event( `PREVIEW_FILTER` ) icon = `sap-icon://filter`
+*            )->button(  text = `Go` press = client->_event( `BUTTON_START` ) type = `Emphasized`
+*             )->get_parent( )->get_parent( ).
+
+     FIELD-SYMBOLS <tab> TYPE data.
+     ASSIGN mr_table->* TO <tab>.
+
+ data(cont2) = vbox->scroll_container( height   = '30%'
+                                               vertical = abap_true ).
+
+     DATA(table) = cont2->table( growing = 'true'
+                                width   = 'auto'
+                                items   = client->_bind_edit( val = <tab> ) ).
+
+     " TODO: variable is assigned but never used (ABAP cleaner)
+     DATA(headder) = table->header_toolbar(
+                )->overflow_toolbar(
                   )->toolbar_spacer(
-*                 )->button( text = `Filter` press = client->_event( `PREVIEW_FILTER` ) icon = `sap-icon://filter`
-            )->button(  text = `Go` press = client->_event( `BUTTON_START` ) type = `Emphasized`
-             )->get_parent( )->get_parent( ).
+                    )->button(  text = `Go` press = client->_event( `BUTTON_START` ) type = `Emphasized` ).
 
-     DATA(lo_columns) = tab->columns( ).
-     lo_columns->column( )->text( text = `Product` ).
-     lo_columns->column( )->text( text = `Date` ).
-     lo_columns->column( )->text( text = `Name` ).
-     lo_columns->column( )->text( text = `Location` ).
-     lo_columns->column( )->text( text = `Quantity` ).
+     headder = z2ui5_cl_pop_display_layout=>render_layout_function( xml    = headder
+                                                               client = client ).
 
-     DATA(lo_cells) = tab->items( )->column_list_item( ).
-     lo_cells->text( `{PRODUCT}` ).
-     lo_cells->text( `{CREATE_DATE}` ).
-     lo_cells->text( `{CREATE_BY}` ).
-     lo_cells->text( `{STORAGE_LOCATION}` ).
-     lo_cells->text( `{QUANTITY}` ).
+     DATA(columns) = table->columns( ).
+
+    if <tab> is not initial.
+         ms_layout = z2ui5_cl_pop_display_layout=>init_layout( control  = z2ui5_cl_pop_display_layout=>m_table
+                                                     data     = mr_table
+*                                                     handle01 = CONV #( class )
+*                                                     handle02 = CONV #( 'z2ui5_t_01' )
+*                                                     handle03 = ''
+*                                                     handle04 = ''
+                                                      ).
+    endif.
+
+     LOOP AT ms_layout-t_layout REFERENCE INTO DATA(layout).
+       DATA(lv_index) = sy-tabix.
+
+       columns->column( visible         = client->_bind( val       = layout->visible
+                                                         tab       = ms_layout-t_layout
+                                                         tab_index = lv_index )
+                        halign          = client->_bind( val       = layout->halign
+                                                         tab       = ms_layout-t_layout
+                                                         tab_index = lv_index )
+                        importance      = client->_bind( val       = layout->importance
+                                                         tab       = ms_layout-t_layout
+                                                         tab_index = lv_index )
+                        mergeduplicates = client->_bind( val       = layout->merge
+                                                         tab       = ms_layout-t_layout
+                                                         tab_index = lv_index )
+                        width           = client->_bind( val       = layout->width
+                                                         tab       = ms_layout-t_layout
+                                                         tab_index = lv_index )
+
+        )->text( layout->tlabel ).
+
+     ENDLOOP.
+
+     DATA(cells) = columns->get_parent( )->items(
+                                        )->column_list_item( valign = 'Middle'
+                                                             type   = 'Navigation'
+
+                                        )->cells( ).
+
+     " Subcolumns require new rendering....
+     LOOP AT ms_layout-t_layout REFERENCE INTO layout.
+
+       IF layout->t_sub_col IS NOT INITIAL.
+
+         DATA(sub_col) = ``.
+         DATA(index) = 0.
+         LOOP AT layout->t_sub_col INTO DATA(subcol).
+
+           index = index + 1.
+
+           READ TABLE ms_layout-t_layout INTO DATA(line) WITH KEY fname = subcol-fname.
+
+           IF index = 1.
+             sub_col = |{ line-tlabel }: \{{ subcol-fname }\}|.
+           ELSE.
+             sub_col = |{ sub_col }{ cl_abap_char_utilities=>cr_lf } { line-tlabel }: \{{ subcol-fname }\}|.
+           ENDIF.
+
+         ENDLOOP.
+
+         cells->object_identifier( title = |\{{ layout->fname }\}|
+                                   text  = sub_col ).
+
+       ELSE.
+         cells->object_identifier( text = |\{{ layout->fname }\}| ).
+       ENDIF.
+     ENDLOOP.
 
      client->view_display( view->stringify( ) ).
 

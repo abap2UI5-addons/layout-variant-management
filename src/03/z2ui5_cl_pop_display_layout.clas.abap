@@ -773,10 +773,10 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
   METHOD choose_layout.
 
     DATA(layouts) = select_layouts( control  = control
-                                    handle01 = handle01
-                                    handle02 = handle02
-                                    handle03 = handle03
-                                    handle04 = handle04 ).
+                                    handle01 = conv #( handle01 )
+                                    handle02 = conv #( handle02 )
+                                    handle03 = conv #( handle03 )
+                                    handle04 = conv #( handle04 ) ).
 
     result = z2ui5_cl_pop_to_select=>factory( i_tab   = layouts
                                               i_title = 'Layouts' ).

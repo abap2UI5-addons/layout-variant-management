@@ -7,10 +7,15 @@ CLASS z2ui5_cl_selscreen DEFINITION
 
     INTERFACES if_serializable_object.
     DATA mv_tabname TYPE string.
+    DATA mv_popup_name TYPE string.
 
     METHODS paint
       IMPORTING
         view   TYPE REF TO z2ui5_cl_xml_view
+        client TYPE REF TO z2ui5_if_client.
+
+    METHODS on_event
+      IMPORTING
         client TYPE REF TO z2ui5_if_client.
 
     DATA mt_filter_tab TYPE z2ui5_cl_util=>ty_t_filter_multi.
@@ -23,6 +28,24 @@ ENDCLASS.
 
 CLASS z2ui5_cl_selscreen IMPLEMENTATION.
 
+  METHOD on_event.
+
+    CASE client->get( )-event.
+
+      WHEN `UPDATE_TOKENS`.
+        mt_filter_tab = z2ui5_cl_util=>filter_update_tokens(
+            val    = mt_filter_tab
+            name   = client->get_event_args( ) ).
+        client->view_model_update( ).
+
+      WHEN 'LIST_OPEN'.
+        DATA(ls_sql) = mt_filter_tab[ name = client->get_event_args( ) ].
+        client->nav_app_call( z2ui5_cl_pop_get_range=>factory( ls_sql-t_range ) ).
+        RETURN.
+
+    ENDCASE.
+
+  ENDMETHOD.
 
   METHOD paint.
 
@@ -30,7 +53,7 @@ CLASS z2ui5_cl_selscreen IMPLEMENTATION.
     CREATE DATA lr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
     mt_filter_tab = z2ui5_cl_util=>filter_get_multi_by_data( lr_table->* ).
 
-    DATA(tab) = view->table( "nodata          = `no conditions defined`
+    DATA(tab) = view->table(
                              id = `tab`
                              items           = client->_bind_edit( mt_filter_tab )
                              selectionchange = client->_event( 'SELCHANGE' ) ).
@@ -49,15 +72,12 @@ CLASS z2ui5_cl_selscreen IMPLEMENTATION.
          )->column(
              )->text( 'Select' )->get_parent(
          )->column(
-             )->text( 'Clear' )->get_parent(
-              ).
-
+             )->text( 'Clear' )->get_parent( ).
 
     DATA(cells) =  tab->items( )->column_list_item( id = `items` )->cells(  ).
     cells->text( text = `{NAME}` ).
     DATA(multi) = cells->multi_input( tokens = `{T_TOKEN}`
              name = '{NAME}'
-*        enabled               = abap_false
           valuehelprequest = client->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) )
          ).
     multi->tokens(

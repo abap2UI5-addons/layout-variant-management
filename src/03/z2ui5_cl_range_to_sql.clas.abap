@@ -3,6 +3,7 @@ CLASS z2ui5_cl_range_to_sql DEFINITION
   CREATE PUBLIC.
 
   PUBLIC SECTION.
+
     CONSTANTS: BEGIN OF signs,
                  including TYPE string VALUE 'I',
                  excluding TYPE string VALUE 'E',
@@ -39,6 +40,8 @@ CLASS z2ui5_cl_range_to_sql DEFINITION
         val        TYPE csequence
       RETURNING
         VALUE(out) TYPE string.
+
+
 
 ENDCLASS.
 

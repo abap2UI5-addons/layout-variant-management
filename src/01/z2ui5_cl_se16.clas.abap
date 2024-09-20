@@ -39,7 +39,11 @@
          CASE client->get( )-event.
 
            WHEN 'DISPLAY_POPUP_SELECT_LAYOUT'.
-*            client->nav_app_call( z2ui5_cl_pop_t=>factory_pop( handle = 'MY_HANDLE' ) ).
+             client->nav_app_call( z2ui5_cl_pop_display_layout=>choose_layout(
+                                     handle01 = 'z2ui5_cl_se16'
+                                     handle02 = mo_selscreen->mv_tabname
+                                     handle03 = 'MY_HANDLE'
+                                   ) ).
 
            WHEN `UPDATE_TOKENS`.
              DATA(lt_arg) = client->get( )-t_event_arg.
@@ -117,7 +121,7 @@
      IF mv_check_initialized = abap_false.
        mv_check_initialized = abap_true.
        mo_selscreen = NEW z2ui5_cl_selscreen( ).
-        mo_selscreen->mv_tabname = `USR01`.
+       mo_selscreen->mv_tabname = `USR01`.
        ms_sel-number_entries = 100.
        view_display( ).
        RETURN.
@@ -125,6 +129,13 @@
      ENDIF.
 
      IF client->get( )-check_on_navigated = abap_true.
+       TRY.
+           DATA(lo_layout) = CAST z2ui5_cl_pop_display_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+           ms_sel-name_layout = lo_layout->ms_layout-s_head-guid.
+           RETURN.
+         CATCH cx_root.
+       ENDTRY.
+
        TRY.
            DATA(lo_popup) = CAST z2ui5_cl_pop_get_range( client->get_app( client->get( )-s_draft-id_prev_app ) ).
            IF lo_popup->result( )-check_confirmed = abap_true.

@@ -108,11 +108,11 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
 
     CLASS-METHODS choose_layout
       IMPORTING
-        !control      TYPE control
-        handle01      TYPE handle OPTIONAL
-        handle02      TYPE handle OPTIONAL
-        handle03      TYPE handle OPTIONAL
-        handle04      TYPE handle OPTIONAL
+        !control      TYPE control default m_table
+        handle01      TYPE clike OPTIONAL
+        handle02      TYPE clike OPTIONAL
+        handle03      TYPE clike OPTIONAL
+        handle04      TYPE clike OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_pop_to_select.
 

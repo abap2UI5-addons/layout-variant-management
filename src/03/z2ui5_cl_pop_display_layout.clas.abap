@@ -96,6 +96,7 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
 
     CLASS-METHODS init_layout
       IMPORTING
+        layout_name   TYPE ty_s_head-layout OPTIONAL
         !data         TYPE REF TO data
         !control      TYPE control
         handle01      TYPE handle OPTIONAL
@@ -104,6 +105,16 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
         handle04      TYPE handle OPTIONAL
       RETURNING
         VALUE(result) TYPE ty_s_layout.
+
+    CLASS-METHODS choose_layout
+      IMPORTING
+        !control      TYPE control
+        handle01      TYPE handle OPTIONAL
+        handle02      TYPE handle OPTIONAL
+        handle03      TYPE handle OPTIONAL
+        handle04      TYPE handle OPTIONAL
+      RETURNING
+        VALUE(result) TYPE REF TO z2ui5_cl_pop_to_select.
 
     CLASS-METHODS factory
       IMPORTING
@@ -124,8 +135,9 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
     METHODS render_edit.
     METHODS on_event.
 
-    METHODS select_layouts
+    CLASS-METHODS select_layouts
       IMPORTING
+        layout_name   TYPE ty_s_head-layout OPTIONAL
         !control      TYPE control
         handle01      TYPE handle
         handle02      TYPE handle
@@ -136,7 +148,7 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
 
     METHODS render_save.
     METHODS save_layout.
-    METHODS render_open.
+    METHODS render_open IMPORTING external_call TYPE abap_bool OPTIONAL.
 
     METHODS get_selected_layout
       RETURNING
@@ -758,7 +770,21 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD choose_layout.
+
+    DATA(layouts) = select_layouts( control  = control
+                                    handle01 = handle01
+                                    handle02 = handle02
+                                    handle03 = handle03
+                                    handle04 = handle04 ).
+
+    result = z2ui5_cl_pop_to_select=>factory( i_tab   = layouts
+                                              i_title = 'Layouts' ).
+
+  ENDMETHOD.
+
   METHOD render_open.
+    " TODO: parameter EXTERNAL_CALL is never used (ABAP cleaner)
 
     DATA(popup) = z2ui5_cl_xml_view=>factory_popup( ).
 
@@ -807,6 +833,11 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
   METHOD select_layouts.
 
+    IF layout_name IS NOT INITIAL.
+      DATA(lr_layout) = VALUE z2ui5_cl_util=>ty_t_range(
+                                  ( CORRESPONDING #( z2ui5_cl_util=>filter_get_range_by_token( |={  layout_name }| ) ) ) ).
+    ENDIF.
+
     SELECT guid,
            layout,
            control,
@@ -818,11 +849,12 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
            def,
            uname
       FROM z2ui5_layo_t_01
-      WHERE control  = @control
-        AND handle01 = @handle01
-        AND handle02 = @handle02
-        AND handle03 = @handle03
-        AND handle04 = @handle04
+      WHERE layout   IN @lr_layout
+        AND control   = @control
+        AND handle01  = @handle01
+        AND handle02  = @handle02
+        AND handle03  = @handle03
+        AND handle04  = @handle04
       INTO CORRESPONDING FIELDS OF TABLE @result ##SUBRC_OK.
 
   ENDMETHOD.
@@ -883,7 +915,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
     DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
 
     LOOP AT t_comp INTO DATA(comp).
-      IF   comp-type->type_kind = cl_abap_elemdescr=>typekind_oref.
+      IF comp-type->type_kind = cl_abap_elemdescr=>typekind_oref.
         DELETE t_comp.
       ENDIF.
     ENDLOOP.
@@ -901,23 +933,11 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
     ENDLOOP.
 
     " Select Layouts
-    SELECT guid,
-           layout,
-           control,
-           handle01,
-           handle02,
-           handle03,
-           handle04,
-           descr,
-           def,
-           uname
-      FROM z2ui5_layo_t_01
-      WHERE control  = @control
-        AND handle01 = @handle01
-        AND handle02 = @handle02
-        AND handle03 = @handle03
-        AND handle04 = @handle04
-      INTO TABLE @DATA(Head).
+    DATA(Head) = select_layouts( control  = control
+                                 handle01 = handle01
+                                 handle02 = handle02
+                                 handle03 = handle03
+                                 handle04 = handle04 ).
 
     IF sy-subrc = 0.
 

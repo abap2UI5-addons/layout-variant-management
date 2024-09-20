@@ -4,21 +4,21 @@ CLASS z2ui5_cl_range_to_sql DEFINITION
 
   PUBLIC SECTION.
     CONSTANTS: BEGIN OF signs,
-                 including TYPE ddsign VALUE 'I',
-                 excluding TYPE ddsign VALUE 'E',
+                 including TYPE string VALUE 'I',
+                 excluding TYPE string VALUE 'E',
                END OF signs.
 
     CONSTANTS: BEGIN OF options,
-                 equal                TYPE ddoption VALUE 'EQ',
-                 not_equal            TYPE ddoption VALUE 'NE',
-                 between              TYPE ddoption VALUE 'BT',
-                 not_between          TYPE ddoption VALUE 'NB',
-                 contains_pattern     TYPE ddoption VALUE 'CP',
-                 not_contains_pattern TYPE ddoption VALUE 'NP',
-                 greater_than         TYPE ddoption VALUE 'GT',
-                 greater_equal        TYPE ddoption VALUE 'GE',
-                 less_equal           TYPE ddoption VALUE 'LE',
-                 less_than            TYPE ddoption VALUE 'LT',
+                 equal                TYPE string VALUE 'EQ',
+                 not_equal            TYPE string VALUE 'NE',
+                 between              TYPE string VALUE 'BT',
+                 not_between          TYPE string VALUE 'NB',
+                 contains_pattern     TYPE string VALUE 'CP',
+                 not_contains_pattern TYPE string VALUE 'NP',
+                 greater_than         TYPE string VALUE 'GT',
+                 greater_equal        TYPE string VALUE 'GE',
+                 less_equal           TYPE string VALUE 'LE',
+                 less_than            TYPE string VALUE 'LT',
                END OF options.
 
     METHODS constructor

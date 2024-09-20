@@ -16,13 +16,16 @@
      DATA mv_popup_name TYPE string.
      DATA ms_layout TYPE z2ui5_cl_pop_display_layout=>ty_s_layout.
 
+     DATA: mo_multiselect TYPE REF TO z2ui5add_cl_var_selscreen,
+           mo_selscreen   TYPE REF TO z2ui5_cl_selscreen.
+
    PROTECTED SECTION.
      DATA client TYPE REF TO z2ui5_if_client.
      DATA mv_check_initialized TYPE abap_bool.
      METHODS on_event.
      METHODS view_display.
    PRIVATE SECTION.
-     DATA: mo_multiselect TYPE REF TO z2ui5add_cl_var_selscreen.
+
 
  ENDCLASS.
 
@@ -35,25 +38,25 @@
      TRY.
          CASE client->get( )-event.
 
+           WHEN 'DISPLAY_POPUP_SELECT_LAYOUT'.
+*            client->nav_app_call( z2ui5_cl_pop_t=>factory_pop( handle = 'MY_HANDLE' ) ).
+
            WHEN `UPDATE_TOKENS`.
              DATA(lt_arg) = client->get( )-t_event_arg.
-             mt_filter_tab = z2ui5_cl_util=>filter_update_tokens(
-                 val    = mt_filter_tab
+             mo_selscreen->mt_filter_tab = z2ui5_cl_util=>filter_update_tokens(
+                 val    = mo_selscreen->mt_filter_tab
                  name   = lt_arg[ 1 ] ).
              client->view_model_update( ).
 
            WHEN 'LIST_OPEN'.
              DATA(lt_event) = client->get( )-t_event_arg.
              mv_popup_name = lt_event[ 1 ].
-             DATA(ls_sql) = mt_filter_tab[ name = mv_popup_name ].
+             DATA(ls_sql) = mo_selscreen->mt_filter_tab[ name = mv_popup_name ].
              client->nav_app_call( z2ui5_cl_pop_get_range=>factory( ls_sql-t_range ) ).
              RETURN.
 
            WHEN `POST`.
 
-             DATA lr_table TYPE REF TO data.
-             CREATE DATA lr_table TYPE STANDARD TABLE OF (ms_sel-tabname) WITH EMPTY KEY.
-             mt_filter_tab = z2ui5_cl_util=>filter_get_multi_by_data( lr_table->* ).
              view_display( ).
 
            WHEN `PREVIEW_FILTER`.
@@ -81,71 +84,12 @@
               shownavbutton = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL )
            ).
 
-     IF ms_sel-tabname IS NOT INITIAL.
+     IF mo_selscreen->mv_tabname IS NOT INITIAL.
 
-       DATA(tab) = page->table( "nodata          = `no conditions defined`
-                                id = `tab`
-                                items           = client->_bind_edit( mt_filter_tab )
-                                selectionchange = client->_event( 'SELCHANGE' ) ).
+       mo_selscreen->paint(
+         view   = page
+         client = client ).
 
-       DATA(headder) = tab->header_toolbar(
-                  )->overflow_toolbar(
-                  )->input( value = client->_bind_edit( ms_sel-tabname ) description = `Tablename` width = '40%'  submit = client->_event( `POST` )
-                    )->toolbar_spacer(
-                      )->button(  text = `Load Select Options` press = client->_event( `POST` )   ).
-
-       tab->columns(
-            )->column(
-                )->text( 'Name' )->get_parent(
-            )->column(
-                )->text( 'Options' )->get_parent(
-            )->column(
-                )->text( 'Select' )->get_parent(
-            )->column(
-                )->text( 'Clear' )->get_parent(
-                 ).
-
-
-       DATA(cells) =  tab->items( )->column_list_item( id = `items` )->cells(  ).
-       cells->text( text = `{NAME}` ).
-       DATA(multi) = cells->multi_input( tokens = `{T_TOKEN}`
-                name = '{NAME}'
-*        enabled               = abap_false
-             valuehelprequest = client->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) )
-            ).
-       multi->tokens(
-            )->token(
-
-                      key      = `{KEY}`
-                      text     = `{TEXT}`
-                      visible  = `{VISIBLE}`
-                      selected = `{SELKZ}`
-                      editable = `{EDITABLE}` ).
-
-
-
-       cells->button( text  = `Select`
-                  press = client->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) ) ).
-       cells->button( icon  = 'sap-icon://delete'
-                  type  = `Transparent`
-                  text  = `Clear`
-                  press = client->_event( val = `LIST_DELETE` t_arg = VALUE #( ( `${NAME}` ) ) )
-        ).
-
-       LOOP AT mt_filter_tab REFERENCE INTO DATA(lr_token).
-         DATA(lv_tabix) = sy-tabix.
-
-         page->_z2ui5( )->multiinput_ext(
-                    multiinputname = client->_bind_edit( val = lr_token->name tab = mt_filter_tab tab_index = lv_tabix )
-                    addedtokens      = client->_bind_edit( val = lr_token->t_token_added tab = mt_filter_tab tab_index =  lv_tabix )
-                    removedtokens    = client->_bind_edit( val = lr_token->t_token_removed  tab = mt_filter_tab tab_index =  lv_tabix )
-                    change           = client->_event( val = 'UPDATE_TOKENS'  t_arg = VALUE #( ( lr_token->name ) ) )
-*                    multiinputid     = '__input5-mainView--tab-' &&  z2ui5_cl_util=>c_trim( lv_tabix - 1 )
-                      ).
-
-*         EXIT.
-       ENDLOOP.
-*
      ENDIF.
 
      page->footer( )->overflow_toolbar(
@@ -153,6 +97,9 @@
 *
          )->checkbox( selected = client->_bind_edit( ms_sel-check_autoload )  text = `A`
          )->input( value = client->_bind_edit( ms_sel-name_layout ) width = `20%` description = `Layout`
+                showvaluehelp = abaP_true
+                valuehelprequest = client->_event( `DISPLAY_POPUP_SELECT_LAYOUT` )
+                valuehelponly = abap_true
                 )->toolbar_spacer(
          )->input( value = client->_bind_edit( ms_sel-number_entries ) width = `10%` description = `Number`
          )->button( text = `Count Entries` press = client->_event( `GO` )
@@ -169,7 +116,8 @@
 
      IF mv_check_initialized = abap_false.
        mv_check_initialized = abap_true.
-       ms_sel-tabname =  `USR01`.
+       mo_selscreen = NEW z2ui5_cl_selscreen( ).
+        mo_selscreen->mv_tabname = `USR01`.
        ms_sel-number_entries = 100.
        view_display( ).
        RETURN.
@@ -180,7 +128,7 @@
        TRY.
            DATA(lo_popup) = CAST z2ui5_cl_pop_get_range( client->get_app( client->get( )-s_draft-id_prev_app ) ).
            IF lo_popup->result( )-check_confirmed = abap_true.
-             ASSIGN mt_filter_tab[ name = mv_popup_name ] TO FIELD-SYMBOL(<tab>).
+             ASSIGN mo_selscreen->mt_filter_tab[ name = mv_popup_name ] TO FIELD-SYMBOL(<tab>).
              <tab>-t_range = lo_popup->result( )-t_range.
              <tab>-t_token = z2ui5_cl_util=>filter_get_token_t_by_range_t( <tab>-t_range ).
              client->view_model_update( ).

@@ -17,22 +17,22 @@ CLASS z2ui5_cl_pop_to_sel_w_layout DEFINITION
     DATA mr_out          TYPE REF TO data.
     DATA mr_out_tmp      TYPE REF TO data.
 
-    DATA ms_layout       TYPE z2ui5_cl_pop_display_layout=>ty_s_layout.
+    DATA mo_layout       TYPE REF TO z2ui5_cl_layout.
     DATA mv_search_value TYPE string.
 
     CLASS-METHODS factory
       IMPORTING
         i_tab              TYPE STANDARD TABLE
-        i_title            TYPE clike                          OPTIONAL
-        i_sort_field       TYPE clike                          OPTIONAL
-        i_descending       TYPE abap_bool                      OPTIONAL
-        i_contentwidth     TYPE clike                          OPTIONAL
-        i_contentheight    TYPE clike                          OPTIONAL
-        i_growingthreshold TYPE clike                          OPTIONAL
-        i_handle01         TYPE z2ui5_cl_pop_display_layout=>handle OPTIONAL
-        i_handle02         TYPE z2ui5_cl_pop_display_layout=>handle OPTIONAL
-        i_handle03         TYPE z2ui5_cl_pop_display_layout=>handle OPTIONAL
-        i_handle04         TYPE z2ui5_cl_pop_display_layout=>handle OPTIONAL
+        i_title            TYPE clike                               OPTIONAL
+        i_sort_field       TYPE clike                               OPTIONAL
+        i_descending       TYPE abap_bool                           OPTIONAL
+        i_contentwidth     TYPE clike                               OPTIONAL
+        i_contentheight    TYPE clike                               OPTIONAL
+        i_growingthreshold TYPE clike                               OPTIONAL
+        i_handle01         TYPE z2ui5_cl_layout=>handle OPTIONAL
+        i_handle02         TYPE z2ui5_cl_layout=>handle OPTIONAL
+        i_handle03         TYPE z2ui5_cl_layout=>handle OPTIONAL
+        i_handle04         TYPE z2ui5_cl_layout=>handle OPTIONAL
       RETURNING
         VALUE(r_result)    TYPE REF TO z2ui5_cl_pop_to_sel_w_layout.
 
@@ -84,12 +84,12 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
     CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.
 
-    r_result->ms_layout = z2ui5_cl_pop_display_layout=>init_layout( data     = r_result->mr_tab
-                                                               control  = z2ui5_cl_pop_display_layout=>m_table
-                                                               handle01 = i_handle01
-                                                               handle02 = i_handle02
-                                                               handle03 = i_handle03
-                                                               handle04 = i_handle04 ).
+    r_result->mo_layout = z2ui5_cl_pop_display_layout=>init_layout( data     = r_result->mr_tab
+                                                                    control  = z2ui5_cl_layout=>m_table
+                                                                    handle01 = i_handle01
+                                                                    handle02 = i_handle02
+                                                                    handle03 = i_handle03
+                                                                    handle04 = i_handle04 ).
 
   ENDMETHOD.
 
@@ -98,102 +98,112 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
     DATA(popup) = z2ui5_cl_xml_view=>factory_popup( )->dialog( title      = title
                                                                afterclose = client->_event( 'CANCEL' )  ).
 
-    DATA(table) = popup->table( growing          = 'true'
-                                growingthreshold = '100'
-                                width            = 'auto'
-                                autopopinmode    = abap_true
-                                items            = client->_bind_edit( val = mr_out->* )
-                                headertext       = title  ).
+    z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
+                                           i_xml          = popup
+                                           i_client       = client
+                                           i_layout       = mo_layout
+                                           i_search_value = REF #( mv_search_value )
+*                                           i_sel_mode     =
+*                                           i_sel_bind_to  =
+                                           i_col_type     = 'Navigation'
+                                           i_col_bind_to  = 'ZZROW_ID' ).
 
-    " TODO: variable is assigned but never used (ABAP cleaner)
-    DATA(headder) = table->header_toolbar(
-               )->overflow_toolbar(
-                 )->title(  title
-                 )->search_field( value  = client->_bind_edit( mv_search_value )
-                                  search = client->_event( 'SEARCH' )
-                                  change = client->_event( 'SEARCH' )
-                                  id     = `SEARCH`
-                                  width  = '17.5rem' ).
-
-    headder = z2ui5_cl_pop_display_layout=>render_layout_function( xml    = headder
-                                                              client = client ).
-
-    DATA(columns) = table->columns( ).
-
-    LOOP AT ms_layout-t_layout REFERENCE INTO DATA(layout).
-      DATA(lv_index) = sy-tabix.
-
-      columns->column( visible         = client->_bind( val       = layout->visible
-                                                        tab       = ms_layout-t_layout
-                                                        tab_index = lv_index )
-                       halign          = client->_bind( val       = layout->halign
-                                                        tab       = ms_layout-t_layout
-                                                        tab_index = lv_index )
-                       importance      = client->_bind( val       = layout->importance
-                                                        tab       = ms_layout-t_layout
-                                                        tab_index = lv_index )
-                       mergeduplicates = client->_bind( val       = layout->merge
-                                                        tab       = ms_layout-t_layout
-                                                        tab_index = lv_index )
-                       width           = client->_bind( val       = layout->width
-                                                        tab       = ms_layout-t_layout
-                                                        tab_index = lv_index )
-       )->text( layout->tlabel ).
-
-    ENDLOOP.
-
-    DATA(cells) = columns->get_parent( )->items(
-                                       )->column_list_item(
-                                           valign = 'Middle'
-                                           type   = 'Navigation'
-                                           press  = client->_event( val   = 'CONFIRM'
-                                                                    t_arg = VALUE #( ( `${ZZROW_ID}`  ) ) )
-                                       )->cells( ).
-
-    LOOP AT ms_layout-t_layout REFERENCE INTO layout.
-
-      IF layout->t_sub_col IS NOT INITIAL.
-
-        DATA(sub_col) = ``.
-        DATA(index) = 0.
-
-        LOOP AT layout->t_sub_col INTO DATA(subcol).
-
-          index = index + 1.
-
-          READ TABLE ms_layout-t_layout INTO DATA(line) WITH KEY fname = subcol-fname.
-          IF sy-subrc <> 0.
-            CONTINUE.
-          ENDIF.
-          IF line-reference_field IS INITIAL.
-            DATA(column) = |{ line-tlabel }: \{{ subcol-fname }\}|.
-          ELSE.
-            column = |{ line-tlabel }: \{{ subcol-fname }\} \{{ line-reference_field }\}|.
-          ENDIF.
-
-          IF index = 1.
-            sub_col = column.
-          ELSE.
-            sub_col = |{ sub_col }{ cl_abap_char_utilities=>cr_lf }{ column }|.
-          ENDIF.
-        ENDLOOP.
-
-        IF layout->reference_field IS NOT INITIAL.
-          cells->object_identifier( title = |\{{ layout->fname }\} \{{ layout->reference_field }\}|
-                                    text  = sub_col ).
-        ELSE.
-          cells->object_identifier( title = |\{{ layout->fname }\}|
-                                    text  = sub_col ).
-        ENDIF.
-
-      ELSE.
-     "   IF layout->reference_field IS NOT INITIAL.
-          cells->object_identifier( text = |\{{ layout->fname }\} \{{ layout->reference_field }\}| ).
-    "    ELSE.
-          cells->object_identifier( text = |\{{ layout->fname }\}| ).
-     "   ENDIF.
-      ENDIF.
-    ENDLOOP.
+*    DATA(table) = popup->table( growing          = 'true'
+*                                growingthreshold = '100'
+*                                width            = 'auto'
+*                                autopopinmode    = abap_true
+*                                items            = client->_bind_edit( val = mr_out->* )
+*                                headertext       = title  ).
+*
+*    " TODO: variable is assigned but never used (ABAP cleaner)
+*    DATA(headder) = table->header_toolbar(
+*               )->overflow_toolbar(
+*                 )->title(  title
+*                 )->search_field( value  = client->_bind_edit( mv_search_value )
+*                                  search = client->_event( 'SEARCH' )
+*                                  change = client->_event( 'SEARCH' )
+*                                  id     = `SEARCH`
+*                                  width  = '17.5rem' ).
+*
+*    headder = z2ui5_cl_pop_display_layout=>render_layout_function( xml    = headder
+*                                                              client = client ).
+*
+*    DATA(columns) = table->columns( ).
+*
+*    LOOP AT mo_layout->ms_layout-t_layout REFERENCE INTO DATA(layout).
+*      DATA(lv_index) = sy-tabix.
+*
+*      columns->column( visible         = client->_bind( val       = layout->visible
+*                                                        tab       = mo_layout->ms_layout-t_layout
+*                                                        tab_index = lv_index )
+*                       halign          = client->_bind( val       = layout->halign
+*                                                        tab       = mo_layout->ms_layout-t_layout
+*                                                        tab_index = lv_index )
+*                       importance      = client->_bind( val       = layout->importance
+*                                                        tab       = mo_layout->ms_layout-t_layout
+*                                                        tab_index = lv_index )
+*                       mergeduplicates = client->_bind( val       = layout->merge
+*                                                        tab       = mo_layout->ms_layout-t_layout
+*                                                        tab_index = lv_index )
+*                       width           = client->_bind( val       = layout->width
+*                                                        tab       = mo_layout->ms_layout-t_layout
+*                                                        tab_index = lv_index )
+*       )->text( layout->tlabel ).
+*
+*    ENDLOOP.
+*
+*    DATA(cells) = columns->get_parent( )->items(
+*                                       )->column_list_item(
+*                                           valign = 'Middle'
+*                                           type   = 'Navigation'
+*                                           press  = client->_event( val   = 'CONFIRM'
+*                                                                    t_arg = VALUE #( ( `${ZZROW_ID}`  ) ) )
+*                                       )->cells( ).
+*
+*    LOOP AT mo_layout->ms_layout-t_layout REFERENCE INTO layout.
+*
+*      IF layout->t_sub_col IS NOT INITIAL.
+*
+*        DATA(sub_col) = ``.
+*        DATA(index) = 0.
+*
+*        LOOP AT layout->t_sub_col INTO DATA(subcol).
+*
+*          index = index + 1.
+*
+*          READ TABLE mo_layout->ms_layout-t_layout INTO DATA(line) WITH KEY fname = subcol-fname.
+*          IF sy-subrc <> 0.
+*            CONTINUE.
+*          ENDIF.
+*          IF line-reference_field IS INITIAL.
+*            DATA(column) = |{ line-tlabel }: \{{ subcol-fname }\}|.
+*          ELSE.
+*            column = |{ line-tlabel }: \{{ subcol-fname }\} \{{ line-reference_field }\}|.
+*          ENDIF.
+*
+*          IF index = 1.
+*            sub_col = column.
+*          ELSE.
+*            sub_col = |{ sub_col }{ cl_abap_char_utilities=>cr_lf }{ column }|.
+*          ENDIF.
+*        ENDLOOP.
+*
+*        IF layout->reference_field IS NOT INITIAL.
+*          cells->object_identifier( title = |\{{ layout->fname }\} \{{ layout->reference_field }\}|
+*                                    text  = sub_col ).
+*        ELSE.
+*          cells->object_identifier( title = |\{{ layout->fname }\}|
+*                                    text  = sub_col ).
+*        ENDIF.
+*
+*      ELSE.
+*     "   IF layout->reference_field IS NOT INITIAL.
+*          cells->object_identifier( text = |\{{ layout->fname }\} \{{ layout->reference_field }\}| ).
+*    "    ELSE.
+*          cells->object_identifier( text = |\{{ layout->fname }\}| ).
+*     "   ENDIF.
+*      ENDIF.
+*    ENDLOOP.
 
     client->popup_display( popup->stringify( ) ).
 
@@ -242,7 +252,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
       WHEN OTHERS.
 
         client = z2ui5_cl_pop_display_layout=>on_event_layout( client = client
-                                                          layout = ms_layout ).
+                                                               layout = mo_layout ).
 
     ENDCASE.
 
@@ -258,7 +268,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
         DATA(app) = CAST z2ui5_cl_pop_display_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
 
-        ms_layout = app->ms_layout.
+        mo_layout = app->mo_layout.
 
         display( ).
 

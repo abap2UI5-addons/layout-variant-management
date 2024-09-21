@@ -16,55 +16,15 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
       END OF fixvalue.
     TYPES fixvalues TYPE STANDARD TABLE OF fixvalue WITH EMPTY KEY.
 
-    TYPES ty_s_Head TYPE z2ui5_layo_t_01.
-    TYPES ty_t_head TYPE STANDARD TABLE OF ty_s_head WITH EMPTY KEY.
-
-    TYPES:
-      BEGIN OF ty_s_sub_columns,
-        key   TYPE string,
-        fname TYPE string,
-      END OF ty_s_sub_columns.
-    TYPES ty_t_sub_columns TYPE STANDARD TABLE OF ty_s_sub_columns WITH EMPTY KEY.
-
-    TYPES  BEGIN OF ty_s_positions.
-             INCLUDE TYPE z2ui5_layo_t_02.
-    TYPES:   tlabel    TYPE string,
-             t_sub_col TYPE ty_t_sub_columns,
-           END OF ty_s_positions.
-    TYPES ty_t_positions TYPE STANDARD TABLE OF ty_s_positions WITH EMPTY KEY.
-
-    TYPES:
-      BEGIN OF ty_s_layout,
-        s_head   TYPE ty_s_head,
-        t_layout TYPE ty_t_positions,
-      END OF ty_s_layout.
-
     TYPES BEGIN OF ty_s_layo.
             INCLUDE TYPE z2ui5_layo_t_01.
     TYPES   selkz TYPE abap_bool.
     TYPES END OF ty_s_layo.
     TYPES ty_t_layo TYPE STANDARD TABLE OF ty_s_layo WITH EMPTY KEY.
 
-    TYPES:
-      BEGIN OF ty_s_controls,
-        attribute TYPE string,
-        control   TYPE string,
-        active    TYPE abap_bool,
-        others    TYPE abap_bool,
-      END OF ty_s_controls.
-    TYPES ty_t_controls TYPE STANDARD TABLE OF ty_s_controls WITH EMPTY KEY.
-
-    TYPES handle        TYPE c LENGTH 40.
-    TYPES control       TYPE c LENGTH 10.
-
-    CLASS-DATA ui_table TYPE control VALUE 'ui.Table' ##NO_TEXT.
-    CLASS-DATA m_table  TYPE control VALUE 'm.Table' ##NO_TEXT.
-    CLASS-DATA others   TYPE control VALUE '' ##NO_TEXT.
-
-    DATA mt_controls         TYPE ty_t_controls.
+    DATA mo_layout           TYPE REF TO z2ui5_cl_layout.
+    DATA mt_controls         TYPE z2ui5_cl_layout=>ty_t_controls.
     DATA mt_Head             TYPE ty_t_layo.
-    DATA ms_layout           TYPE ty_s_layout.
-    DATA ms_layout_tmp       TYPE ty_s_layout.
     DATA mv_descr            TYPE string.
     DATA mv_layout           TYPE string.
     DATA mv_def              TYPE abap_bool.
@@ -73,17 +33,13 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
     DATA mv_delete           TYPE abap_bool.
     DATA mt_halign           TYPE fixvalues.
     DATA mt_importance       TYPE fixvalues.
-
     DATA mv_active_subcolumn TYPE string.
-    DATA mt_comps            TYPE ty_t_positions.
-    DATA mt_sub_cols         TYPE ty_t_sub_columns.
-    DATA mt_sub_cols_tmp     TYPE ty_t_sub_columns.
     DATA mv_rerender         TYPE abap_bool.
 
     CLASS-METHODS on_event_layout
       IMPORTING
         !client       TYPE REF TO z2ui5_if_client
-        !layout       TYPE ty_s_layout
+        !layout       TYPE REF TO z2ui5_cl_layout
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_if_client.
 
@@ -96,85 +52,61 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
 
     CLASS-METHODS init_layout
       IMPORTING
-        layout_name   TYPE ty_s_head-layout OPTIONAL
+        layout_guid   TYPE guid  OPTIONAL
         !data         TYPE REF TO data
-        !control      TYPE control
-        handle01      TYPE handle OPTIONAL
-        handle02      TYPE handle OPTIONAL
-        handle03      TYPE handle OPTIONAL
-        handle04      TYPE handle OPTIONAL
-      RETURNING
-        VALUE(result) TYPE ty_s_layout.
-
-    CLASS-METHODS choose_layout
-      IMPORTING
-        !control      TYPE control default m_table
+        !control      TYPE clike
         handle01      TYPE clike OPTIONAL
         handle02      TYPE clike OPTIONAL
         handle03      TYPE clike OPTIONAL
         handle04      TYPE clike OPTIONAL
       RETURNING
+        VALUE(result) TYPE REF TO z2ui5_cl_layout.
+
+    CLASS-METHODS choose_layout
+      IMPORTING
+        !control      TYPE z2ui5_cl_layout=>control DEFAULT z2ui5_cl_layout=>m_table
+        handle01      TYPE clike                    OPTIONAL
+        handle02      TYPE clike                    OPTIONAL
+        handle03      TYPE clike                    OPTIONAL
+        handle04      TYPE clike                    OPTIONAL
+      RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_pop_to_select.
 
     CLASS-METHODS factory
       IMPORTING
-        !layout       TYPE ty_s_layout
+        !layout       TYPE REF TO z2ui5_cl_layout
         open_layout   TYPE abap_bool OPTIONAL
         delete_layout TYPE abap_bool OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_pop_display_layout.
 
   PROTECTED SECTION.
+
     DATA client  TYPE REF TO z2ui5_if_client.
     DATA mv_init TYPE abap_bool.
 
-    METHODS on_init
-      IMPORTING
-        !control TYPE control.
-
     METHODS render_edit.
     METHODS on_event.
-
-    CLASS-METHODS select_layouts
-      IMPORTING
-        layout_name   TYPE ty_s_head-layout OPTIONAL
-        !control      TYPE control
-        handle01      TYPE handle
-        handle02      TYPE handle
-        handle03      TYPE handle
-        handle04      TYPE handle
-      RETURNING
-        VALUE(result) TYPE ty_t_head.
-
     METHODS render_save.
     METHODS save_layout.
-    METHODS render_open IMPORTING external_call TYPE abap_bool OPTIONAL.
+    METHODS get_layouts.
+    METHODS init_edit.
+    METHODS render_delete.
+    METHODS render_add_subcolumn.
+    METHODS on_event_subcoloumns.
+    METHODS check_rerender_necessary.
+
+    METHODS on_init
+      IMPORTING
+        !control TYPE clike.
+
+    METHODS render_open
+      IMPORTING
+        external_call TYPE abap_bool OPTIONAL.
 
     METHODS get_selected_layout
       RETURNING
         VALUE(result) TYPE ty_s_layo.
-
-    METHODS get_layouts.
-    METHODS init_edit.
-    METHODS render_delete.
-
-    METHODS check_width_unit
-      IMPORTING
-        !width        TYPE z2ui5_layo_t_02-width
-      RETURNING
-        VALUE(result) TYPE z2ui5_layo_t_02-width.
-
-    CLASS-METHODS sort_by_seqence
-      IMPORTING
-        !Pos          TYPE ty_t_positions
-      RETURNING
-        VALUE(result) TYPE ty_t_positions.
-
-    CLASS-METHODS set_text
-      IMPORTING
-        !layout       TYPE ty_s_positions
-      RETURNING
-        VALUE(result) TYPE ty_s_positions-tlabel.
 
     METHODS delete_selected_layout
       IMPORTING
@@ -184,9 +116,34 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
       IMPORTING
         !Head TYPE ty_s_layo.
 
-    METHODS render_add_subcolumn.
-    METHODS on_event_subcoloumns.
-    METHODS check_rerender_necessary.
+    METHODS check_width_unit
+      IMPORTING
+        !width        TYPE z2ui5_layo_t_02-width
+      RETURNING
+        VALUE(result) TYPE z2ui5_layo_t_02-width.
+
+    CLASS-METHODS select_layouts
+      IMPORTING
+        layout_guid   TYPE guid OPTIONAL
+        !control      TYPE clike
+        handle01      TYPE clike
+        handle02      TYPE clike
+        handle03      TYPE clike
+        handle04      TYPE clike
+      RETURNING
+        VALUE(result) TYPE z2ui5_cl_layout=>ty_t_head.
+
+    CLASS-METHODS sort_by_seqence
+      IMPORTING
+        !Pos          TYPE z2ui5_cl_layout=>ty_t_positions
+      RETURNING
+        VALUE(result) TYPE z2ui5_cl_layout=>ty_t_positions.
+
+    CLASS-METHODS set_text
+      IMPORTING
+        !layout       TYPE z2ui5_cl_layout=>ty_s_positions
+      RETURNING
+        VALUE(result) TYPE string.
 
     CLASS-METHODS get_relative_name_of_table
       IMPORTING
@@ -196,20 +153,20 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
 
     CLASS-METHODS default_layout
       IMPORTING
-        t_layout      TYPE ty_t_positions
-        !control      TYPE control
-        handle01      TYPE handle
-        handle02      TYPE handle
-        handle03      TYPE handle
-        handle04      TYPE handle
+        t_layout      TYPE z2ui5_cl_layout=>ty_t_positions
+        !control      TYPE clike
+        handle01      TYPE clike
+        handle02      TYPE clike
+        handle03      TYPE clike
+        handle04      TYPE clike
       RETURNING
-        VALUE(result) TYPE ty_s_layout.
+        VALUE(result) TYPE REF TO z2ui5_cl_layout.
 
     CLASS-METHODS set_sub_columns
       IMPORTING
-        !layout       TYPE ty_t_positions
+        !layout       TYPE z2ui5_cl_layout=>ty_t_positions
       RETURNING
-        VALUE(result) TYPE ty_t_positions.
+        VALUE(result) TYPE z2ui5_cl_layout=>ty_t_positions.
 
 ENDCLASS.
 
@@ -223,7 +180,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
     IF mv_init = abap_false.
       mv_init = abap_true.
 
-      on_init( ms_layout-s_head-control ).
+      on_init( mo_layout->ms_layout-s_head-control ).
 
       init_edit( ).
 
@@ -240,7 +197,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
   METHOD on_init.
 
     CASE Control.
-      WHEN m_table.
+      WHEN z2ui5_cl_layout=>m_table.
         mt_halign = VALUE #( ( low = 'Begin'     ddtext = 'Locale-specific positioning at the beginning of the line' )
                              ( low = 'Center'    ddtext = 'Centered text alignment'                                  )
                              ( low = 'End'       ddtext = 'Locale-specific positioning at the end of the line'       )
@@ -248,7 +205,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
                              ( low = 'Left'      ddtext = 'Hard option for left alignment'                           )
                              ( low = 'Right'     ddtext = 'Hard option for right alignment'                          ) ).
 
-      WHEN ui_table.
+      WHEN z2ui5_cl_layout=>ui_table.
         mt_halign = VALUE #( ( low = 'Begin'     ddtext = 'Locale-specific positioning at the beginning of the line' )
                              ( low = 'Center'    ddtext = 'Centered text alignment'                                  )
                              ( low = 'End'       ddtext = 'Locale-specific positioning at the end of the line'       )
@@ -261,25 +218,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
                              ( low = 'Medium' ddtext = 'Medium priority'        )
                              ( low = 'None'   ddtext = 'Default, none priority' ) ).
 
-    mt_controls = VALUE #( active = abap_true
-                           ( control = m_table  attribute = 'VISIBLE' )
-                           ( control = m_table  attribute = 'MERGE' )
-                           ( control = m_table  attribute = 'HALIGN' )
-                           ( control = m_table  attribute = 'IMPORTANCE' )
-                           ( control = m_table  attribute = 'WIDTH' )
-                           ( control = m_table  attribute = 'ALTERNATIVE_TEXT' )
-                           ( control = m_table  attribute = 'SEQUENCE' )
-                           ( control = m_table  attribute = 'SUBCOLUMN' )
-                           ( control = m_table  attribute = 'REFERENCE_FIELD' )
-                           ( control = ui_table attribute = 'VISIBLE' )
-                           ( control = ui_table attribute = 'ALTERNATIVE_TEXT' )
-                           ( control = ui_table attribute = 'HALIGN' )
-                           ( control = ui_table attribute = 'WIDTH' )
-                           ( control = others   attribute = 'VISIBLE' )
-                           ( control = others   attribute = 'SEQUENCE' )
-                           ( control = others   attribute = 'ALTERNATIVE_TEXT' )
-                           ( control = others   attribute = 'REFERENCE_FIELD' )
-                           ( control = others   attribute = 'WIDTH' ) ).
+   mt_controls = z2ui5_cl_layout=>get_controls( ).
 
   ENDMETHOD.
 
@@ -294,7 +233,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
     DATA(tab) = dialog->table( growing          = abap_true
                                growingthreshold = '80'
-                               items            = client->_bind_edit( ms_layout-t_layout ) ).
+                               items            = client->_bind_edit( mo_layout->ms_layout-t_layout ) ).
 
     DATA(list) = tab->column_list_item( ).
 
@@ -302,14 +241,14 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
     DATA(columns) = tab->columns( ).
 
-    DATA(lt_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( ms_layout-t_layout ).
+    DATA(lt_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( mo_layout->ms_layout-t_layout ).
 
     DATA(col) = columns->column( '15rem' )->header( `` ).
     col->text( `Row` ).
 
     LOOP AT lt_comp REFERENCE INTO DATA(comp).
 
-      READ TABLE mt_controls INTO DATA(control) WITH KEY control   = ms_layout-s_head-control
+      READ TABLE mt_controls INTO DATA(control) WITH KEY control   = mo_layout->ms_layout-s_head-control
                                                          attribute = comp->name
                                                          active    = abap_true.
       IF sy-subrc <> 0.
@@ -354,7 +293,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
         cells->text( |\{{ comp->name }\} { cl_abap_char_utilities=>cr_lf } \{TLABEL\} | ).
       ENDIF.
 
-      READ TABLE mt_controls INTO control WITH KEY control   = ms_layout-s_head-control
+      READ TABLE mt_controls INTO control WITH KEY control   = mo_layout->ms_layout-s_head-control
                                                    attribute = comp->name
                                                    active    = abap_true.
 
@@ -408,7 +347,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
         WHEN 'REFERENCE_FIELD'.
 
           cells->combobox( selectedkey = |\{{ comp->name }\}|
-                           items       = client->_bind_local( ms_layout-t_layout )
+                           items       = client->_bind_local( mo_layout->ms_layout-t_layout )
                         )->item( key  = '{FNAME}'
                                  text = '{FNAME} - {TLABEL}' ).
 
@@ -468,12 +407,12 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
       WHEN 'EDIT_OKAY'.
 
-        LOOP AT ms_layout-t_layout REFERENCE INTO DATA(layout).
+        LOOP AT mo_layout->ms_layout-t_layout REFERENCE INTO DATA(layout).
           layout->tlabel           = set_text( layout->* ).
           layout->alternative_text = to_upper( layout->alternative_text ).
         ENDLOOP.
 
-        ms_layout-t_layout = sort_by_seqence( ms_layout-t_layout ).
+        mo_layout->ms_layout-t_layout = sort_by_seqence( mo_layout->ms_layout-t_layout ).
 
         check_rerender_necessary( ).
 
@@ -485,7 +424,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
         client->popup_destroy( ).
 
-        ms_layout = ms_layout_tmp.
+        mo_layout->ms_layout = mo_layout->ms_layout_tmp.
 
         client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
 
@@ -537,11 +476,11 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
     result = NEW #( ).
 
-    result->ms_layout     = layout.
-    result->ms_layout_tmp = layout.
+    result->mo_layout = layout.
+    result->mo_layout = layout.
 
-    result->mv_open       = open_layout.
-    result->mv_delete     = delete_layout.
+    result->mv_open   = open_layout.
+    result->mv_delete = delete_layout.
 
   ENDMETHOD.
 
@@ -622,22 +561,22 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
       DATA(user) = sy-uname.
     ENDIF.
 
-    DATA(Head) = VALUE z2ui5_layo_t_01( guid     = ms_layout-s_head-guid
+    DATA(Head) = VALUE z2ui5_layo_t_01( guid     = mo_layout->ms_layout-s_head-guid
                                         layout   = mv_layout
-                                        control  = ms_layout-s_head-control
-                                        handle01 = ms_layout-s_head-handle01
-                                        handle02 = ms_layout-s_head-handle02
-                                        handle03 = ms_layout-s_head-handle03
-                                        handle04 = ms_layout-s_head-handle04
+                                        control  = mo_layout->ms_layout-s_head-control
+                                        handle01 = mo_layout->ms_layout-s_head-handle01
+                                        handle02 = mo_layout->ms_layout-s_head-handle02
+                                        handle03 = mo_layout->ms_layout-s_head-handle03
+                                        handle04 = mo_layout->ms_layout-s_head-handle04
                                         descr    = mv_descr
                                         def      = mv_def
                                         uname    = user ).
 
-    LOOP AT ms_layout-t_layout INTO DATA(layout).
+    LOOP AT mo_layout->ms_layout-t_layout INTO DATA(layout).
 
       CLEAR line.
 
-      line = CORRESPONDING #( ms_layout-s_head ).
+      line = CORRESPONDING #( mo_layout->ms_layout-s_head ).
       line = CORRESPONDING #( layout ).
       line-layout = mv_layout.
 
@@ -707,19 +646,19 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
         client->message_toast_display( 'Data saved.' ).
 
-        ms_layout-s_head = Head.
+        mo_layout->ms_layout-s_head = Head.
 
-        CLEAR ms_layout-t_layout.
+        CLEAR mo_layout->ms_layout-t_layout.
 
         LOOP AT positions INTO DATA(pos).
           CLEAR layout.
           layout = CORRESPONDING #( pos ).
           layout-tlabel = set_text( layout ).
-          APPEND layout TO ms_layout-t_layout.
+          APPEND layout TO mo_layout->ms_layout-t_layout.
         ENDLOOP.
 
-        ms_layout-t_layout = sort_by_seqence( ms_layout-t_layout ).
-        ms_layout-t_layout = set_sub_columns( ms_layout-t_layout ).
+        mo_layout->ms_layout-t_layout = sort_by_seqence( mo_layout->ms_layout-t_layout ).
+        mo_layout->ms_layout-t_layout = set_sub_columns( mo_layout->ms_layout-t_layout ).
       ENDIF.
     ENDIF.
 
@@ -773,10 +712,10 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
   METHOD choose_layout.
 
     DATA(layouts) = select_layouts( control  = control
-                                    handle01 = conv #( handle01 )
-                                    handle02 = conv #( handle02 )
-                                    handle03 = conv #( handle03 )
-                                    handle04 = conv #( handle04 ) ).
+                                    handle01 = handle01
+                                    handle02 = handle02
+                                    handle03 = handle03
+                                    handle04 = handle04  ).
 
     result = z2ui5_cl_pop_to_select=>factory( i_tab   = layouts
                                               i_title = 'Layouts' ).
@@ -833,9 +772,9 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
   METHOD select_layouts.
 
-    IF layout_name IS NOT INITIAL.
-      DATA(lr_layout) = VALUE z2ui5_cl_util=>ty_t_range(
-                                  ( CORRESPONDING #( z2ui5_cl_util=>filter_get_range_by_token( |={  layout_name }| ) ) ) ).
+    IF layout_guid IS NOT INITIAL.
+      DATA(lr_guid) = VALUE z2ui5_cl_util=>ty_t_range(
+                                ( CORRESPONDING #( z2ui5_cl_util=>filter_get_range_by_token( |={  layout_guid }| ) ) ) ).
     ENDIF.
 
     SELECT guid,
@@ -849,7 +788,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
            def,
            uname
       FROM z2ui5_layo_t_01
-      WHERE layout   IN @lr_layout
+      WHERE guid     IN @lr_guid
         AND control   = @control
         AND handle01  = @handle01
         AND handle02  = @handle02
@@ -883,7 +822,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
                   uname
       FROM z2ui5_layo_t_01
       WHERE guid = @Head-guid
-      INTO CORRESPONDING FIELDS OF @ms_layout-s_head ##SUBRC_OK.
+      INTO CORRESPONDING FIELDS OF @mo_layout->ms_layout-s_head ##SUBRC_OK.
 
     SELECT guid,
            layout,
@@ -905,11 +844,13 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
            reference_field
       FROM z2ui5_layo_t_02
       WHERE guid = @Head-guid
-      INTO CORRESPONDING FIELDS OF TABLE @ms_layout-t_layout  ##SUBRC_OK.
+      INTO CORRESPONDING FIELDS OF TABLE @mo_layout->ms_layout-t_layout  ##SUBRC_OK.
 
   ENDMETHOD.
 
   METHOD init_layout.
+
+    result = NEW #( ).
 
     " create the tab first if the db fields were added/deleted
     DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
@@ -929,15 +870,16 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
                       handle04 = handle04
                       fname    = lr_comp->name
                       rollname = lr_comp->type->get_relative_name( ) )
-             INTO TABLE result-t_layout.
+             INTO TABLE result->ms_layout-t_layout.
     ENDLOOP.
 
     " Select Layouts
-    DATA(Head) = select_layouts( control  = control
-                                 handle01 = handle01
-                                 handle02 = handle02
-                                 handle03 = handle03
-                                 handle04 = handle04 ).
+    DATA(Head) = select_layouts( layout_guid = layout_guid
+                                 control     = control
+                                 handle01    = handle01
+                                 handle02    = handle02
+                                 handle03    = handle03
+                                 handle04    = handle04 ).
 
     IF sy-subrc = 0.
 
@@ -1006,7 +948,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
         WHERE guid = @def-guid
         INTO TABLE @DATA(t_pos) ##SUBRC_OK.
 
-      LOOP AT result-t_layout REFERENCE INTO DATA(layout).
+      LOOP AT result->ms_layout-t_layout REFERENCE INTO DATA(layout).
 
         TRY.
             DATA(pos) = REF #( t_pos[ fname = layout->fname ] ).
@@ -1036,15 +978,15 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
       ENDLOOP.
 
-      result-s_head   = CORRESPONDING #( def ).
-      result-t_layout = sort_by_seqence( result-t_layout ).
-      result-t_layout = set_sub_columns( result-t_layout ).
+      result->ms_layout-s_head   = CORRESPONDING #( def ).
+      result->ms_layout-t_layout = sort_by_seqence( result->ms_layout-t_layout ).
+      result->ms_layout-t_layout = set_sub_columns( result->ms_layout-t_layout ).
 
       RETURN.
 
     ENDIF.
 
-    result = default_layout( t_layout = result-t_layout
+    result = default_layout( t_layout = result->ms_layout-t_layout
                              control  = control
                              handle01 = handle01
                              handle02 = handle02
@@ -1055,19 +997,19 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
   METHOD default_layout.
 
-    DATA layout TYPE REF TO ty_s_positions.
+    result = NEW #( ).
 
     TRY.
         DATA(guid) = cl_system_uuid=>create_uuid_c32_static( ).
       CATCH cx_root.
     ENDTRY.
 
-    result-t_layout = t_layout.
+    result->ms_layout-t_layout = t_layout.
 
     " Default Layout
     DATA(index) = 0.
 
-    LOOP AT result-t_layout REFERENCE INTO layout.
+    LOOP AT result->ms_layout-t_layout REFERENCE INTO DATA(layout).
 
       TRY.
           DATA(pos_guid) = cl_system_uuid=>create_uuid_c32_static( ).
@@ -1103,29 +1045,29 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
     ENDLOOP.
 
-    result-s_head-guid     = guid.
-    result-s_head-layout   = 'Default'.
-    result-s_head-control  = control.
-    result-s_head-descr    = 'System generated Layout'.
-    result-s_head-def      = abap_true.
-    result-s_head-handle01 = handle01.
-    result-s_head-handle02 = handle02.
-    result-s_head-handle03 = handle03.
-    result-s_head-handle04 = handle04.
+    result->ms_layout-s_head-guid     = guid.
+    result->ms_layout-s_head-layout   = 'Default'.
+    result->ms_layout-s_head-control  = control.
+    result->ms_layout-s_head-descr    = 'System generated Layout'.
+    result->ms_layout-s_head-def      = abap_true.
+    result->ms_layout-s_head-handle01 = handle01.
+    result->ms_layout-s_head-handle02 = handle02.
+    result->ms_layout-s_head-handle03 = handle03.
+    result->ms_layout-s_head-handle04 = handle04.
 
   ENDMETHOD.
 
   METHOD get_layouts.
 
-    mt_head = select_layouts( control  = ms_layout-s_head-control
-                              handle01 = ms_layout-s_head-handle01
-                              handle02 = ms_layout-s_head-handle02
-                              handle03 = ms_layout-s_head-handle03
-                              handle04 = ms_layout-s_head-handle04 ).
+    mt_head = select_layouts( control  = mo_layout->ms_layout-s_head-control
+                              handle01 = mo_layout->ms_layout-s_head-handle01
+                              handle02 = mo_layout->ms_layout-s_head-handle02
+                              handle03 = mo_layout->ms_layout-s_head-handle03
+                              handle04 = mo_layout->ms_layout-s_head-handle04 ).
 
     IF mt_head IS NOT INITIAL.
 
-      DATA(Head) = REF #( mt_head[ layout = ms_layout-s_head-layout ] OPTIONAL ).
+      DATA(Head) = REF #( mt_head[ layout = mo_layout->ms_layout-s_head-layout ] OPTIONAL ).
       IF Head IS BOUND.
         Head->selkz = abap_true.
         RETURN.
@@ -1140,11 +1082,11 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
   METHOD init_edit.
 
-    mv_layout = ms_layout-s_head-layout.
-    mv_descr  = ms_layout-s_head-descr.
-    mv_def    = ms_layout-s_head-def.
+    mv_layout = mo_layout->ms_layout-s_head-layout.
+    mv_descr  = mo_layout->ms_layout-s_head-descr.
+    mv_def    = mo_layout->ms_layout-s_head-def.
 
-    mv_usr    = xsdbool( ms_layout-s_head-uname IS NOT INITIAL ).
+    mv_usr    = xsdbool( mo_layout->ms_layout-s_head-uname IS NOT INITIAL ).
 
   ENDMETHOD.
 
@@ -1152,7 +1094,11 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
     result = client.
 
-    IF result->get( )-event = 'LAYOUT_EDIT'.
+    IF layout IS NOT BOUND.
+      RETURN.
+    ENDIF.
+
+    IF result->get( )-event = layout->ms_layout-s_head-guid.
       result->nav_app_call( factory( layout = layout ) ).
     ENDIF.
 
@@ -1261,12 +1207,12 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
     DATA(vbox) = lo_popup->vbox( justifycontent = 'SpaceBetween' ).
 
     DATA(item) = vbox->list( nodata          = `no Subcolumns defined`
-                             items           = client->_bind_edit( mt_sub_cols )
+                             items           = client->_bind_edit( mo_layout->mt_sub_cols )
                              selectionchange = client->_event( 'SELCHANGE' )
                 )->custom_list_item( ).
 
     item->combobox( selectedkey = `{FNAME}`
-                    items       = client->_bind( mt_comps  )
+                    items       = client->_bind( mo_layout->mt_comps  )
                    )->item( key  = '{FNAME}'
                             text = '{FNAME} {TLABEL}'
              )->get_parent(
@@ -1302,32 +1248,32 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
         DATA(arg) = client->get( )-t_event_arg.
         mv_active_subcolumn = VALUE #( arg[ 1 ] OPTIONAL ).
 
-        READ TABLE ms_layout-t_layout REFERENCE INTO DATA(layout) WITH KEY fname = mv_active_subcolumn.
+        READ TABLE mo_layout->ms_layout-t_layout REFERENCE INTO DATA(layout) WITH KEY fname = mv_active_subcolumn.
         IF sy-subrc <> 0.
           RETURN.
         ENDIF.
 
-        mt_comps    = ms_layout-t_layout.
-        mt_sub_cols = layout->t_sub_col.
-        mt_sub_cols_tmp = mt_sub_cols.
+        mo_layout->mt_comps        = mo_layout->ms_layout-t_layout.
+        mo_layout->mt_sub_cols     = layout->t_sub_col.
+        mo_layout->mt_sub_cols_tmp = mo_layout->mt_sub_cols.
 
         render_add_subcolumn( ).
 
       WHEN `SUBCOLUMN_CONFIRM`.
 
-        READ TABLE ms_layout-t_layout REFERENCE INTO layout WITH KEY fname = mv_active_subcolumn.
+        READ TABLE mo_layout->ms_layout-t_layout REFERENCE INTO layout WITH KEY fname = mv_active_subcolumn.
         IF sy-subrc <> 0.
           RETURN.
         ENDIF.
 
         CLEAR layout->subcolumn.
 
-        LOOP AT mt_sub_cols REFERENCE INTO DATA(line).
+        LOOP AT mo_layout->mt_sub_cols REFERENCE INTO DATA(line).
           layout->subcolumn = |{ layout->subcolumn } { line->fname }|.
         ENDLOOP.
         SHIFT layout->subcolumn LEFT DELETING LEADING space.
 
-        layout->t_sub_col = mt_sub_cols.
+        layout->t_sub_col = mo_layout->mt_sub_cols.
 
         client->popup_destroy( ).
 
@@ -1340,16 +1286,16 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
         render_edit( ).
 
       WHEN `SUBCOLUMN_ADD`.
-        INSERT VALUE #( key = z2ui5_cl_util=>uuid_get_c32( ) ) INTO TABLE mt_sub_cols.
+        INSERT VALUE #( key = z2ui5_cl_util=>uuid_get_c32( ) ) INTO TABLE mo_layout->mt_sub_cols.
         client->popup_model_update( ).
 
       WHEN `SUBCOLUMN_DELETE`.
         DATA(lt_event) = client->get( )-t_event_arg.
-        DELETE mt_sub_cols WHERE key = lt_event[ 1 ].
+        DELETE mo_layout->mt_sub_cols WHERE key = lt_event[ 1 ].
         client->popup_model_update( ).
 
       WHEN `SUBCOLUMN_DELETE_ALL`.
-        mt_sub_cols = VALUE #( ).
+        mo_layout->mt_sub_cols = VALUE #( ).
         client->popup_model_update( ).
 
     ENDCASE.
@@ -1376,9 +1322,9 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
     CLEAR mv_rerender.
 
     " Sequence and SubCols need rerendering
-    LOOP AT ms_layout-t_layout INTO DATA(layout).
+    LOOP AT mo_layout->ms_layout-t_layout INTO DATA(layout).
 
-      READ TABLE ms_layout_tmp-t_layout INTO DATA(layout_tmp)
+      READ TABLE mo_layout->ms_layout_tmp-t_layout INTO DATA(layout_tmp)
            WITH KEY guid     = layout-guid
                     pos_guid = layout-pos_guid.
 

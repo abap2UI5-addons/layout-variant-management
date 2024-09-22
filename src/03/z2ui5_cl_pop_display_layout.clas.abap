@@ -39,9 +39,7 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
     CLASS-METHODS on_event_layout
       IMPORTING
         !client       TYPE REF TO z2ui5_if_client
-        !layout       TYPE REF TO z2ui5_cl_layout
-      RETURNING
-        VALUE(result) TYPE REF TO z2ui5_if_client.
+        !layout       TYPE REF TO z2ui5_cl_layout.
 
     CLASS-METHODS render_layout_function
       IMPORTING
@@ -1092,8 +1090,6 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
   METHOD on_event_layout.
 
-    result = client.
-
     IF layout IS NOT BOUND.
       RETURN.
     ENDIF.
@@ -1102,8 +1098,8 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    IF result->get( )-event = layout->ms_layout-s_head-guid.
-      result->nav_app_call( factory( layout = layout ) ).
+    IF client->get( )-event = layout->ms_layout-s_head-guid.
+      client->nav_app_call( factory( layout = layout ) ).
     ENDIF.
 
   ENDMETHOD.

@@ -6,7 +6,7 @@ CLASS z2ui5_cl_sample_layout DEFINITION
     INTERFACES z2ui5_if_app.
 
     DATA mt_table  TYPE REF TO data.
-    DATA mo_layout TYPE ref to z2ui5_cl_layout.
+    DATA mo_layout TYPE REF TO z2ui5_cl_layout.
 
     TYPES:
       BEGIN OF ty_s_tab,
@@ -46,8 +46,8 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
       WHEN OTHERS.
 
-        client = z2ui5_cl_pop_display_layout=>on_event_layout( client = client
-                                                          layout = mo_layout ).
+        z2ui5_cl_pop_display_layout=>on_event_layout( client = client
+                                                     layout = mo_layout ).
 
     ENDCASE.
   ENDMETHOD.
@@ -71,8 +71,8 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
                              shownavbutton  = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL )
                              class          = 'sapUiContentPadding' ).
 *
-    page->header_content( )->scroll_container( height   = '70%'
-                                               vertical = abap_true ).
+*    page->header_content( )->scroll_container( height   = '70%'
+*                                               vertical = abap_true ).
 
 
     z2ui5_cl_xml_builder=>xml_build_table( i_data         = mt_table
@@ -94,7 +94,9 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
     on_event( ).
 
-    on_after_navigation( ).
+    IF client->get( )-check_on_navigated = abap_true.
+      on_after_navigation( ).
+    ENDIF.
 
   ENDMETHOD.
 
@@ -120,7 +122,7 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
   METHOD init_layout.
 
-    IF mo_layout IS bound.
+    IF mo_layout IS BOUND.
       RETURN.
     ENDIF.
 
@@ -138,14 +140,9 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
   METHOD on_after_navigation.
 
-    IF client->get( )-check_on_navigated = abap_false.
-      RETURN.
-    ENDIF.
-
     TRY.
 
         DATA(app) = CAST z2ui5_cl_pop_display_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
-
         mo_layout = app->mo_layout.
 
         IF app->mv_rerender = abap_true.

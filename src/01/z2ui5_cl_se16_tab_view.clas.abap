@@ -5,10 +5,9 @@
      INTERFACES z2ui5_if_app.
 
      DATA mo_variant TYPE REF TO z2ui5add_cl_var_db_api.
-     data mo_layout type ref to z2ui5_cl_pop_display_layout.
+     DATA mo_layout TYPE REF TO z2ui5_cl_layout.
 
-     DATA ms_layout TYPE z2ui5_cl_pop_display_layout=>ty_s_layout.
-     DATA mv_tabname TYPE string VALUE 'T100'.
+     DATA mv_tabname TYPE string VALUE 'USR01'.
      DATA mr_table TYPE REF TO data.
      DATA mt_filter TYPE z2ui5_cl_util=>ty_t_filter_multi.
 
@@ -18,6 +17,8 @@
      METHODS on_event.
      METHODS view_display.
      METHODS set_data.
+     METHODS on_navigated.
+     METHODS on_init.
 
    PRIVATE SECTION.
      DATA: mo_multiselect TYPE REF TO z2ui5add_cl_var_selscreen.
@@ -38,14 +39,18 @@
 
        WHEN 'BACK'.
          client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
+
+       WHEN OTHERS.
+         z2ui5_cl_pop_display_layout=>on_event_layout( client = client
+                                                        layout = mo_layout ).
      ENDCASE.
 
    ENDMETHOD.
 
    METHOD set_data.
 
-    "Variante lesen
-    "SQL Select machen
+     "Variante lesen
+     "SQL Select machen
 
      DATA lv_result TYPE string.
 
@@ -64,100 +69,19 @@
 
      DATA(view) = z2ui5_cl_xml_view=>factory( ).
 
-     view = view->shell( )->page( id = `page_main`
+     DATA(page) = view->shell( )->page( id = `page_main`
               title          = 'abap2UI5 - SE16-CLOUD - ' && mv_tabname
               navbuttonpress = client->_event( 'BACK' )
               floatingfooter = abap_true
               shownavbutton = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL )
            ).
 
-     FIELD-SYMBOLS <tab> TYPE data.
-     ASSIGN mr_table->* TO <tab>.
+     z2ui5_cl_xml_builder=>xml_build_table( i_data        = mr_table
+                                           i_xml          = page
+                                           i_client       = client
+                                           i_layout       = mo_layout ).
 
-
-     DATA(table) = view->table( "growing = 'true'
-                                width   = 'auto'
-                                items   = client->_bind_edit( val = <tab> ) ).
-
-     DATA(headder) = table->header_toolbar(
-                )->overflow_toolbar(
-                  )->toolbar_spacer(
-                    )->button(  text = `Go` press = client->_event( `BUTTON_START` ) type = `Emphasized` ).
-
-     headder = z2ui5_cl_pop_display_layout=>render_layout_function( xml    = headder
-                                                               client = client ).
-
-     DATA(columns) = table->columns( ).
-
-     IF <tab> IS NOT INITIAL.
-       ms_layout = z2ui5_cl_pop_display_layout=>init_layout( control  = z2ui5_cl_pop_display_layout=>m_table
-                                                   data     = mr_table
-*                                                     handle01 = CONV #( class )
-*                                                     handle02 = CONV #( 'z2ui5_t_01' )
-*                                                     handle03 = ''
-*                                                     handle04 = ''
-                                                    ).
-     ENDIF.
-
-     LOOP AT ms_layout-t_layout REFERENCE INTO DATA(layout).
-       DATA(lv_index) = sy-tabix.
-
-       columns->column( visible         = client->_bind( val       = layout->visible
-                                                         tab       = ms_layout-t_layout
-                                                         tab_index = lv_index )
-                        halign          = client->_bind( val       = layout->halign
-                                                         tab       = ms_layout-t_layout
-                                                         tab_index = lv_index )
-                        importance      = client->_bind( val       = layout->importance
-                                                         tab       = ms_layout-t_layout
-                                                         tab_index = lv_index )
-                        mergeduplicates = client->_bind( val       = layout->merge
-                                                         tab       = ms_layout-t_layout
-                                                         tab_index = lv_index )
-                        width           = client->_bind( val       = layout->width
-                                                         tab       = ms_layout-t_layout
-                                                         tab_index = lv_index )
-
-        )->text( layout->tlabel ).
-
-     ENDLOOP.
-
-     DATA(cells) = columns->get_parent( )->items(
-                                        )->column_list_item( valign = 'Middle'
-                                                             type   = 'Navigation'
-
-                                        )->cells( ).
-
-     " Subcolumns require new rendering....
-     LOOP AT ms_layout-t_layout REFERENCE INTO layout.
-
-       IF layout->t_sub_col IS NOT INITIAL.
-
-         DATA(sub_col) = ``.
-         DATA(index) = 0.
-         LOOP AT layout->t_sub_col INTO DATA(subcol).
-
-           index = index + 1.
-
-           READ TABLE ms_layout-t_layout INTO DATA(line) WITH KEY fname = subcol-fname.
-
-           IF index = 1.
-             sub_col = |{ line-tlabel }: \{{ subcol-fname }\}|.
-           ELSE.
-             sub_col = |{ sub_col }{ cl_abap_char_utilities=>cr_lf } { line-tlabel }: \{{ subcol-fname }\}|.
-           ENDIF.
-
-         ENDLOOP.
-
-         cells->object_identifier( title = |\{{ layout->fname }\}|
-                                   text  = sub_col ).
-
-       ELSE.
-         cells->object_identifier( text = |\{{ layout->fname }\}| ).
-       ENDIF.
-     ENDLOOP.
-
-     view->footer( )->overflow_toolbar(
+     page->footer( )->overflow_toolbar(
          )->button( text = `Back` press = client->_event( `BACK` )
          )->toolbar_spacer(
          )->button( text = `Refresh` press = client->_event( `REFRESH` ) ).
@@ -173,16 +97,62 @@
 
      IF mv_check_initialized = abap_false.
        mv_check_initialized = abap_true.
-       CREATE DATA mr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
-       set_data( ).
-       view_display( ).
+       on_init( ).
        RETURN.
 
      ENDIF.
 
+     IF client->get( )-check_on_navigated = abap_true.
+       on_navigated( ).
+       RETURN.
+     ENDIF.
+
      IF client->get( )-event IS NOT INITIAL.
        on_event( ).
+       RETURN.
      ENDIF.
 
    ENDMETHOD.
+
+   METHOD on_navigated.
+
+     TRY.
+
+         DATA(app) = CAST z2ui5_cl_pop_display_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+         mo_layout = app->mo_layout.
+
+         IF app->mv_rerender = abap_true.
+           " subcolumns need rerendering to work ..
+           view_display( ).
+         ELSE.
+           "  for all other changes in Layout View Model Update is enough.
+           client->view_model_update( ).
+         ENDIF.
+       CATCH cx_root.
+     ENDTRY.
+
+
+   ENDMETHOD.
+
+
+   METHOD on_init.
+
+     CREATE DATA mr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
+     set_data( ).
+
+     IF mo_layout IS NOT BOUND.
+
+       mo_layout = z2ui5_cl_pop_display_layout=>init_layout( control  = z2ui5_cl_layout=>m_table
+                                                data     = mr_table
+                                                handle01 =  ''
+                                                handle02 =  'Z2UI5_T_01'
+                                                handle03 = ''
+                                                handle04 = '' ).
+
+     ENDIF.
+
+     view_display( ).
+
+   ENDMETHOD.
+
  ENDCLASS.

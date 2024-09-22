@@ -9,7 +9,7 @@
          tabname        TYPE string,
          number_entries TYPE i,
          check_autoload TYPE abap_bool,
-         S_layout       TYPE z2ui5_cl_pop_display_layout=>ty_s_layout,
+         s_layout       TYPE  z2ui5_cl_layout=>ty_s_layout,
        END OF ms_sel.
      DATA mt_filter_tab TYPE z2ui5_cl_util=>ty_t_filter_multi.
 
@@ -116,7 +116,7 @@
      IF client->get( )-check_on_navigated = abap_true.
        TRY.
            DATA(lo_layout) = CAST z2ui5_cl_pop_display_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
-           ms_sel-s_layout = lo_layout->ms_layout.
+           ms_sel-s_layout = lo_layout->mo_layout->ms_layout.
            RETURN.
          CATCH cx_root.
        ENDTRY.

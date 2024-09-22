@@ -35,11 +35,11 @@ CLASS z2ui5_cl_selscreen IMPLEMENTATION.
       WHEN `UPDATE_TOKENS`.
         mt_filter_tab = z2ui5_cl_util=>filter_update_tokens(
             val    = mt_filter_tab
-            name   = client->get_event_args( ) ).
+            name   = client->get_event_arg( ) ).
         client->view_model_update( ).
 
       WHEN 'LIST_OPEN'.
-        DATA(ls_sql) = mt_filter_tab[ name = client->get_event_args( ) ].
+        DATA(ls_sql) = mt_filter_tab[ name = client->get_event_arg( ) ].
         client->nav_app_call( z2ui5_cl_pop_get_range=>factory( ls_sql-t_range ) ).
         RETURN.
 

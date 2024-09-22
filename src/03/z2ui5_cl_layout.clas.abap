@@ -5,6 +5,9 @@ CLASS z2ui5_cl_layout DEFINITION
   PUBLIC SECTION.
     INTERFACES if_serializable_object.
 
+    TYPES handle  TYPE c LENGTH 40.
+    TYPES control TYPE c LENGTH 10.
+
     TYPES:
       BEGIN OF ty_s_controls,
         attribute TYPE string,
@@ -13,6 +16,10 @@ CLASS z2ui5_cl_layout DEFINITION
         others    TYPE abap_bool,
       END OF ty_s_controls.
     TYPES ty_t_controls TYPE STANDARD TABLE OF ty_s_controls WITH EMPTY KEY.
+
+    CLASS-DATA ui_table TYPE control VALUE 'ui.Table' ##NO_TEXT.
+    CLASS-DATA m_table  TYPE control VALUE 'm.Table' ##NO_TEXT.
+    CLASS-DATA others   TYPE control VALUE '' ##NO_TEXT.
 
     TYPES ty_s_Head TYPE z2ui5_layo_t_01.
     TYPES ty_t_head TYPE STANDARD TABLE OF ty_s_head WITH EMPTY KEY.
@@ -37,12 +44,7 @@ CLASS z2ui5_cl_layout DEFINITION
         t_layout TYPE ty_t_positions,
       END OF ty_s_layout.
 
-    TYPES handle  TYPE c LENGTH 40.
-    TYPES control TYPE c LENGTH 10.
 
-    CLASS-DATA ui_table TYPE control VALUE 'ui.Table' ##NO_TEXT.
-    CLASS-DATA m_table  TYPE control VALUE 'm.Table' ##NO_TEXT.
-    CLASS-DATA others   TYPE control VALUE '' ##NO_TEXT.
 
     DATA ms_layout       TYPE ty_s_layout.
     DATA ms_layout_tmp   TYPE ty_s_layout.

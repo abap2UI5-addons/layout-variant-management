@@ -81,7 +81,6 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
         VALUE(result) TYPE REF TO z2ui5_cl_pop_display_layout.
 
   PROTECTED SECTION.
-
     DATA client  TYPE REF TO z2ui5_if_client.
     DATA mv_init TYPE abap_bool.
 
@@ -218,7 +217,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
                              ( low = 'Medium' ddtext = 'Medium priority'        )
                              ( low = 'None'   ddtext = 'Default, none priority' ) ).
 
-   mt_controls = z2ui5_cl_layout=>get_controls( ).
+    mt_controls = z2ui5_cl_layout=>get_controls( ).
 
   ENDMETHOD.
 
@@ -347,7 +346,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
         WHEN 'REFERENCE_FIELD'.
 
           cells->combobox( selectedkey = |\{{ comp->name }\}|
-                           items       = client->_bind_local( mo_layout->ms_layout-t_layout )
+                           items       = client->_bind_edit( mo_layout->ms_layout-t_layout )
                         )->item( key  = '{FNAME}'
                                  text = '{FNAME} - {TLABEL}' ).
 
@@ -477,10 +476,11 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
     result = NEW #( ).
 
     result->mo_layout = layout.
-    result->mo_layout = layout.
 
     result->mv_open   = open_layout.
     result->mv_delete = delete_layout.
+
+    result->mo_layout->ms_layout_tmp = result->mo_layout->ms_layout.
 
   ENDMETHOD.
 
@@ -1095,6 +1095,10 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
     result = client.
 
     IF layout IS NOT BOUND.
+      RETURN.
+    ENDIF.
+
+    IF layout->ms_layout IS INITIAL.
       RETURN.
     ENDIF.
 

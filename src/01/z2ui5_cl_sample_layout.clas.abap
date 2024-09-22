@@ -6,7 +6,7 @@ CLASS z2ui5_cl_sample_layout DEFINITION
     INTERFACES z2ui5_if_app.
 
     DATA mt_table  TYPE REF TO data.
-    DATA ms_layout TYPE z2ui5_cl_pop_display_layout=>ty_s_layout.
+    DATA mo_layout TYPE REF TO z2ui5_cl_layout.
 
     TYPES:
       BEGIN OF ty_s_tab,
@@ -46,8 +46,8 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
       WHEN OTHERS.
 
-        client = z2ui5_cl_pop_display_layout=>on_event_layout( client = client
-                                                          layout = ms_layout ).
+        z2ui5_cl_pop_display_layout=>on_event_layout( client = client
+                                                     layout = mo_layout ).
 
     ENDCASE.
   ENDMETHOD.
@@ -63,7 +63,6 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
   METHOD render_main.
 
-    FIELD-SYMBOLS <tab> TYPE data.
 
     DATA(view) = z2ui5_cl_xml_view=>factory( )->shell( ).
 
@@ -71,83 +70,15 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
                              navbuttonpress = client->_event( 'BACK' )
                              shownavbutton  = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL )
                              class          = 'sapUiContentPadding' ).
+*
+*    page->header_content( )->scroll_container( height   = '70%'
+*                                               vertical = abap_true ).
 
-    page->header_content( )->scroll_container( height   = '70%'
-                                               vertical = abap_true ).
 
-    ASSIGN mt_table->* TO <tab>.
-
-    DATA(table) = page->table( growing = 'true'
-                               width   = 'auto'
-                               items   = client->_bind_edit( val = <tab> ) ).
-
-    " TODO: variable is assigned but never used (ABAP cleaner)
-    DATA(headder) = table->header_toolbar(
-               )->overflow_toolbar(
-                 )->toolbar_spacer( ).
-
-    headder = z2ui5_cl_pop_display_layout=>render_layout_function( xml    = headder
-                                                              client = client ).
-
-    DATA(columns) = table->columns( ).
-
-    LOOP AT ms_layout-t_layout REFERENCE INTO DATA(layout).
-      DATA(lv_index) = sy-tabix.
-
-      columns->column( visible         = client->_bind( val       = layout->visible
-                                                        tab       = ms_layout-t_layout
-                                                        tab_index = lv_index )
-                       halign          = client->_bind( val       = layout->halign
-                                                        tab       = ms_layout-t_layout
-                                                        tab_index = lv_index )
-                       importance      = client->_bind( val       = layout->importance
-                                                        tab       = ms_layout-t_layout
-                                                        tab_index = lv_index )
-                       mergeduplicates = client->_bind( val       = layout->merge
-                                                        tab       = ms_layout-t_layout
-                                                        tab_index = lv_index )
-                       width           = client->_bind( val       = layout->width
-                                                        tab       = ms_layout-t_layout
-                                                        tab_index = lv_index )
-
-       )->text( layout->tlabel ).
-
-    ENDLOOP.
-
-    DATA(cells) = columns->get_parent( )->items(
-                                       )->column_list_item( valign = 'Middle'
-                                                            type   = 'Navigation'
-
-                                       )->cells( ).
-
-    " Subcolumns require new rendering....
-    LOOP AT ms_layout-t_layout REFERENCE INTO layout.
-
-      IF layout->t_sub_col IS NOT INITIAL.
-
-        DATA(sub_col) = ``.
-        DATA(index) = 0.
-        LOOP AT layout->t_sub_col INTO DATA(subcol).
-
-          index = index + 1.
-
-          READ TABLE ms_layout-t_layout INTO DATA(line) WITH KEY fname = subcol-fname.
-
-          IF index = 1.
-            sub_col = |{ line-tlabel }: \{{ subcol-fname }\}|.
-          ELSE.
-            sub_col = |{ sub_col }{ cl_abap_char_utilities=>cr_lf } { line-tlabel }: \{{ subcol-fname }\}|.
-          ENDIF.
-
-        ENDLOOP.
-
-        cells->object_identifier( title = |\{{ layout->fname }\}|
-                                  text  = sub_col ).
-
-      ELSE.
-        cells->object_identifier( text = |\{{ layout->fname }\}| ).
-      ENDIF.
-    ENDLOOP.
+    z2ui5_cl_xml_builder=>xml_build_table( i_data         = mt_table
+                                           i_xml          = page
+                                           i_client       = client
+                                           i_layout       = mo_layout ).
 
     client->view_display( view->stringify( ) ).
 
@@ -163,7 +94,9 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
     on_event( ).
 
-    on_after_navigation( ).
+    IF client->get( )-check_on_navigated = abap_true.
+      on_after_navigation( ).
+    ENDIF.
 
   ENDMETHOD.
 
@@ -189,17 +122,17 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
   METHOD init_layout.
 
-    IF ms_layout IS NOT INITIAL.
+    IF mo_layout IS BOUND.
       RETURN.
     ENDIF.
 
     DATA(class) = cl_abap_classdescr=>get_class_name( me ).
     SHIFT class LEFT DELETING LEADING '\CLASS='.
 
-    ms_layout = z2ui5_cl_pop_display_layout=>init_layout( control  = z2ui5_cl_pop_display_layout=>m_table
+    mo_layout = z2ui5_cl_pop_display_layout=>init_layout( control  = z2ui5_cl_layout=>m_table
                                                      data     = mt_table
-                                                     handle01 = CONV #( class )
-                                                     handle02 = CONV #( 'z2ui5_t_01' )
+                                                     handle01 =  class
+                                                     handle02 =  'Z2UI5_T_01'
                                                      handle03 = ''
                                                      handle04 = '' ).
 
@@ -207,15 +140,10 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
   METHOD on_after_navigation.
 
-    IF client->get( )-check_on_navigated = abap_false.
-      RETURN.
-    ENDIF.
-
     TRY.
 
         DATA(app) = CAST z2ui5_cl_pop_display_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
-
-        ms_layout = app->ms_layout.
+        mo_layout = app->mo_layout.
 
         IF app->mv_rerender = abap_true.
           " subcolumns need rerendering to work ..

@@ -251,8 +251,8 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
       WHEN OTHERS.
 
-        client = z2ui5_cl_pop_display_layout=>on_event_layout( client = client
-                                                               layout = mo_layout ).
+        z2ui5_cl_pop_display_layout=>on_event_layout( client = client
+                                                      layout = mo_layout ).
 
     ENDCASE.
 

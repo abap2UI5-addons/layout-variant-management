@@ -23,12 +23,12 @@ CLASS z2ui5_cl_pop_to_sel_w_layout DEFINITION
     CLASS-METHODS factory
       IMPORTING
         i_tab              TYPE STANDARD TABLE
-        i_title            TYPE clike                               OPTIONAL
-        i_sort_field       TYPE clike                               OPTIONAL
-        i_descending       TYPE abap_bool                           OPTIONAL
-        i_contentwidth     TYPE clike                               OPTIONAL
-        i_contentheight    TYPE clike                               OPTIONAL
-        i_growingthreshold TYPE clike                               OPTIONAL
+        i_title            TYPE clike                   OPTIONAL
+        i_sort_field       TYPE clike                   OPTIONAL
+        i_descending       TYPE abap_bool               OPTIONAL
+        i_contentwidth     TYPE clike                   OPTIONAL
+        i_contentheight    TYPE clike                   OPTIONAL
+        i_growingthreshold TYPE clike                   OPTIONAL
         i_handle01         TYPE z2ui5_cl_layout=>handle OPTIONAL
         i_handle02         TYPE z2ui5_cl_layout=>handle OPTIONAL
         i_handle03         TYPE z2ui5_cl_layout=>handle OPTIONAL
@@ -84,12 +84,12 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
     CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.
 
-    r_result->mo_layout = z2ui5_cl_pop_display_layout=>init_layout( data     = r_result->mr_tab
-                                                                    control  = z2ui5_cl_layout=>m_table
-                                                                    handle01 = i_handle01
-                                                                    handle02 = i_handle02
-                                                                    handle03 = i_handle03
-                                                                    handle04 = i_handle04 ).
+    r_result->mo_layout = z2ui5_cl_layout=>factory( data     = r_result->mr_tab
+                                                    control  = z2ui5_cl_layout=>m_table
+                                                    handle01 = i_handle01
+                                                    handle02 = i_handle02
+                                                    handle03 = i_handle03
+                                                    handle04 = i_handle04 ).
 
   ENDMETHOD.
 

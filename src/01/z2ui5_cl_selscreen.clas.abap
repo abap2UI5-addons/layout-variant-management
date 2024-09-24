@@ -18,9 +18,14 @@ CLASS z2ui5_cl_selscreen DEFINITION
       IMPORTING
         client TYPE REF TO z2ui5_if_client.
 
+    METHODS on_navigated
+      IMPORTING
+        client TYPE REF TO z2ui5_if_client.
+
     DATA mt_filter_tab TYPE z2ui5_cl_util=>ty_t_filter_multi.
 
   PROTECTED SECTION.
+    METHODS init_filter_tab.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -29,8 +34,11 @@ ENDCLASS.
 CLASS z2ui5_cl_selscreen IMPLEMENTATION.
 
   METHOD on_event.
-
     CASE client->get( )-event.
+
+      WHEN `SELSCREEN_POST`.
+        init_filter_tab( ).
+        client->view_model_update( ).
 
       WHEN `UPDATE_TOKENS`.
         mt_filter_tab = z2ui5_cl_util=>filter_update_tokens(
@@ -39,19 +47,17 @@ CLASS z2ui5_cl_selscreen IMPLEMENTATION.
         client->view_model_update( ).
 
       WHEN 'LIST_OPEN'.
+        mv_popup_name = client->get_event_arg( ).
         DATA(ls_sql) = mt_filter_tab[ name = client->get_event_arg( ) ].
         client->nav_app_call( z2ui5_cl_pop_get_range=>factory( ls_sql-t_range ) ).
         RETURN.
 
     ENDCASE.
-
   ENDMETHOD.
 
   METHOD paint.
 
-    DATA lr_table TYPE REF TO data.
-    CREATE DATA lr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
-    mt_filter_tab = z2ui5_cl_util=>filter_get_multi_by_data( lr_table->* ).
+    init_filter_tab( ).
 
     DATA(tab) = view->table(
                              id = `tab`
@@ -60,9 +66,8 @@ CLASS z2ui5_cl_selscreen IMPLEMENTATION.
 
     DATA(headder) = tab->header_toolbar(
                )->overflow_toolbar(
-               )->input( value = client->_bind_edit( mv_tabname ) description = `Tablename` width = '40%'  submit = client->_event( `POST` )
-                 )->toolbar_spacer(
-                   )->button(  text = `Load Select Options` press = client->_event( `POST` )   ).
+               )->input( id = `selinput` value = client->_bind_edit( mv_tabname ) description = `Tablename` width = '40%'  submit = client->_event( `SELSCREEN_POST` )
+                 )->toolbar_spacer( ).
 
     tab->columns(
          )->column(
@@ -111,4 +116,36 @@ CLASS z2ui5_cl_selscreen IMPLEMENTATION.
 
 
   ENDMETHOD.
+
+  METHOD init_filter_tab.
+
+    TRY.
+
+        DATA lr_table TYPE REF TO data.
+        CREATE DATA lr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
+        mt_filter_tab = z2ui5_cl_util=>filter_get_multi_by_data( lr_table->* ).
+      CATCH cx_sy_create_data_error.
+        IF mv_tabname IS INITIAL.
+          z2ui5_cl_util=>x_raise( |Table empty. Please enter a value.| ).
+        ELSE.
+          z2ui5_cl_util=>x_raise( |Table with Name { mv_tabname } not found.| ).
+        ENDIF.
+    ENDTRY.
+  ENDMETHOD.
+
+  METHOD on_navigated.
+
+    TRY.
+        DATA(lo_popup) = CAST z2ui5_cl_pop_get_range( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+        IF lo_popup->result( )-check_confirmed = abap_true.
+          ASSIGN mt_filter_tab[ name = mv_popup_name ] TO FIELD-SYMBOL(<tab>).
+          <tab>-t_range = lo_popup->result( )-t_range.
+          <tab>-t_token = z2ui5_cl_util=>filter_get_token_t_by_range_t( <tab>-t_range ).
+          client->view_model_update( ).
+        ENDIF.
+      CATCH cx_root.
+    ENDTRY.
+
+  ENDMETHOD.
+
 ENDCLASS.

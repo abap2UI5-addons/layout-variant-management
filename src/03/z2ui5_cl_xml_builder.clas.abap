@@ -94,8 +94,7 @@ CLASS z2ui5_cl_xml_builder IMPLEMENTATION.
 
   METHOD xml_build_table.
 
-    DATA(table) = i_xml->table(
-                                width           = 'auto'
+    DATA(table) = i_xml->table( width           = 'auto'
                                 mode            = COND #( WHEN i_sel_mode = space THEN `None` ELSE i_sel_mode  )
                                 items           = i_client->_bind_edit( val = i_DATA->* )
                                 selectionChange = i_client->_event( 'SELECTION_CHANGE' ) ).
@@ -112,8 +111,9 @@ CLASS z2ui5_cl_xml_builder IMPLEMENTATION.
                              width  = '17.5rem' ).
     ENDIF.
 
-    toolbar->button( icon  = 'sap-icon://action-settings'
-                     press = i_client->_event( val = i_layout->ms_layout-s_head-guid  ) ).
+    z2ui5_cl_pop_display_layout=>render_layout_function( client = i_client
+                                                         xml    = toolbar
+                                                         layout = i_layout ).
 
     DATA(columns) = table->columns( ).
 
@@ -157,45 +157,45 @@ CLASS z2ui5_cl_xml_builder IMPLEMENTATION.
 
     LOOP AT i_layout->ms_layout-t_layout REFERENCE INTO layout.
 
-        IF layout->t_sub_col IS NOT INITIAL.
+      IF layout->t_sub_col IS NOT INITIAL.
 
-          DATA(sub_col) = ``.
-          DATA(index) = 0.
+        DATA(sub_col) = ``.
+        DATA(index) = 0.
 
-          LOOP AT layout->t_sub_col INTO DATA(subcol).
+        LOOP AT layout->t_sub_col INTO DATA(subcol).
 
-            index = index + 1.
+          index = index + 1.
 
-            READ TABLE i_layout->ms_layout-t_layout INTO DATA(line) WITH KEY fname = subcol-fname.
+          READ TABLE i_layout->ms_layout-t_layout INTO DATA(line) WITH KEY fname = subcol-fname.
 
-            IF line-reference_field IS INITIAL.
-              DATA(Column) = |{ line-tlabel }: \{{ subcol-fname }\}|.
-            ELSE.
-              column = |{ line-tlabel }: \{{ subcol-fname }\} \{{ line-reference_field }\}|.
-            ENDIF.
-
-            IF index = 1.
-              sub_col = column.
-            ELSE.
-              sub_col = |{ sub_col }{ cl_abap_char_utilities=>cr_lf }{ column }|.
-            ENDIF.
-          ENDLOOP.
-
-          IF layout->reference_field IS NOT INITIAL.
-            cells->object_identifier( title = |\{{ layout->fname }\} \{{ layout->reference_field }\}|
-                                      text  = sub_col ).
+          IF line-reference_field IS INITIAL.
+            DATA(Column) = |{ line-tlabel }: \{{ subcol-fname }\}|.
           ELSE.
-            cells->object_identifier( title = |\{{ layout->fname }\}|
-                                      text  = sub_col ).
+            column = |{ line-tlabel }: \{{ subcol-fname }\} \{{ line-reference_field }\}|.
           ENDIF.
 
+          IF index = 1.
+            sub_col = column.
+          ELSE.
+            sub_col = |{ sub_col }{ cl_abap_char_utilities=>cr_lf }{ column }|.
+          ENDIF.
+        ENDLOOP.
+
+        IF layout->reference_field IS NOT INITIAL.
+          cells->object_identifier( title = |\{{ layout->fname }\} \{{ layout->reference_field }\}|
+                                    text  = sub_col ).
         ELSE.
-          IF layout->reference_field IS NOT INITIAL.
-            cells->object_identifier( text = |\{{ layout->fname }\} \{{ layout->reference_field }\}| ).
-          ELSE.
-            cells->object_identifier( text = |\{{ layout->fname }\}| ).
-          ENDIF.
+          cells->object_identifier( title = |\{{ layout->fname }\}|
+                                    text  = sub_col ).
         ENDIF.
+
+      ELSE.
+        IF layout->reference_field IS NOT INITIAL.
+          cells->object_identifier( text = |\{{ layout->fname }\} \{{ layout->reference_field }\}| ).
+        ELSE.
+          cells->object_identifier( text = |\{{ layout->fname }\}| ).
+        ENDIF.
+      ENDIF.
 
     ENDLOOP.
 

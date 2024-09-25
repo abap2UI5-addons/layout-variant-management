@@ -45,10 +45,9 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
       IMPORTING
         !xml          TYPE REF TO z2ui5_cl_xml_view
         !client       TYPE REF TO z2ui5_if_client
+        !layout       type ref to Z2UI5_CL_LAYOUT
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_xml_view.
-
-
 
     CLASS-METHODS factory
       IMPORTING
@@ -379,7 +378,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
         save_layout( ).
 
-        check_rerender_necessary( ).
+        mv_rerender = abap_true.
 
         client->popup_destroy( ).
 
@@ -389,6 +388,8 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
         set_selected_layout( get_selected_layout( ) ).
 
+        mv_rerender = abap_true.
+
         client->popup_destroy( ).
 
         client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
@@ -397,9 +398,9 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
         delete_selected_layout( get_selected_layout( ) ).
 
-        client->popup_destroy( ).
+        delete mt_head where selkz = abap_true.
 
-        client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
+        client->popup_model_update( ).
 
       WHEN OTHERS.
 
@@ -427,7 +428,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
     result = xml.
 
     result->button( icon  = 'sap-icon://action-settings'
-                    press = client->_event( val = 'LAYOUT_EDIT' ) ).
+                    press = client->_event( layout->ms_layout-s_head-guid ) ).
 
   ENDMETHOD.
 
@@ -703,49 +704,50 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
   METHOD set_selected_layout.
 
-    IF Head IS INITIAL.
-      RETURN.
-    ENDIF.
+*    IF Head IS INITIAL.
+*      RETURN.
+*    ENDIF.
+*
+*    SELECT SINGLE guid,
+*                  layout,
+*                  control,
+*                  handle01,
+*                  handle02,
+*                  handle03,
+*                  handle04,
+*                  descr,
+*                  def,
+*                  uname
+*      FROM z2ui5_layo_t_01
+*      WHERE guid = @Head-guid
+*      INTO CORRESPONDING FIELDS OF @mo_layout->ms_layout-s_head ##SUBRC_OK.
+*
+*    SELECT guid,
+*           layout,
+*           control,
+*           handle01,
+*           handle02,
+*           handle03,
+*           handle04,
+*           fname,
+*           rollname,
+*           visible,
+*           merge,
+*           halign,
+*           importance,
+*           width,
+*           sequence,
+*           alternative_text,
+*           subcolumn,
+*           reference_field
+*      FROM z2ui5_layo_t_02
+*      WHERE guid = @Head-guid
+*      INTO CORRESPONDING FIELDS OF TABLE @mo_layout->ms_layout-t_layout  ##SUBRC_OK.
 
-    SELECT SINGLE guid,
-                  layout,
-                  control,
-                  handle01,
-                  handle02,
-                  handle03,
-                  handle04,
-                  descr,
-                  def,
-                  uname
-      FROM z2ui5_layo_t_01
-      WHERE guid = @Head-guid
-      INTO CORRESPONDING FIELDS OF @mo_layout->ms_layout-s_head ##SUBRC_OK.
+mo_layout = Z2UI5_CL_LAYOUT=>factory_by_guid( layout_guid = head-guid ).
 
-    SELECT guid,
-           layout,
-           control,
-           handle01,
-           handle02,
-           handle03,
-           handle04,
-           fname,
-           rollname,
-           visible,
-           merge,
-           halign,
-           importance,
-           width,
-           sequence,
-           alternative_text,
-           subcolumn,
-           reference_field
-      FROM z2ui5_layo_t_02
-      WHERE guid = @Head-guid
-      INTO CORRESPONDING FIELDS OF TABLE @mo_layout->ms_layout-t_layout  ##SUBRC_OK.
 
   ENDMETHOD.
-
-
 
   METHOD get_layouts.
 

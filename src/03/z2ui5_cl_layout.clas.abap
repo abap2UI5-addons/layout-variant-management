@@ -52,7 +52,6 @@ CLASS z2ui5_cl_layout DEFINITION
 
     CLASS-METHODS factory
       IMPORTING
-        layout_guid   TYPE guid  OPTIONAL
         !data         TYPE REF TO data
         !control      TYPE clike
         handle01      TYPE clike OPTIONAL
@@ -62,9 +61,15 @@ CLASS z2ui5_cl_layout DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_layout.
 
+    CLASS-METHODS factory_by_guid
+      IMPORTING
+        layout_guid   TYPE clike
+      RETURNING
+        VALUE(result) TYPE REF TO z2ui5_cl_layout.
+
     CLASS-METHODS select_layouts
       IMPORTING
-        layout_guid   TYPE guid OPTIONAL
+        layout_guid   TYPE clike OPTIONAL
         !control      TYPE clike
         handle01      TYPE clike
         handle02      TYPE clike
@@ -72,6 +77,12 @@ CLASS z2ui5_cl_layout DEFINITION
         handle04      TYPE clike
       RETURNING
         VALUE(result) TYPE z2ui5_cl_layout=>ty_t_head.
+
+    CLASS-METHODS select_layout_components
+      IMPORTING
+        layout_guid   TYPE clike
+      RETURNING
+        VALUE(result) TYPE z2ui5_cl_layout=>ty_t_positions.
 
     CLASS-METHODS set_text
       IMPORTING
@@ -116,6 +127,19 @@ CLASS z2ui5_cl_layout DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_pop_to_select.
 
+  PRIVATE SECTION.
+    CLASS-METHODS create_layout_obj
+      IMPORTING
+        layout_guid   TYPE clike       OPTIONAL
+        !data         TYPE REF TO data OPTIONAL
+        !control      TYPE clike       OPTIONAL
+        handle01      TYPE clike       OPTIONAL
+        handle02      TYPE clike       OPTIONAL
+        handle03      TYPE clike       OPTIONAL
+        handle04      TYPE clike       OPTIONAL
+      RETURNING
+        VALUE(result) TYPE REF TO z2ui5_cl_layout.
+
 ENDCLASS.
 
 
@@ -147,174 +171,83 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
 
   METHOD factory.
 
-    result = NEW #( ).
+    result = create_layout_obj(
+*                                layout_guid =
+                                data     = data
+                                control  = control
+                                handle01 = handle01
+                                handle02 = handle02
+                                handle03 = handle03
+                                handle04 = handle04 ).
 
-    " create the tab first if the db fields were added/deleted
-    DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
+  ENDMETHOD.
 
-    LOOP AT t_comp INTO DATA(comp).
-      IF comp-type->type_kind = cl_abap_elemdescr=>typekind_oref.
-        DELETE t_comp.
-      ENDIF.
-    ENDLOOP.
+  METHOD select_layouts.
 
-    LOOP AT t_comp REFERENCE INTO DATA(lr_comp).
-
-      INSERT VALUE #( control  = control
-                      handle01 = handle01
-                      handle02 = handle02
-                      handle03 = handle03
-                      handle04 = handle04
-                      fname    = lr_comp->name
-                      rollname = lr_comp->type->get_relative_name( ) )
-             INTO TABLE result->ms_layout-t_layout.
-    ENDLOOP.
-
-    " Select Layouts
-    DATA(Head) = select_layouts( layout_guid = layout_guid
-                                 control     = control
-                                 handle01    = handle01
-                                 handle02    = handle02
-                                 handle03    = handle03
-                                 handle04    = handle04 ).
-
-    IF sy-subrc = 0.
-
-      " Default all Handles + User
-      DATA(def) = VALUE #( Head[ handle01 = handle01
-                                 handle02 = handle02
-                                 handle03 = handle03
-                                 handle04 = handle04
-                                 def      = abap_true
-                                 uname    = sy-uname ] OPTIONAL ).
-
-      IF def IS INITIAL.
-        " Default frist 3 Handles + User
-        def = VALUE #( Head[ handle01 = handle01
-                             handle02 = handle02
-                             handle03 = handle03
-                             def      = abap_true
-                             uname    = sy-uname ] OPTIONAL ).
-        IF def IS INITIAL.
-          " Default frist 2 Handles + User
-          def = VALUE #( Head[ handle01 = handle01
-                               handle02 = handle02
-                               def      = abap_true
-                               uname    = sy-uname ] OPTIONAL ).
-          IF def IS INITIAL.
-            " Default frist 1 Handles + User
-            def = VALUE #( Head[ handle01 = handle01
-                                 def      = abap_true
-                                 uname    = sy-uname ] OPTIONAL ).
-          ENDIF.
-          IF def IS INITIAL.
-            " Default User
-            def = VALUE #( Head[ def   = abap_true
-                                 uname = sy-uname ] OPTIONAL ).
-          ENDIF.
-          IF def IS INITIAL.
-            " Default User
-            def = VALUE #( Head[ def = abap_true ] OPTIONAL ).
-          ENDIF.
-        ENDIF.
-      ENDIF.
-    ENDIF.
-
-    IF def-layout IS NOT INITIAL.
-
+    IF layout_guid IS NOT INITIAL.
+*      DATA(lr_guid) = VALUE z2ui5_cl_util=>ty_t_range(
+*                                ( CORRESPONDING #( z2ui5_cl_util=>filter_get_range_by_token( |={  layout_guid }| ) ) ) ).
       SELECT guid,
-             pos_guid,
              layout,
              control,
              handle01,
              handle02,
              handle03,
              handle04,
-             fname,
-             rollname,
-             visible,
-             merge,
-             halign,
-             importance,
-             width,
-             sequence,
-             alternative_text,
-             subcolumn,
-             reference_field
-        FROM z2ui5_layo_t_02
-        WHERE guid = @def-guid
-        INTO TABLE @DATA(t_pos) ##SUBRC_OK.
+             descr,
+             def,
+             uname
+        FROM z2ui5_layo_t_01
+        WHERE guid = @layout_guid
+        INTO CORRESPONDING FIELDS OF TABLE @result ##SUBRC_OK.
 
-      LOOP AT result->ms_layout-t_layout REFERENCE INTO DATA(layout).
+    ELSE.
 
-        TRY.
-            DATA(pos) = REF #( t_pos[ fname = layout->fname ] ).
-            layout->* = CORRESPONDING #( pos->* ).
-          CATCH cx_root.
-
-            TRY.
-                DATA(pos_guid) = cl_system_uuid=>create_uuid_c32_static( ).
-              CATCH cx_root.
-            ENDTRY.
-
-            layout->guid       = def-guid.
-            layout->pos_guid   = pos_guid.
-            layout->layout     = 'Default'.
-            layout->control    = control.
-            layout->halign     = 'Begin'.
-            layout->importance = 'None'.
-            layout->rollname   = layout->rollname.
-            layout->fname      = layout->fname.
-            layout->handle01   = handle01.
-            layout->handle02   = handle02.
-            layout->handle03   = handle03.
-            layout->handle04   = handle04.
-        ENDTRY.
-
-        layout->tlabel = set_text( layout->* ).
-
-      ENDLOOP.
-
-      result->ms_layout-s_head   = CORRESPONDING #( def ).
-      result->ms_layout-t_layout = sort_by_seqence( result->ms_layout-t_layout ).
-      result->ms_layout-t_layout = set_sub_columns( result->ms_layout-t_layout ).
-
-      RETURN.
+      SELECT guid,
+             layout,
+             control,
+             handle01,
+             handle02,
+             handle03,
+             handle04,
+             descr,
+             def,
+             uname
+        FROM z2ui5_layo_t_01
+        WHERE control  = @control
+          AND handle01 = @handle01
+          AND handle02 = @handle02
+          AND handle03 = @handle03
+          AND handle04 = @handle04
+        INTO CORRESPONDING FIELDS OF TABLE @result ##SUBRC_OK.
 
     ENDIF.
 
-    result = default_layout( t_layout = result->ms_layout-t_layout
-                             control  = control
-                             handle01 = handle01
-                             handle02 = handle02
-                             handle03 = handle03
-                             handle04 = handle04 ).
   ENDMETHOD.
 
-  METHOD select_layouts.
-
-    IF layout_guid IS NOT INITIAL.
-      DATA(lr_guid) = VALUE z2ui5_cl_util=>ty_t_range(
-                                ( CORRESPONDING #( z2ui5_cl_util=>filter_get_range_by_token( |={  layout_guid }| ) ) ) ).
-    ENDIF.
+  METHOD select_layout_components.
 
     SELECT guid,
+           pos_guid,
            layout,
            control,
            handle01,
            handle02,
            handle03,
            handle04,
-           descr,
-           def,
-           uname
-      FROM z2ui5_layo_t_01
-      WHERE guid     IN @lr_guid
-        AND control   = @control
-        AND handle01  = @handle01
-        AND handle02  = @handle02
-        AND handle03  = @handle03
-        AND handle04  = @handle04
+           fname,
+           rollname,
+           visible,
+           merge,
+           halign,
+           importance,
+           width,
+           sequence,
+           alternative_text,
+           reference_field,
+           subcolumn
+      FROM z2ui5_layo_t_02
+      WHERE guid = @layout_guid
       INTO CORRESPONDING FIELDS OF TABLE @result ##SUBRC_OK.
 
   ENDMETHOD.
@@ -445,6 +378,144 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
 
     result = z2ui5_cl_pop_to_select=>factory( i_tab   = layouts
                                               i_title = 'Layouts' ).
+
+  ENDMETHOD.
+
+  METHOD factory_by_guid.
+
+    result = create_layout_obj( layout_guid = layout_guid ).
+
+  ENDMETHOD.
+
+  METHOD create_layout_obj.
+
+    result = NEW #( ).
+
+    " Select Layout Heads
+    DATA(Head) = select_layouts( layout_guid = layout_guid
+                                 control     = control
+                                 handle01    = handle01
+                                 handle02    = handle02
+                                 handle03    = handle03
+                                 handle04    = handle04 ).
+
+    IF sy-subrc = 0.
+
+      " Default all Handles + User
+      DATA(def) = VALUE #( Head[ handle01 = handle01
+                                 handle02 = handle02
+                                 handle03 = handle03
+                                 handle04 = handle04
+                                 def      = abap_true
+                                 uname    = sy-uname ] OPTIONAL ).
+
+      IF def IS INITIAL.
+        " Default frist 3 Handles + User
+        def = VALUE #( Head[ handle01 = handle01
+                             handle02 = handle02
+                             handle03 = handle03
+                             def      = abap_true
+                             uname    = sy-uname ] OPTIONAL ).
+        IF def IS INITIAL.
+          " Default frist 2 Handles + User
+          def = VALUE #( Head[ handle01 = handle01
+                               handle02 = handle02
+                               def      = abap_true
+                               uname    = sy-uname ] OPTIONAL ).
+          IF def IS INITIAL.
+            " Default frist 1 Handles + User
+            def = VALUE #( Head[ handle01 = handle01
+                                 def      = abap_true
+                                 uname    = sy-uname ] OPTIONAL ).
+          ENDIF.
+          IF def IS INITIAL.
+            " Default User
+            def = VALUE #( Head[ def   = abap_true
+                                 uname = sy-uname ] OPTIONAL ).
+          ENDIF.
+          IF def IS INITIAL.
+            " Default User
+            def = VALUE #( Head[ def = abap_true ] OPTIONAL ).
+          ENDIF.
+        ENDIF.
+      ENDIF.
+    ENDIF.
+
+
+    IF def-layout IS NOT INITIAL.
+
+      SELECT guid,
+             pos_guid,
+             layout,
+             control,
+             handle01,
+             handle02,
+             handle03,
+             handle04,
+             fname,
+             rollname,
+             visible,
+             merge,
+             halign,
+             importance,
+             width,
+             sequence,
+             alternative_text,
+             subcolumn,
+             reference_field
+        FROM z2ui5_layo_t_02
+        WHERE guid = @def-guid
+        INTO TABLE @DATA(t_pos) ##SUBRC_OK.
+
+
+      LOOP AT t_pos REFERENCE INTO DATA(pos).
+
+        DATA(layout) = VALUE ty_s_positions( ).
+
+        layout = CORRESPONDING #( pos->* ).
+        layout-tlabel = set_text( layout ).
+
+        APPEND layout TO result->ms_layout-t_layout.
+
+      ENDLOOP.
+
+      result->ms_layout-s_head   = CORRESPONDING #( def ).
+      result->ms_layout-t_layout = sort_by_seqence( result->ms_layout-t_layout ).
+      result->ms_layout-t_layout = set_sub_columns( result->ms_layout-t_layout ).
+
+      RETURN.
+
+    ENDIF.
+
+
+
+      " create the tab first if the db fields were added/deleted
+      DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
+
+      LOOP AT t_comp INTO DATA(comp).
+        IF comp-type->type_kind = cl_abap_elemdescr=>typekind_oref.
+          DELETE t_comp.
+        ENDIF.
+      ENDLOOP.
+
+      LOOP AT t_comp REFERENCE INTO DATA(lr_comp).
+
+        INSERT VALUE #( control  = control
+                        handle01 = handle01
+                        handle02 = handle02
+                        handle03 = handle03
+                        handle04 = handle04
+                        fname    = lr_comp->name
+                        rollname = lr_comp->type->get_relative_name( ) )
+               INTO TABLE result->ms_layout-t_layout.
+      ENDLOOP.
+
+    result = default_layout( t_layout = result->ms_layout-t_layout
+                             control  = control
+                             handle01 = handle01
+                             handle02 = handle02
+                             handle03 = handle03
+                             handle04 = handle04 ).
 
   ENDMETHOD.
 

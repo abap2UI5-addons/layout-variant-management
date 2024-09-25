@@ -51,7 +51,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout DEFINITION
     DATA descending        TYPE abap_bool.
 
     METHODS on_event.
-    METHODS display.
+    METHODS Render_main.
     METHODS set_output_table.
 
     METHODS on_event_search.
@@ -93,7 +93,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD display.
+  METHOD Render_main.
 
     DATA(popup) = z2ui5_cl_xml_view=>factory_popup( )->dialog( title      = title
                                                                afterclose = client->_event( 'CANCEL' )  ).
@@ -103,107 +103,8 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
                                            i_client       = client
                                            i_layout       = mo_layout
                                            i_search_value = REF #( mv_search_value )
-*                                           i_sel_mode     =
-*                                           i_sel_bind_to  =
                                            i_col_type     = 'Navigation'
                                            i_col_bind_to  = 'ZZROW_ID' ).
-
-*    DATA(table) = popup->table( growing          = 'true'
-*                                growingthreshold = '100'
-*                                width            = 'auto'
-*                                autopopinmode    = abap_true
-*                                items            = client->_bind_edit( val = mr_out->* )
-*                                headertext       = title  ).
-*
-*    " TODO: variable is assigned but never used (ABAP cleaner)
-*    DATA(headder) = table->header_toolbar(
-*               )->overflow_toolbar(
-*                 )->title(  title
-*                 )->search_field( value  = client->_bind_edit( mv_search_value )
-*                                  search = client->_event( 'SEARCH' )
-*                                  change = client->_event( 'SEARCH' )
-*                                  id     = `SEARCH`
-*                                  width  = '17.5rem' ).
-*
-*    headder = z2ui5_cl_pop_display_layout=>render_layout_function( xml    = headder
-*                                                              client = client ).
-*
-*    DATA(columns) = table->columns( ).
-*
-*    LOOP AT mo_layout->ms_layout-t_layout REFERENCE INTO DATA(layout).
-*      DATA(lv_index) = sy-tabix.
-*
-*      columns->column( visible         = client->_bind( val       = layout->visible
-*                                                        tab       = mo_layout->ms_layout-t_layout
-*                                                        tab_index = lv_index )
-*                       halign          = client->_bind( val       = layout->halign
-*                                                        tab       = mo_layout->ms_layout-t_layout
-*                                                        tab_index = lv_index )
-*                       importance      = client->_bind( val       = layout->importance
-*                                                        tab       = mo_layout->ms_layout-t_layout
-*                                                        tab_index = lv_index )
-*                       mergeduplicates = client->_bind( val       = layout->merge
-*                                                        tab       = mo_layout->ms_layout-t_layout
-*                                                        tab_index = lv_index )
-*                       width           = client->_bind( val       = layout->width
-*                                                        tab       = mo_layout->ms_layout-t_layout
-*                                                        tab_index = lv_index )
-*       )->text( layout->tlabel ).
-*
-*    ENDLOOP.
-*
-*    DATA(cells) = columns->get_parent( )->items(
-*                                       )->column_list_item(
-*                                           valign = 'Middle'
-*                                           type   = 'Navigation'
-*                                           press  = client->_event( val   = 'CONFIRM'
-*                                                                    t_arg = VALUE #( ( `${ZZROW_ID}`  ) ) )
-*                                       )->cells( ).
-*
-*    LOOP AT mo_layout->ms_layout-t_layout REFERENCE INTO layout.
-*
-*      IF layout->t_sub_col IS NOT INITIAL.
-*
-*        DATA(sub_col) = ``.
-*        DATA(index) = 0.
-*
-*        LOOP AT layout->t_sub_col INTO DATA(subcol).
-*
-*          index = index + 1.
-*
-*          READ TABLE mo_layout->ms_layout-t_layout INTO DATA(line) WITH KEY fname = subcol-fname.
-*          IF sy-subrc <> 0.
-*            CONTINUE.
-*          ENDIF.
-*          IF line-reference_field IS INITIAL.
-*            DATA(column) = |{ line-tlabel }: \{{ subcol-fname }\}|.
-*          ELSE.
-*            column = |{ line-tlabel }: \{{ subcol-fname }\} \{{ line-reference_field }\}|.
-*          ENDIF.
-*
-*          IF index = 1.
-*            sub_col = column.
-*          ELSE.
-*            sub_col = |{ sub_col }{ cl_abap_char_utilities=>cr_lf }{ column }|.
-*          ENDIF.
-*        ENDLOOP.
-*
-*        IF layout->reference_field IS NOT INITIAL.
-*          cells->object_identifier( title = |\{{ layout->fname }\} \{{ layout->reference_field }\}|
-*                                    text  = sub_col ).
-*        ELSE.
-*          cells->object_identifier( title = |\{{ layout->fname }\}|
-*                                    text  = sub_col ).
-*        ENDIF.
-*
-*      ELSE.
-*     "   IF layout->reference_field IS NOT INITIAL.
-*          cells->object_identifier( text = |\{{ layout->fname }\} \{{ layout->reference_field }\}| ).
-*    "    ELSE.
-*          cells->object_identifier( text = |\{{ layout->fname }\}| ).
-*     "   ENDIF.
-*      ENDIF.
-*    ENDLOOP.
 
     client->popup_display( popup->stringify( ) ).
 
@@ -218,7 +119,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
       set_output_table( ).
 
-      display( ).
+      Render_main( ).
 
       RETURN.
 
@@ -270,7 +171,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
         mo_layout = app->mo_layout.
 
-        display( ).
+        Render_main( ).
 
       CATCH cx_root.
     ENDTRY.

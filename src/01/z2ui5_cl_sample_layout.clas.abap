@@ -47,7 +47,7 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
       WHEN OTHERS.
 
         z2ui5_cl_pop_display_layout=>on_event_layout( client = client
-                                                     layout = mo_layout ).
+                                                      layout = mo_layout ).
 
     ENDCASE.
   ENDMETHOD.
@@ -63,7 +63,6 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
   METHOD render_main.
 
-
     DATA(view) = z2ui5_cl_xml_view=>factory( )->shell( ).
 
     DATA(page) = view->page( title          = 'Layout'
@@ -74,11 +73,10 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 *    page->header_content( )->scroll_container( height   = '70%'
 *                                               vertical = abap_true ).
 
-
-    z2ui5_cl_xml_builder=>xml_build_table( i_data         = mt_table
-                                           i_xml          = page
-                                           i_client       = client
-                                           i_layout       = mo_layout ).
+    z2ui5_cl_xml_builder=>xml_build_table( i_data   = mt_table
+                                           i_xml    = page
+                                           i_client = client
+                                           i_layout = mo_layout ).
 
     client->view_display( view->stringify( ) ).
 
@@ -129,12 +127,12 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
     DATA(class) = cl_abap_classdescr=>get_class_name( me ).
     SHIFT class LEFT DELETING LEADING '\CLASS='.
 
-    mo_layout = z2ui5_cl_pop_display_layout=>init_layout( control  = z2ui5_cl_layout=>m_table
-                                                     data     = mt_table
-                                                     handle01 =  class
-                                                     handle02 =  'Z2UI5_T_01'
-                                                     handle03 = ''
-                                                     handle04 = '' ).
+    mo_layout = z2ui5_cl_layout=>factory( control  = z2ui5_cl_layout=>m_table
+                                          data     = mt_table
+                                          handle01 = class
+                                          handle02 = 'Z2UI5_T_01'
+                                          handle03 = ''
+                                          handle04 = '' ).
 
   ENDMETHOD.
 

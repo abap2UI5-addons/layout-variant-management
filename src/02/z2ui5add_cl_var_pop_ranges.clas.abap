@@ -81,7 +81,7 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
         CLEAR mt_variant.
 
         DATA lt_variant_user TYPE ty_t_variant_out.
-        z2ui5_cl_util=>db_load_by_handle(
+        z2ui5add_cl_var_db_api=>hlp_db_load_by_handle(
             EXPORTING
                 uname   = ms_variant-uname
                 handle  = ms_variant-handle1
@@ -92,7 +92,7 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
         INSERT LINES OF lt_variant_user INTO TABLE mt_variant.
 
         DATA lt_variant TYPE ty_t_variant_out.
-        z2ui5_cl_util=>db_load_by_handle(
+        z2ui5add_cl_var_db_api=>hlp_db_load_by_handle(
             EXPORTING
                 handle  = ms_variant-handle1
                 handle2 = ms_variant-handle2
@@ -112,7 +112,7 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
     DATA(lt_variant_user) = mt_variant.
     DELETE lt_variant_user WHERE s_variant-uname IS INITIAL.
-    z2ui5_cl_util=>db_save(
+    z2ui5add_cl_var_db_api=>hlp_db_save(
         uname   = ms_variant-uname
         handle  = ms_variant-handle1
         handle2 = ms_variant-handle2
@@ -122,7 +122,7 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
     DATA(lt_variant) = mt_variant.
     DELETE lt_variant WHERE s_variant-uname IS NOT INITIAL.
-    z2ui5_cl_util=>db_save(
+    z2ui5add_cl_var_db_api=>hlp_db_save(
         handle  = ms_variant-handle1
         handle2 = ms_variant-handle2
         handle3 = ms_variant-handle3

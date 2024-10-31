@@ -125,7 +125,7 @@ CLASS z2ui5_cl_layout DEFINITION
         handle03      TYPE clike                    OPTIONAL
         handle04      TYPE clike                    OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5_cl_pop_to_select.
+        VALUE(result) TYPE REF TO z2ui5_cl_pop_to_sel_w_layout.
 
   PRIVATE SECTION.
     CLASS-METHODS create_layout_obj
@@ -376,8 +376,8 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
                                     handle03 = handle03
                                     handle04 = handle04  ).
 
-    result = z2ui5_cl_pop_to_select=>factory( i_tab   = layouts
-                                              i_title = 'Layouts' ).
+    result = z2ui5_cl_pop_to_sel_w_layout=>factory( i_tab   = layouts
+                                                    i_title = 'Layouts' ).
 
   ENDMETHOD.
 
@@ -399,7 +399,7 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
                                  handle03    = handle03
                                  handle04    = handle04 ).
 
-    IF sy-subrc = 0.
+    IF sy-subrc = 0 AND layout_guid IS INITIAL.
 
       " Default all Handles + User
       DATA(def) = VALUE #( Head[ handle01 = handle01
@@ -439,8 +439,11 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
           ENDIF.
         ENDIF.
       ENDIF.
-    ENDIF.
+    ELSE.
 
+      def = VALUE #( head[ 1 ] OPTIONAL ).
+
+    ENDIF.
 
     IF def-layout IS NOT INITIAL.
 
@@ -467,7 +470,6 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
         WHERE guid = @def-guid
         INTO TABLE @DATA(t_pos) ##SUBRC_OK.
 
-
       LOOP AT t_pos REFERENCE INTO DATA(pos).
 
         DATA(layout) = VALUE ty_s_positions( ).
@@ -487,28 +489,26 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
 
     ENDIF.
 
+    " create the tab first if the db fields were added/deleted
+    DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
 
+    LOOP AT t_comp INTO DATA(comp).
+      IF comp-type->type_kind = cl_abap_elemdescr=>typekind_oref.
+        DELETE t_comp.
+      ENDIF.
+    ENDLOOP.
 
-      " create the tab first if the db fields were added/deleted
-      DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
+    LOOP AT t_comp REFERENCE INTO DATA(lr_comp).
 
-      LOOP AT t_comp INTO DATA(comp).
-        IF comp-type->type_kind = cl_abap_elemdescr=>typekind_oref.
-          DELETE t_comp.
-        ENDIF.
-      ENDLOOP.
-
-      LOOP AT t_comp REFERENCE INTO DATA(lr_comp).
-
-        INSERT VALUE #( control  = control
-                        handle01 = handle01
-                        handle02 = handle02
-                        handle03 = handle03
-                        handle04 = handle04
-                        fname    = lr_comp->name
-                        rollname = lr_comp->type->get_relative_name( ) )
-               INTO TABLE result->ms_layout-t_layout.
-      ENDLOOP.
+      INSERT VALUE #( control  = control
+                      handle01 = handle01
+                      handle02 = handle02
+                      handle03 = handle03
+                      handle04 = handle04
+                      fname    = lr_comp->name
+                      rollname = lr_comp->type->get_relative_name( ) )
+             INTO TABLE result->ms_layout-t_layout.
+    ENDLOOP.
 
     result = default_layout( t_layout = result->ms_layout-t_layout
                              control  = control

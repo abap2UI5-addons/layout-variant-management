@@ -135,7 +135,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
     CASE client->get( )-event.
 
-      WHEN 'CONFIRM'.
+      WHEN 'ROW_SELECT'.
 
         confirm( ).
 

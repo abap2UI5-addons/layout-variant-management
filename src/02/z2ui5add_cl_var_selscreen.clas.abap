@@ -46,10 +46,7 @@ CLASS z2ui5add_cl_var_selscreen DEFINITION
     DATA check_initialized      TYPE abap_bool.
 
     METHODS popup_display.
-
     METHODS init.
-
-
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -90,9 +87,11 @@ CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD result.
     result = ms_result.
   ENDMETHOD.
+
 
   METHOD z2ui5_if_app~main.
 
@@ -118,6 +117,7 @@ CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
     on_event( client ).
 
   ENDMETHOD.
+
 
   METHOD set_output.
 

@@ -32,9 +32,9 @@ CLASS z2ui5_cl_layout DEFINITION
     TYPES ty_t_sub_columns TYPE STANDARD TABLE OF ty_s_sub_columns WITH EMPTY KEY.
 
     TYPES  BEGIN OF ty_s_positions.
-             INCLUDE TYPE z2ui5_layo_t_02.
-    TYPES:   tlabel    TYPE string,
-             t_sub_col TYPE ty_t_sub_columns,
+    INCLUDE TYPE z2ui5_layo_t_02.
+    TYPES: tlabel    TYPE string,
+           t_sub_col TYPE ty_t_sub_columns,
            END OF ty_s_positions.
     TYPES ty_t_positions TYPE STANDARD TABLE OF ty_s_positions WITH EMPTY KEY.
 
@@ -52,7 +52,7 @@ CLASS z2ui5_cl_layout DEFINITION
 
     CLASS-METHODS factory
       IMPORTING
-        !data         TYPE REF TO data
+        data         TYPE REF TO data OPTIONAL
         !control      TYPE clike
         handle01      TYPE clike OPTIONAL
         handle02      TYPE clike OPTIONAL

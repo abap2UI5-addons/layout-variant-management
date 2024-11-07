@@ -1,8 +1,8 @@
 # Layout & Variant Management
 
-🚀 [Get Started](https://abap2ui5.github.io/docs/)
+🚀 [More Information...](https://abap2ui5.github.io/docs/addons/layout.html)
 
 
-### Dependencies:
+#### Dependencies:
 * abap2UI5
 * S-RTTI

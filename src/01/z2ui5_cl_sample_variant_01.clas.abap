@@ -171,7 +171,8 @@ CLASS z2ui5_cl_sample_variant_01 IMPLEMENTATION.
       mv_tabname = `T100`.
 
       CREATE DATA mr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
-      mt_filter = z2ui5_cl_util=>filter_get_multi_by_data( mr_table->* ).
+      ASSIGN mr_table->* TO FIELD-SYMBOL(<table>).
+      mt_filter = z2ui5_cl_util=>filter_get_multi_by_data( <table> ).
 *       DELETE mt_filter WHERE name = `SELKZ`.
       view_display( ).
       RETURN.

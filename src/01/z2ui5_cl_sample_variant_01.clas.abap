@@ -133,7 +133,8 @@ CLASS z2ui5_cl_sample_variant_01 IMPLEMENTATION.
                                  client2  = client
                                  view     = vbox ).
 
-    DATA(tab) = vbox->table( items = client->_bind( val = mr_table->* )
+    ASSIGN mr_table->* TO FIELD-SYMBOL(<table>).
+    DATA(tab) = vbox->table( items = client->_bind( val = <table> )
            )->header_toolbar(
              )->overflow_toolbar(
                  )->toolbar_spacer(

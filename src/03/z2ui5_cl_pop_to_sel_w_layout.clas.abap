@@ -68,7 +68,9 @@ CLASS z2ui5_cl_pop_to_sel_w_layout DEFINITION
 ENDCLASS.
 
 
-CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
+
+CLASS Z2UI5_CL_POP_TO_SEL_W_LAYOUT IMPLEMENTATION.
+
 
   METHOD factory.
 
@@ -93,6 +95,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD Render_main.
 
     DATA(popup) = z2ui5_cl_xml_view=>factory_popup( )->dialog( title      = title
@@ -109,6 +112,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
     client->popup_display( popup->stringify( ) ).
 
   ENDMETHOD.
+
 
   METHOD z2ui5_if_app~main.
 
@@ -130,6 +134,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
     on_after_layout( ).
 
   ENDMETHOD.
+
 
   METHOD on_event.
 
@@ -159,6 +164,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD on_after_layout.
 
     IF client->get( )-check_on_navigated = abap_false.
@@ -177,6 +183,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
     ENDTRY.
 
   ENDMETHOD.
+
 
   METHOD confirm.
 
@@ -206,11 +213,13 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD result.
 
     result = ms_result.
 
   ENDMETHOD.
+
 
   METHOD set_output_table.
 
@@ -231,7 +240,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
     ASSIGN mr_tab->* TO FIELD-SYMBOL(<in>).
     ASSIGN mr_out->* TO FIELD-SYMBOL(<out>).
-    MOVE-CORRESPONDING mr_tab->* TO <in>.
+
     z2ui5_cl_util=>itab_corresponding(
       EXPORTING
         val = <in>
@@ -245,6 +254,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
     mr_out_tmp->* = mr_out->*.
 
   ENDMETHOD.
+
 
   METHOD set_row_id.
     FIELD-SYMBOLS <tab>  TYPE STANDARD TABLE.
@@ -260,6 +270,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
+
 
   METHOD get_comp.
     DATA index TYPE int4.
@@ -287,6 +298,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
       CATCH cx_root.
     ENDTRY.
   ENDMETHOD.
+
 
   METHOD on_event_search.
 
@@ -322,5 +334,4 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
-
 ENDCLASS.

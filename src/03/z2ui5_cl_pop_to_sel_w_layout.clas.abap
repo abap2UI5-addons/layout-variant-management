@@ -195,7 +195,8 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
       ENDIF.
 
       IF <row_id> = row_clicked.
-        ms_result-row->* = CORRESPONDING #( <line> ).
+        ASSIGN ms_result-row->* TO FIELD-SYMBOL(<any>).
+        MOVE-CORRESPONDING <line> TO <any>.
         EXIT.
       ENDIF.
 
@@ -228,7 +229,16 @@ CLASS z2ui5_cl_pop_to_sel_w_layout IMPLEMENTATION.
 
     ENDTRY.
 
-    mr_out->* = CORRESPONDING #( mr_tab->* ).
+    ASSIGN mr_tab->* TO FIELD-SYMBOL(<in>).
+    ASSIGN mr_out->* TO FIELD-SYMBOL(<out>).
+    MOVE-CORRESPONDING mr_tab->* TO <in>.
+    z2ui5_cl_util=>itab_corresponding(
+      EXPORTING
+        val = <in>
+      CHANGING
+        tab = <out>
+    ).
+    "mr_out->* = CORRESPONDING #( mr_tab->* ).
 
     set_row_id( ).
 

@@ -245,13 +245,12 @@ CLASS Z2UI5_CL_POP_TO_SEL_W_LAYOUT IMPLEMENTATION.
       EXPORTING
         val = <in>
       CHANGING
-        tab = <out>
-    ).
-    "mr_out->* = CORRESPONDING #( mr_tab->* ).
+        tab = <out> ).
 
     set_row_id( ).
 
-    mr_out_tmp->* = mr_out->*.
+    ASSIGN mr_out_tmp->* TO FIELD-SYMBOL(<out_tmp>).
+    <out_tmp> = <out>.
 
   ENDMETHOD.
 

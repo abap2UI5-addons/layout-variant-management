@@ -52,7 +52,8 @@ CLASS z2ui5_cl_xml_builder IMPLEMENTATION.
 
       DATA(lv_index) = sy-tabix.
 
-      ASSIGN COMPONENT layout->fname OF STRUCTURE i_data->* TO FIELD-SYMBOL(<value>).
+      ASSIGN i_data->* TO FIELD-SYMBOL(<data>).
+      ASSIGN COMPONENT layout->fname OF STRUCTURE <data> TO FIELD-SYMBOL(<value>).
       IF <value> IS NOT ASSIGNED.
         CONTINUE.
       ENDIF.
@@ -72,7 +73,8 @@ CLASS z2ui5_cl_xml_builder IMPLEMENTATION.
 
       IF layout->reference_field IS NOT INITIAL.
 
-        ASSIGN COMPONENT layout->reference_field OF STRUCTURE i_data->* TO FIELD-SYMBOL(<ref_value>).
+        ASSIGN i_data->* TO <data>.
+        ASSIGN COMPONENT layout->reference_field OF STRUCTURE <data> TO FIELD-SYMBOL(<ref_value>).
         IF <ref_value> IS NOT ASSIGNED.
           CONTINUE.
         ENDIF.
@@ -94,9 +96,10 @@ CLASS z2ui5_cl_xml_builder IMPLEMENTATION.
 
   METHOD xml_build_table.
 
+    ASSIGN i_data->* TO FIELD-SYMBOL(<data>).
     DATA(table) = i_xml->table( width           = 'auto'
                                 mode            = COND #( WHEN i_sel_mode = space THEN `None` ELSE i_sel_mode  )
-                                items           = i_client->_bind_edit( val = i_DATA->* )
+                                items           = i_client->_bind_edit( val = <data> )
                                 selectionChange = i_client->_event( 'SELECTION_CHANGE' ) ).
 
     DATA(toolbar) = table->header_toolbar(
@@ -104,7 +107,8 @@ CLASS z2ui5_cl_xml_builder IMPLEMENTATION.
                    )->toolbar_spacer( ).
 
     IF i_search_value IS SUPPLIED.
-      toolbar->search_field( value  = i_client->_bind_edit( i_search_value->* )
+      ASSIGN i_search_value->* TO FIELD-SYMBOL(<search_value>).
+      toolbar->search_field( value  = i_client->_bind_edit( <search_value> )
                              search = i_client->_event( 'SEARCH' )
                              change = i_client->_event( 'SEARCH' )
                              id     = `SEARCH`

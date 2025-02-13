@@ -21,7 +21,7 @@ CLASS z2ui5_cl_layout DEFINITION
     CLASS-DATA m_table  TYPE control VALUE 'm.Table' ##NO_TEXT.
     CLASS-DATA others   TYPE control VALUE '' ##NO_TEXT.
 
-    TYPES ty_s_Head TYPE z2ui5_layo_t_01.
+    TYPES ty_s_Head TYPE z2ui5_t_11.
     TYPES ty_t_head TYPE STANDARD TABLE OF ty_s_head WITH EMPTY KEY.
 
     TYPES:
@@ -32,7 +32,7 @@ CLASS z2ui5_cl_layout DEFINITION
     TYPES ty_t_sub_columns TYPE STANDARD TABLE OF ty_s_sub_columns WITH EMPTY KEY.
 
     TYPES  BEGIN OF ty_s_positions.
-    INCLUDE TYPE z2ui5_layo_t_02.
+    INCLUDE TYPE z2ui5_t_12.
     TYPES: tlabel    TYPE string,
            t_sub_col TYPE ty_t_sub_columns,
            END OF ty_s_positions.
@@ -197,7 +197,7 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
              descr,
              def,
              uname
-        FROM z2ui5_layo_t_01
+        FROM z2ui5_t_11
         WHERE guid = @layout_guid
         INTO CORRESPONDING FIELDS OF TABLE @result ##SUBRC_OK.
 
@@ -213,7 +213,7 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
              descr,
              def,
              uname
-        FROM z2ui5_layo_t_01
+        FROM z2ui5_t_11
         WHERE control  = @control
           AND handle01 = @handle01
           AND handle02 = @handle02
@@ -246,7 +246,7 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
            alternative_text,
            reference_field,
            subcolumn
-      FROM z2ui5_layo_t_02
+      FROM z2ui5_t_12
       WHERE guid = @layout_guid
       INTO CORRESPONDING FIELDS OF TABLE @result ##SUBRC_OK.
 
@@ -466,7 +466,7 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
              alternative_text,
              subcolumn,
              reference_field
-        FROM z2ui5_layo_t_02
+        FROM z2ui5_t_12
         WHERE guid = @def-guid
         INTO TABLE @DATA(t_pos) ##SUBRC_OK.
 

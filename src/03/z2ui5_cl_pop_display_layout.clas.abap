@@ -17,7 +17,7 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
     TYPES fixvalues TYPE STANDARD TABLE OF fixvalue WITH EMPTY KEY.
 
     TYPES BEGIN OF ty_s_layo.
-            INCLUDE TYPE z2ui5_layo_t_01.
+    INCLUDE TYPE z2ui5_t_11.
     TYPES   selkz TYPE abap_bool.
     TYPES END OF ty_s_layo.
     TYPES ty_t_layo TYPE STANDARD TABLE OF ty_s_layo WITH EMPTY KEY.
@@ -45,7 +45,7 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
       IMPORTING
         !xml          TYPE REF TO z2ui5_cl_xml_view
         !client       TYPE REF TO z2ui5_if_client
-        !layout       type ref to Z2UI5_CL_LAYOUT
+        !layout       TYPE REF TO z2ui5_cl_layout
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_xml_view.
 
@@ -94,9 +94,9 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
 
     METHODS check_width_unit
       IMPORTING
-        !width        TYPE z2ui5_layo_t_02-width
+        !width        TYPE z2ui5_t_12-width
       RETURNING
-        VALUE(result) TYPE z2ui5_layo_t_02-width.
+        VALUE(result) TYPE z2ui5_t_12-width.
 
     CLASS-METHODS get_relative_name_of_table
       IMPORTING
@@ -398,7 +398,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
         delete_selected_layout( get_selected_layout( ) ).
 
-        delete mt_head where selkz = abap_true.
+        DELETE mt_head WHERE selkz = abap_true.
 
         client->popup_model_update( ).
 
@@ -488,8 +488,8 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
   METHOD save_layout.
 
-    DATA line      TYPE z2ui5_layo_t_02.
-    DATA Positions TYPE STANDARD TABLE OF z2ui5_layo_t_02 WITH EMPTY KEY.
+    DATA line      TYPE z2ui5_t_12.
+    DATA Positions TYPE STANDARD TABLE OF z2ui5_t_12 WITH EMPTY KEY.
 
     IF mv_layout IS INITIAL.
       client->message_toast_display( 'Layoutname missing.' ).
@@ -500,7 +500,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
       DATA(user) = sy-uname.
     ENDIF.
 
-    DATA(Head) = VALUE z2ui5_layo_t_01( guid     = mo_layout->ms_layout-s_head-guid
+    DATA(Head) = VALUE z2ui5_t_11( guid     = mo_layout->ms_layout-s_head-guid
                                         layout   = mv_layout
                                         control  = mo_layout->ms_layout-s_head-control
                                         handle01 = mo_layout->ms_layout-s_head-handle01
@@ -526,7 +526,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
     ENDLOOP.
 
     " Does a matching Layout exist?
-    SELECT guid FROM z2ui5_layo_t_01
+    SELECT guid FROM z2ui5_t_11
       WHERE layout   = @Head-layout
         AND control  = @Head-control
         AND handle01 = @Head-handle01
@@ -539,14 +539,14 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
       IF t_heads IS NOT INITIAL.
 
-        SELECT mandt, guid, pos_guid FROM z2ui5_layo_t_02
+        SELECT mandt, guid, pos_guid FROM z2ui5_t_12
           FOR ALL ENTRIES IN @t_heads
           WHERE guid = @t_heads-guid
           INTO TABLE @DATA(t_del).
 
         IF sy-subrc = 0.
           " if structure was changed we do not want any dead entries ...
-          DELETE z2ui5_layo_t_02 FROM TABLE @t_del.
+          DELETE z2ui5_t_12 FROM TABLE @t_del.
           COMMIT WORK AND WAIT.
         ENDIF.
 
@@ -554,7 +554,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
     ELSE.
 
       " guid already taken
-      SELECT guid FROM z2ui5_layo_t_01
+      SELECT guid FROM z2ui5_t_11
         WHERE guid = @head-guid
         INTO TABLE @t_heads.
 
@@ -574,10 +574,10 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
     ENDIF.
 
-    MODIFY z2ui5_layo_t_01 FROM @Head.
+    MODIFY z2ui5_t_11 FROM @Head.
     IF sy-subrc = 0.
 
-      MODIFY z2ui5_layo_t_02 FROM TABLE @Positions.
+      MODIFY z2ui5_t_12 FROM TABLE @Positions.
 
       IF sy-subrc = 0.
 
@@ -744,7 +744,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 *      WHERE guid = @Head-guid
 *      INTO CORRESPONDING FIELDS OF TABLE @mo_layout->ms_layout-t_layout  ##SUBRC_OK.
 
-mo_layout = Z2UI5_CL_LAYOUT=>factory_by_guid( layout_guid = head-guid ).
+    mo_layout = z2ui5_cl_layout=>factory_by_guid( layout_guid = head-guid ).
 
 
   ENDMETHOD.
@@ -800,9 +800,9 @@ mo_layout = Z2UI5_CL_LAYOUT=>factory_by_guid( layout_guid = head-guid ).
 
   METHOD delete_selected_layout.
 
-    DELETE FROM z2ui5_layo_t_01 WHERE guid = @Head-guid.
+    DELETE FROM z2ui5_t_11 WHERE guid = @Head-guid.
 
-    DELETE FROM z2ui5_layo_t_02 WHERE guid = @Head-guid.
+    DELETE FROM z2ui5_t_12 WHERE guid = @Head-guid.
 
     IF sy-subrc = 0.
       COMMIT WORK AND WAIT.

@@ -46,7 +46,7 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
       WHEN OTHERS.
 
-        z2ui5_cl_pop_display_layout=>on_event_layout( client = client
+        z2ui5_cl_pop_layout=>on_event_layout( client = client
                                                       layout = mo_layout ).
 
     ENDCASE.
@@ -140,7 +140,7 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
     TRY.
 
-        DATA(app) = CAST z2ui5_cl_pop_display_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+        DATA(app) = CAST z2ui5_cl_pop_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
         mo_layout = app->mo_layout.
 
         IF app->mv_rerender = abap_true.

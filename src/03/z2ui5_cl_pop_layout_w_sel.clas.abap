@@ -1,4 +1,4 @@
-CLASS z2ui5_cl_pop_to_sel_w_layout DEFINITION
+CLASS z2ui5_cl_pop_layout_w_sel DEFINITION
   PUBLIC FINAL
   CREATE PROTECTED.
 
@@ -34,7 +34,7 @@ CLASS z2ui5_cl_pop_to_sel_w_layout DEFINITION
         i_handle03         TYPE z2ui5_cl_layout=>handle OPTIONAL
         i_handle04         TYPE z2ui5_cl_layout=>handle OPTIONAL
       RETURNING
-        VALUE(r_result)    TYPE REF TO z2ui5_cl_pop_to_sel_w_layout.
+        VALUE(r_result)    TYPE REF TO z2ui5_cl_pop_layout_w_sel.
 
     METHODS result
       RETURNING
@@ -69,7 +69,7 @@ ENDCLASS.
 
 
 
-CLASS Z2UI5_CL_POP_TO_SEL_W_LAYOUT IMPLEMENTATION.
+CLASS z2ui5_cl_pop_layout_w_sel IMPLEMENTATION.
 
 
   METHOD factory.
@@ -157,7 +157,7 @@ CLASS Z2UI5_CL_POP_TO_SEL_W_LAYOUT IMPLEMENTATION.
 
       WHEN OTHERS.
 
-        z2ui5_cl_pop_display_layout=>on_event_layout( client = client
+        z2ui5_cl_pop_layout=>on_event_layout( client = client
                                                       layout = mo_layout ).
 
     ENDCASE.
@@ -173,7 +173,7 @@ CLASS Z2UI5_CL_POP_TO_SEL_W_LAYOUT IMPLEMENTATION.
 
     TRY.
 
-        DATA(app) = CAST z2ui5_cl_pop_display_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+        DATA(app) = CAST z2ui5_cl_pop_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
 
         mo_layout = app->mo_layout.
 

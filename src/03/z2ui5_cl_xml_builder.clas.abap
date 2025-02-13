@@ -115,7 +115,7 @@ CLASS z2ui5_cl_xml_builder IMPLEMENTATION.
                              width  = '17.5rem' ).
     ENDIF.
 
-    z2ui5_cl_pop_display_layout=>render_layout_function( client = i_client
+    z2ui5_cl_pop_layout=>render_layout_function( client = i_client
                                                          xml    = toolbar
                                                          layout = i_layout ).
 

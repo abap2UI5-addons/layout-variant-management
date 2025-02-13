@@ -1,4 +1,4 @@
-CLASS z2ui5_cl_pop_display_layout DEFINITION
+CLASS z2ui5_cl_pop_layout DEFINITION
   PUBLIC FINAL
   CREATE PUBLIC.
 
@@ -55,7 +55,7 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
         open_layout   TYPE abap_bool OPTIONAL
         delete_layout TYPE abap_bool OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5_cl_pop_display_layout.
+        VALUE(result) TYPE REF TO z2ui5_cl_pop_layout.
 
   PROTECTED SECTION.
     DATA client  TYPE REF TO z2ui5_if_client.
@@ -107,7 +107,7 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
 ENDCLASS.
 
 
-CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
+CLASS z2ui5_cl_pop_layout IMPLEMENTATION.
 
   METHOD z2ui5_if_app~main.
 

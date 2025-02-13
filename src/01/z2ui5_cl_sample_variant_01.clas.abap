@@ -170,8 +170,10 @@ CLASS z2ui5_cl_sample_variant_01 IMPLEMENTATION.
       mv_check_initialized = abap_true.
       mv_tabname = `T100`.
 
-      CREATE DATA mr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
-      ASSIGN mr_table->* TO FIELD-SYMBOL(<table>).
+      FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+      TYPES ty_T_t100 TYPE STANDARD TABLE OF  t100 WITH EMPTY KEY.
+      CREATE DATA mr_table TYPE ty_T_T100.
+      ASSIGN mr_table->* TO <table>.
       mt_filter = z2ui5_cl_util=>filter_get_multi_by_data( <table> ).
 *       DELETE mt_filter WHERE name = `SELKZ`.
       view_display( ).
@@ -182,7 +184,8 @@ CLASS z2ui5_cl_sample_variant_01 IMPLEMENTATION.
       TRY.
           DATA(lo_popup) = CAST z2ui5_cl_pop_get_range( client->get_app( client->get( )-s_draft-id_prev_app ) ).
           IF lo_popup->result( )-check_confirmed = abap_true.
-            ASSIGN mt_filter[ name = mo_multiselect->mv_popup_name ] TO FIELD-SYMBOL(<tab>).
+            FIELD-SYMBOLS <tab> TYPE z2ui5_cl_util=>ty_s_filter_multi.
+            ASSIGN mt_filter[ name = mo_multiselect->mv_popup_name ] TO <tab>.
             <tab>-t_range = lo_popup->result( )-t_range.
             <tab>-t_token = z2ui5_cl_util=>filter_get_token_t_by_range_t( <tab>-t_range ).
             client->view_model_update( ).

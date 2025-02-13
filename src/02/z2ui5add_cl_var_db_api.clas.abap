@@ -11,8 +11,8 @@ CLASS z2ui5add_cl_var_db_api DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO z2ui5add_cl_var_db_api.
 
-    TYPES ty_s_head TYPE z2ui5_t_var_01.
-    TYPES ty_s_pos TYPE z2ui5_t_var_02.
+    TYPES ty_s_head TYPE z2ui5_t_13.
+    TYPES ty_s_pos TYPE z2ui5_t_14.
 
     DATA mt_variant TYPE STANDARD TABLE OF ty_S_head WITH EMPTY KEY.
     METHODS check_default.
@@ -97,7 +97,7 @@ CLASS z2ui5add_cl_var_db_api IMPLEMENTATION.
 
   METHOD hlp_db_delete_by_handle.
 
-    DELETE FROM z2ui5_t_02
+    DELETE FROM z2ui5_t_15
         WHERE
            uname = @uname
             AND handle = @handle
@@ -113,10 +113,10 @@ CLASS z2ui5add_cl_var_db_api IMPLEMENTATION.
 
   METHOD hlp_db_load_by_handle.
 
-    DATA lt_db TYPE STANDARD TABLE OF z2ui5_t_02 WITH EMPTY KEY.
+    DATA lt_db TYPE STANDARD TABLE OF z2ui5_t_15 WITH EMPTY KEY.
 
     SELECT data
-      FROM z2ui5_t_02
+      FROM z2ui5_t_15
        WHERE
         uname = @uname
         AND handle = @handle
@@ -142,10 +142,10 @@ CLASS z2ui5add_cl_var_db_api IMPLEMENTATION.
 
   METHOD hlp_db_load_by_id.
 
-    DATA lt_db TYPE STANDARD TABLE OF z2ui5_t_02 WITH EMPTY KEY.
+    DATA lt_db TYPE STANDARD TABLE OF z2ui5_t_15 WITH EMPTY KEY.
 
     SELECT data
-      FROM z2ui5_t_02
+      FROM z2ui5_t_15
       WHERE id = @id
       INTO CORRESPONDING FIELDS OF TABLE @lt_db.
     ASSERT sy-subrc = 0.
@@ -163,9 +163,9 @@ CLASS z2ui5add_cl_var_db_api IMPLEMENTATION.
 
   METHOD hlp_db_save.
 
-    DATA lt_db TYPE STANDARD TABLE OF z2ui5_t_02 WITH EMPTY KEY.
+    DATA lt_db TYPE STANDARD TABLE OF z2ui5_t_15 WITH EMPTY KEY.
     SELECT id
-      FROM z2ui5_t_02
+      FROM z2ui5_t_15
        WHERE
         uname = @uname
         AND handle = @handle
@@ -173,7 +173,7 @@ CLASS z2ui5add_cl_var_db_api IMPLEMENTATION.
         AND handle3 = @handle3
       INTO CORRESPONDING FIELDS OF TABLE @lt_db ##SUBRC_OK.
 
-    DATA(ls_db) = VALUE z2ui5_t_02(
+    DATA(ls_db) = VALUE z2ui5_t_15(
         uname   = uname
         handle  = handle
         handle2 = handle2
@@ -186,7 +186,7 @@ CLASS z2ui5add_cl_var_db_api IMPLEMENTATION.
         ls_db-id = z2ui5_cl_util=>uuid_get_c32( ).
     ENDTRY.
 
-    MODIFY z2ui5_t_02 FROM @ls_db.
+    MODIFY z2ui5_t_15 FROM @ls_db.
     ASSERT sy-subrc = 0.
 
     IF check_commit = abap_true.
@@ -220,7 +220,7 @@ CLASS z2ui5add_cl_var_db_api IMPLEMENTATION.
 
     CREATE OBJECT result.
 
-    SELECT FROM z2ui5_t_var_01
+    SELECT FROM z2ui5_t_13
         FIELDS *
         WHERE report = @report
         INTO TABLE @result->mt_variant.

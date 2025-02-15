@@ -1,4 +1,4 @@
-name: build_downport
+name: ABAP_702
 
 on:
   push:

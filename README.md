@@ -1,8 +1,9 @@
 [![ABAP_702](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_702.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_702.yaml)
 [![ABAP_750](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_750.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_750.yaml)
 [![ABAP_CLOUD](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_CLOUD.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_CLOUD.yaml)
-
-
+<br>
+[![renaming](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/renaming.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/renaming.yaml)
+ 
 # Layout-Variant-Management
 
 <i class="fa-brands fa-github"></i> [Layout-Variant Addon on GitHub](https://github.com/abap2UI5-addons/layout-variant-management)<br>

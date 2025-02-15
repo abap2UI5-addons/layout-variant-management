@@ -1,3 +1,5 @@
+[![ABAP_702](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/build_downport.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/build_downport.yaml)
+
 # Layout-Variant-Management
 
 <i class="fa-brands fa-github"></i> [Layout-Variant Addon on GitHub](https://github.com/abap2UI5-addons/layout-variant-management)<br>

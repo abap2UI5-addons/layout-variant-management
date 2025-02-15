@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  ABAP_702:
+  ABAP_750:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -17,4 +17,4 @@ jobs:
       with:
         node-version: 20
     - run: npm ci
-    - run:  abaplint ./abaplint.jsonc
+    - run:  npx abaplint ./abaplint.jsonc

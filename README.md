@@ -3,9 +3,7 @@
 [![ABAP_CLOUD](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_CLOUD.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_CLOUD.yaml)
 <br>
 [![auto_renaming](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_renaming.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_renaming.yaml)
- <br>
- <a href="https://github.com/abap2UI5-addons/layout-variant-management/releases/"><img src="https://img.shields.io/github/v/release/abap2UI5-addons/layout-variant-management"></a>
- <a href="https://github.com/abap2UI5-addons/layout-variant-management/graphs/contributors"><img src="https://img.shields.io/github/contributors/abap2UI5-addons/layout-variant-management"></a>
+[![auto_downporting](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_downporting.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_downporting.yaml)
 
 # Layout-Variant-Management
 

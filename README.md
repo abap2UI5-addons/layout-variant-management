@@ -1,4 +1,4 @@
-[![ABAP_702](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/build_downport.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/build_downport.yaml)
+[![ABAP_702](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_702.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_702.yaml)
 
 # Layout-Variant-Management
 

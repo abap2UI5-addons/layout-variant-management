@@ -1,5 +1,5 @@
 [![ABAP_702](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_702.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_702.yaml)
-[![ABAP_STANDARD](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_750.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_STANDARD.yaml)
+[![ABAP_STANDARD](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_STANDARD.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_STANDARD.yaml)
 [![ABAP_CLOUD](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_CLOUD.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_CLOUD.yaml)
 <br>
 [![auto_renaming](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_renaming.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_renaming.yaml)

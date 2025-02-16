@@ -9,6 +9,20 @@
 
 In classic SAP GUI development, one of the most frequently used features was variant management for selection screens and layout management for ALVs. Storing input values and user-specific table output settings greatly enhances the user experience. This add-on brings back these functionalities.
 
+#### Content
+* Layout
+* Variants
+  
+#### Compatibility
+* BTP ABAP Environment (ABAP for Cloud)
+* S/4 Public Cloud ABAP Environment (ABAP for Cloud)
+* S/4 Private Cloud or On-Premise (ABAP for Cloud, Standard ABAP)
+* R/3 NetWeaver AS ABAP 7.50 or higher (Standard ABAP)
+
+#### Required Projects
+
+#### Limitations
+  
 #### Layout Management
 <img width="700" alt="Google Chrome 2024-09-09 12 14 58" src="https://github.com/user-attachments/assets/5e5f9291-3817-4a66-a886-cd0ac0c6e175">
 

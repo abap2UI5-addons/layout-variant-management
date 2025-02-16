@@ -24,7 +24,8 @@ jobs:
       id: cpr
       uses: peter-evans/create-pull-request@v5
       with:
-        branch: 702
+        base: 702
+        branch: auto-downport
         title: "Auto Update Downport"
         commit-message: "Auto Update Downport"
         body: "This PR contains automated changes."

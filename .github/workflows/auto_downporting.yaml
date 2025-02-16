@@ -25,6 +25,7 @@ jobs:
       id: cpr
       uses: peter-evans/create-pull-request@v5
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         branch: downport
         title: "Auto Update Downport"
         commit-message: "Auto Update Downport"

@@ -2,7 +2,7 @@ name: ABAP_702
 
 on:
   push:
-    branches: [main]
+    branches: ["702"]
 
 permissions:
   contents: read

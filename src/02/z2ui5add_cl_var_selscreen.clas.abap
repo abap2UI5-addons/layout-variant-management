@@ -57,7 +57,7 @@ CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
 
   METHOD factory.
 
-    r_result = NEW #( ).
+    CREATE OBJECT r_result.
     r_result->ms_result-t_filter = val.
 
   ENDMETHOD.
@@ -72,7 +72,8 @@ CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
 
   METHOD popup_display.
 
-    DATA(lo_popup) = z2ui5_cl_xml_view=>factory_popup( ).
+    DATA lo_popup TYPE REF TO z2ui5_cl_xml_view.
+    lo_popup = z2ui5_cl_xml_view=>factory_popup( ).
     lo_popup = lo_popup->dialog( afterclose    = client->_event( 'BUTTON_CANCEL' )
                                  contentheight = `50%`
                                  contentwidth  = `50%`
@@ -94,6 +95,9 @@ CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
 
 
   METHOD z2ui5_if_app~main.
+      DATA temp1 TYPE REF TO z2ui5_cl_pop_get_range.
+      DATA lo_popup LIKE temp1.
+        FIELD-SYMBOLS <tab> TYPE z2ui5_cl_util=>ty_s_filter_multi.
 
     me->client = client.
     IF check_initialized = abap_false.
@@ -104,9 +108,13 @@ CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
 
     IF client->get( )-check_on_navigated = abap_true.
 
-      DATA(lo_popup) = CAST z2ui5_cl_pop_get_range( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+      
+      temp1 ?= client->get_app( client->get( )-s_draft-id_prev_app ).
+      
+      lo_popup = temp1.
       IF lo_popup->result( )-check_confirmed = abap_true.
-        ASSIGN ms_result-t_filter[ name = mv_popup_name ] TO FIELD-SYMBOL(<tab>).
+        
+        READ TABLE ms_result-t_filter WITH KEY name = mv_popup_name ASSIGNING <tab>.
         <tab>-t_range = lo_popup->result( )-t_range.
         <tab>-t_token = z2ui5_cl_util=>filter_get_token_t_by_range_t( <tab>-t_range ).
       ENDIF.
@@ -121,20 +129,31 @@ CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
 
   METHOD set_output.
 
-    DATA(vbox) = view->vbox( height         = `100%`
+    DATA vbox TYPE REF TO z2ui5_cl_xml_view.
+    DATA item TYPE REF TO z2ui5_cl_xml_view.
+    DATA grid TYPE REF TO z2ui5_cl_xml_view.
+    DATA temp2 TYPE string_table.
+    DATA temp4 TYPE string_table.
+    DATA temp6 TYPE string_table.
+    vbox = view->vbox( height         = `100%`
                                  justifycontent = 'SpaceBetween' ).
 
-    DATA(item) = vbox->list( nodata          = `no conditions defined`
+    
+    item = vbox->list( nodata          = `no conditions defined`
                              items           = client2->_bind( ms_result-t_filter )
                              selectionchange = client2->_event( 'SELCHANGE' )
                 )->custom_list_item( ).
 
-    DATA(grid) = item->grid( class = `sapUiSmallMarginTop sapUiSmallMarginBottom sapUiSmallMarginBegin` ).
+    
+    grid = item->grid( class = `sapUiSmallMarginTop sapUiSmallMarginBottom sapUiSmallMarginBegin` ).
     grid->text( `{NAME}` ).
 
+    
+    CLEAR temp2.
+    INSERT `${NAME}` INTO TABLE temp2.
     grid->multi_input( tokens = `{T_TOKEN}`
         enabled               = abap_false
-             valuehelprequest = client2->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) )
+             valuehelprequest = client2->_event( val = `LIST_OPEN` t_arg = temp2 )
             )->tokens(
                  )->token( key      = `{KEY}`
                            text     = `{TEXT}`
@@ -142,12 +161,18 @@ CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
                            selected = `{SELKZ}`
                            editable = `{EDITABLE}` ).
 
+    
+    CLEAR temp4.
+    INSERT `${NAME}` INTO TABLE temp4.
     grid->button( text  = `Select`
-                  press = client2->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) ) ).
+                  press = client2->_event( val = `LIST_OPEN` t_arg = temp4 ) ).
+    
+    CLEAR temp6.
+    INSERT `${NAME}` INTO TABLE temp6.
     grid->button( icon  = 'sap-icon://delete'
                   type  = `Transparent`
                   text  = `Clear`
-                  press = client2->_event( val = `LIST_DELETE` t_arg = VALUE #( ( `${NAME}` ) ) ) ).
+                  press = client2->_event( val = `LIST_DELETE` t_arg = temp6 ) ).
 
     view->buttons(
         )->button( text  = `Clear All`
@@ -172,7 +197,12 @@ CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
 *                             selectionchange = client2->_event( 'SELCHANGE' )
 *                )->custom_list_item( ).
 
-    DATA(tab) = view->table( "nodata          = `no conditions defined`
+    DATA tab TYPE REF TO z2ui5_cl_xml_view.
+  DATA cells TYPE REF TO z2ui5_cl_xml_view.
+DATA temp8 TYPE string_table.
+DATA temp10 TYPE string_table.
+DATA temp12 TYPE string_table.
+    tab = view->table( "nodata          = `no conditions defined`
                              items           = client2->_bind( t_filter )
                              selectionchange = client2->_event( 'SELCHANGE' )
                 ).
@@ -199,23 +229,33 @@ CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
          )->column(
              )->text( 'Clear' )->get_parent(
               ).
-  data(cells) =  tab->items( )->column_list_item( )->cells( ).
+  
+  cells =  tab->items( )->column_list_item( )->cells( ).
 cells->text( text = `{NAME}` ).
+
+CLEAR temp8.
+INSERT `${NAME}` INTO TABLE temp8.
 cells->multi_input( tokens = `{T_TOKEN}`
  enabled               = abap_false
-      valuehelprequest = client2->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) )
+      valuehelprequest = client2->_event( val = `LIST_OPEN` t_arg = temp8 )
      )->tokens(
           )->token( key      = `{KEY}`
                     text     = `{TEXT}`
                     visible  = `{VISIBLE}`
                     selected = `{SELKZ}`
                     editable = `{EDITABLE}` ).
+
+CLEAR temp10.
+INSERT `${NAME}` INTO TABLE temp10.
 cells->button( text  = `Select`
-           press = client2->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) ) ).
+           press = client2->_event( val = `LIST_OPEN` t_arg = temp10 ) ).
+
+CLEAR temp12.
+INSERT `${NAME}` INTO TABLE temp12.
 cells->button( icon  = 'sap-icon://delete'
            type  = `Transparent`
            text  = `Clear`
-           press = client2->_event( val = `LIST_DELETE` t_arg = VALUE #( ( `${NAME}` ) ) )
+           press = client2->_event( val = `LIST_DELETE` t_arg = temp12 )
  ).
 
 
@@ -267,20 +307,56 @@ cells->button( icon  = 'sap-icon://delete'
   METHOD on_event.
 
     FIELD-SYMBOLS <tab> TYPE z2ui5_cl_util=>ty_s_filter_multi.
+        DATA lt_event TYPE string_table.
+        DATA temp1 LIKE LINE OF lt_event.
+        DATA temp2 LIKE sy-tabix.
+        DATA temp14 LIKE LINE OF lt_event.
+        DATA temp15 LIKE sy-tabix.
+        DATA ls_sql TYPE z2ui5_cl_util=>ty_s_filter_multi.
+        DATA temp3 LIKE LINE OF ms_result-t_filter.
+        DATA temp4 LIKE sy-tabix.
+        DATA temp16 LIKE LINE OF ms_result-t_filter.
+        DATA lr_sql LIKE REF TO temp16.
 
     CASE i_client->get( )-event.
 
       WHEN 'LIST_DELETE'.
-        DATA(lt_event) = i_client->get( )-t_event_arg.
-        ASSIGN ms_result-t_filter[ name = lt_event[ 1 ] ] TO <tab>.
+        
+        lt_event = i_client->get( )-t_event_arg.
+        
+        
+        temp2 = sy-tabix.
+        READ TABLE lt_event INDEX 1 INTO temp1.
+        sy-tabix = temp2.
+        IF sy-subrc <> 0.
+          ASSERT 1 = 0.
+        ENDIF.
+        READ TABLE ms_result-t_filter WITH KEY name = temp1 ASSIGNING <tab>.
         CLEAR <tab>-t_token.
         CLEAR <tab>-t_range.
         i_client->popup_model_update( ).
 
       WHEN 'LIST_OPEN'.
         lt_event = i_client->get( )-t_event_arg.
-        mv_popup_name = lt_event[ 1 ].
-        DATA(ls_sql) = ms_result-t_filter[ name = mv_popup_name ].
+        
+        
+        temp15 = sy-tabix.
+        READ TABLE lt_event INDEX 1 INTO temp14.
+        sy-tabix = temp15.
+        IF sy-subrc <> 0.
+          ASSERT 1 = 0.
+        ENDIF.
+        mv_popup_name = temp14.
+        
+        
+        
+        temp4 = sy-tabix.
+        READ TABLE ms_result-t_filter WITH KEY name = mv_popup_name INTO temp3.
+        sy-tabix = temp4.
+        IF sy-subrc <> 0.
+          ASSERT 1 = 0.
+        ENDIF.
+        ls_sql = temp3.
         i_client->nav_app_call( z2ui5_cl_pop_get_range=>factory( ls_sql-t_range ) ).
 
       WHEN `BUTTON_CONFIRM`.
@@ -293,7 +369,9 @@ cells->button( icon  = 'sap-icon://delete'
         i_client->nav_app_leave( i_client->get_app( i_client->get( )-s_draft-id_prev_app_stack ) ).
 
       WHEN `POPUP_DELETE_ALL`.
-        LOOP AT ms_result-t_filter REFERENCE INTO DATA(lr_sql).
+        
+        
+        LOOP AT ms_result-t_filter REFERENCE INTO lr_sql.
           CLEAR lr_sql->t_range.
           CLEAR lr_sql->t_token.
         ENDLOOP.

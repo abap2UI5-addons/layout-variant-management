@@ -23,7 +23,7 @@ CLASS z2ui5add_cl_var_pop_ranges DEFINITION
         check_default TYPE abap_bool,
         t_filter      TYPE z2ui5_cl_util=>ty_t_filter_multi,
       END OF ty_s_variant_out.
-    TYPES ty_t_variant_out TYPE STANDARD TABLE OF ty_s_variant_out WITH EMPTY KEY.
+    TYPES ty_t_variant_out TYPE STANDARD TABLE OF ty_s_variant_out WITH DEFAULT KEY.
     DATA mt_variant TYPE ty_t_variant_out.
 
     DATA ms_variant_save TYPE ty_s_variant_out.
@@ -75,12 +75,14 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
 
   METHOD db_read.
+        DATA lt_variant_user TYPE ty_t_variant_out.
+        DATA lt_variant TYPE ty_t_variant_out.
 
     TRY.
 
         CLEAR mt_variant.
 
-        DATA lt_variant_user TYPE ty_t_variant_out.
+        
         z2ui5add_cl_var_db_api=>hlp_db_load_by_handle(
             EXPORTING
                 uname   = ms_variant-uname
@@ -91,7 +93,7 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
                 result  = lt_variant_user ).
         INSERT LINES OF lt_variant_user INTO TABLE mt_variant.
 
-        DATA lt_variant TYPE ty_t_variant_out.
+        
         z2ui5add_cl_var_db_api=>hlp_db_load_by_handle(
             EXPORTING
                 handle  = ms_variant-handle1
@@ -110,7 +112,9 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
   METHOD db_save.
 
-    DATA(lt_variant_user) = mt_variant.
+    DATA lt_variant_user LIKE mt_variant.
+    DATA lt_variant LIKE mt_variant.
+    lt_variant_user = mt_variant.
     DELETE lt_variant_user WHERE s_variant-uname IS INITIAL.
     z2ui5add_cl_var_db_api=>hlp_db_save(
         uname   = ms_variant-uname
@@ -120,7 +124,8 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
         data    = lt_variant_user
     ).
 
-    DATA(lt_variant) = mt_variant.
+    
+    lt_variant = mt_variant.
     DELETE lt_variant WHERE s_variant-uname IS NOT INITIAL.
     z2ui5add_cl_var_db_api=>hlp_db_save(
         handle  = ms_variant-handle1
@@ -133,17 +138,23 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
 
   METHOD factory.
+    DATA temp1 TYPE z2ui5add_cl_var_pop_ranges=>ty_s_variant-uname.
 
-    r_result = NEW #( ).
+    CREATE OBJECT r_result.
     r_result->ms_result-t_filter = val.
     r_result->check_db_active = check_db_active.
 
-    r_result->ms_variant = VALUE #(
-        uname  = COND #( WHEN var_check_user = abap_true THEN sy-uname )
-        handle1 = var_handle1
-        handle2 = var_handle2
-        handle3 = var_handle3
-    ).
+    CLEAR r_result->ms_variant.
+    
+    IF var_check_user = abap_true.
+      temp1 = sy-uname.
+    ELSE.
+      CLEAR temp1.
+    ENDIF.
+    r_result->ms_variant-uname = temp1.
+    r_result->ms_variant-handle1 = var_handle1.
+    r_result->ms_variant-handle2 = var_handle2.
+    r_result->ms_variant-handle3 = var_handle3.
 
   ENDMETHOD.
 
@@ -158,26 +169,39 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
   METHOD popup_display.
 
-    DATA(lo_popup) = z2ui5_cl_xml_view=>factory_popup( ).
+    DATA lo_popup TYPE REF TO z2ui5_cl_xml_view.
+    DATA vbox TYPE REF TO z2ui5_cl_xml_view.
+    DATA item TYPE REF TO z2ui5_cl_xml_view.
+    DATA grid TYPE REF TO z2ui5_cl_xml_view.
+    DATA temp1 TYPE string_table.
+    DATA temp3 TYPE string_table.
+    DATA temp5 TYPE string_table.
+    lo_popup = z2ui5_cl_xml_view=>factory_popup( ).
     lo_popup = lo_popup->dialog( afterclose    = client->_event( 'BUTTON_CANCEL' )
                                  contentheight = `50%`
                                  contentwidth  = `50%`
                                  title         = 'Define Filter Conditons' ).
 
-    DATA(vbox) = lo_popup->vbox( height         = `100%`
+    
+    vbox = lo_popup->vbox( height         = `100%`
                                  justifycontent = 'SpaceBetween' ).
 
-    DATA(item) = vbox->list( nodata          = `no conditions defined`
+    
+    item = vbox->list( nodata          = `no conditions defined`
                              items           = client->_bind( ms_result-t_filter )
                              selectionchange = client->_event( 'SELCHANGE' )
                 )->custom_list_item( ).
 
-    DATA(grid) = item->grid(    class = `sapUiSmallMarginTop sapUiSmallMarginBottom sapUiSmallMarginBegin` ).
+    
+    grid = item->grid(    class = `sapUiSmallMarginTop sapUiSmallMarginBottom sapUiSmallMarginBegin` ).
     grid->text( `{NAME}` ).
 
+    
+    CLEAR temp1.
+    INSERT `${NAME}` INTO TABLE temp1.
     grid->multi_input( tokens = `{T_TOKEN}`
         enabled               = abap_false
-             valuehelprequest = client->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) )
+             valuehelprequest = client->_event( val = `LIST_OPEN` t_arg = temp1 )
             )->tokens(
                  )->token( key      = `{KEY}`
                            text     = `{TEXT}`
@@ -185,12 +209,18 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
                            selected = `{SELKZ}`
                            editable = `{EDITABLE}` ).
 
+    
+    CLEAR temp3.
+    INSERT `${NAME}` INTO TABLE temp3.
     grid->button( text  = `Select`
-                  press = client->_event( val = `LIST_OPEN` t_arg = VALUE #( ( `${NAME}` ) ) ) ).
+                  press = client->_event( val = `LIST_OPEN` t_arg = temp3 ) ).
+    
+    CLEAR temp5.
+    INSERT `${NAME}` INTO TABLE temp5.
     grid->button( icon  = 'sap-icon://delete'
                   type  = `Transparent`
                   text  = `Clear`
-                  press = client->_event( val = `LIST_DELETE` t_arg = VALUE #( ( `${NAME}` ) ) ) ).
+                  press = client->_event( val = `LIST_DELETE` t_arg = temp5 ) ).
 
     lo_popup->buttons(
 *        )->begin_button(
@@ -217,9 +247,12 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
   METHOD popup_variant_read.
 
-    DATA(popup) = z2ui5_cl_xml_view=>factory_popup(  ).
+    DATA popup TYPE REF TO z2ui5_cl_xml_view.
+    DATA dialog TYPE REF TO z2ui5_cl_xml_view.
+    popup = z2ui5_cl_xml_view=>factory_popup(  ).
 
-    DATA(dialog) = popup->dialog( title      = 'Variant'
+    
+    dialog = popup->dialog( title      = 'Variant'
         contentheight = `50%`
         contentwidth  = `50%`
         afterclose    = client->_event( 'DB_READ_CLOSE' ) ).
@@ -269,14 +302,19 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
   METHOD popup_variant_save.
 
-    DATA(popup) = z2ui5_cl_xml_view=>factory_popup(  ).
+    DATA popup TYPE REF TO z2ui5_cl_xml_view.
+    DATA dialog TYPE REF TO z2ui5_cl_xml_view.
+    DATA form TYPE REF TO z2ui5_cl_xml_view.
+    popup = z2ui5_cl_xml_view=>factory_popup(  ).
 
-    DATA(dialog) = popup->dialog( title      = 'Save'
+    
+    dialog = popup->dialog( title      = 'Save'
         contentheight = `50%`
                                  contentwidth  = `50%`
                                   afterclose = client->_event( 'DB_SAVE_CLOSE' ) ).
 
-    DATA(form) = dialog->simple_form( title           = 'Layout'
+    
+    form = dialog->simple_form( title           = 'Layout'
                                       editable        = abap_true
                                       labelspanxl     = `4`
                                       labelspanl      = `4`
@@ -349,6 +387,22 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
 
   METHOD z2ui5_if_app~main.
+      DATA temp7 TYPE REF TO z2ui5_cl_pop_get_range.
+      DATA lo_popup LIKE temp7.
+        FIELD-SYMBOLS <tab> TYPE z2ui5_cl_util=>ty_s_filter_multi.
+        DATA lt_event TYPE string_table.
+        DATA temp2 LIKE LINE OF lt_event.
+        DATA temp3 LIKE sy-tabix.
+        DATA temp8 LIKE LINE OF lt_event.
+        DATA temp9 LIKE sy-tabix.
+        DATA ls_sql TYPE z2ui5_cl_util=>ty_s_filter_multi.
+        DATA temp4 LIKE LINE OF ms_result-t_filter.
+        DATA temp5 LIKE sy-tabix.
+        DATA ls_variant LIKE LINE OF mt_variant.
+        DATA temp6 LIKE LINE OF mt_variant.
+        DATA temp11 LIKE sy-tabix.
+        DATA temp10 LIKE LINE OF ms_result-t_filter.
+        DATA lr_sql LIKE REF TO temp10.
     me->client = client.
 
     IF check_initialized = abap_false.
@@ -359,9 +413,13 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
     IF client->get( )-check_on_navigated = abap_true.
 
-      DATA(lo_popup) = CAST z2ui5_cl_pop_get_range( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+      
+      temp7 ?= client->get_app( client->get( )-s_draft-id_prev_app ).
+      
+      lo_popup = temp7.
       IF lo_popup->result( )-check_confirmed = abap_true.
-        ASSIGN ms_result-t_filter[ name = mv_popup_name ] TO FIELD-SYMBOL(<tab>).
+        
+        READ TABLE ms_result-t_filter WITH KEY name = mv_popup_name ASSIGNING <tab>.
         <tab>-t_range = lo_popup->result( )-t_range.
         <tab>-t_token = z2ui5_cl_util=>filter_get_token_t_by_range_t( <tab>-t_range ).
       ENDIF.
@@ -372,16 +430,42 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN 'LIST_DELETE'.
-        DATA(lt_event) = client->get( )-t_event_arg.
-        ASSIGN ms_result-t_filter[ name = lt_event[ 1 ] ] TO <tab>.
+        
+        lt_event = client->get( )-t_event_arg.
+        
+        
+        temp3 = sy-tabix.
+        READ TABLE lt_event INDEX 1 INTO temp2.
+        sy-tabix = temp3.
+        IF sy-subrc <> 0.
+          ASSERT 1 = 0.
+        ENDIF.
+        READ TABLE ms_result-t_filter WITH KEY name = temp2 ASSIGNING <tab>.
         CLEAR <tab>-t_token.
         CLEAR <tab>-t_range.
         client->popup_model_update( ).
 
       WHEN 'LIST_OPEN'.
         lt_event = client->get( )-t_event_arg.
-        mv_popup_name = lt_event[ 1 ].
-        DATA(ls_sql) = ms_result-t_filter[ name = mv_popup_name ].
+        
+        
+        temp9 = sy-tabix.
+        READ TABLE lt_event INDEX 1 INTO temp8.
+        sy-tabix = temp9.
+        IF sy-subrc <> 0.
+          ASSERT 1 = 0.
+        ENDIF.
+        mv_popup_name = temp8.
+        
+        
+        
+        temp5 = sy-tabix.
+        READ TABLE ms_result-t_filter WITH KEY name = mv_popup_name INTO temp4.
+        sy-tabix = temp5.
+        IF sy-subrc <> 0.
+          ASSERT 1 = 0.
+        ENDIF.
+        ls_sql = temp4.
         client->nav_app_call( z2ui5_cl_pop_get_range=>factory( ls_sql-t_range ) ).
 
       WHEN `BUTTON_DB_READ`.
@@ -409,12 +493,23 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
         client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
 
       WHEN `OPEN_SELECT`.
-        DATA(ls_variant) = mt_variant[ selkz = abap_true ].
+        
+        
+        
+        temp11 = sy-tabix.
+        READ TABLE mt_variant WITH KEY selkz = abap_true INTO temp6.
+        sy-tabix = temp11.
+        IF sy-subrc <> 0.
+          ASSERT 1 = 0.
+        ENDIF.
+        ls_variant = temp6.
         ms_result-t_filter = ls_variant-t_filter.
         popup_display( ).
 
       WHEN `POPUP_DELETE_ALL`.
-        LOOP AT ms_result-t_filter REFERENCE INTO DATA(lr_sql).
+        
+        
+        LOOP AT ms_result-t_filter REFERENCE INTO lr_sql.
           CLEAR lr_sql->t_range.
           CLEAR lr_sql->t_token.
         ENDLOOP.

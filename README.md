@@ -2,8 +2,8 @@
 [![ABAP_STANDARD](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_STANDARD.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_STANDARD.yaml)
 [![ABAP_CLOUD](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_CLOUD.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_CLOUD.yaml)
 <br>
-[![auto_renaming](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_renaming.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_renaming.yaml)
 [![auto_downporting](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_downporting.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_downporting.yaml)
+[![auto_renaming](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_renaming.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_renaming.yaml)
 
 # a2UI5-layout-variant-management
 

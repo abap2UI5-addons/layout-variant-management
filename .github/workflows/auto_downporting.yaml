@@ -20,13 +20,8 @@ jobs:
     - run: npm ci
     - run: npm run downport
 
-    - name: Create Pull Request
-      id: cpr
-      uses: peter-evans/create-pull-request@v5
+    - name: Commit and Push Changes
+      uses: ad-m/github-push-action@v0.6.0
       with:
-        base: 702
-        branch: auto-downport
-        title: "Auto Update Downport"
-        commit-message: "Auto Update Downport"
-        body: "This PR contains automated changes."
-        labels: "auto-merge"
+        branch: 702
+        force: true

@@ -23,9 +23,6 @@ In classic SAP GUI development, one of the most frequently used features was var
 
 #### Limitations
 
-#### Contribution & Support
-Pull Requests are welcome! Whether you're fixing a bug, adding new functionality, or improving the documentation, your contributions are always appreciated. If you run into problems, feel free to open an issue.
-
 #### Demo
 
 ###### Layout Management
@@ -34,3 +31,5 @@ Pull Requests are welcome! Whether you're fixing a bug, adding new functionality
 ###### Persistence
 <img width="700" alt="Google Chrome 2024-09-09 12 15 32" src="https://github.com/user-attachments/assets/d7f39663-d864-4737-89e4-8e925e54bc2d">
 
+#### How to Contribute & Get Support
+Pull requests are welcome! Whether you're fixing bugs, adding new functionality, or improving documentation, your contributions are highly appreciated. If you encounter any issues, feel free to open an issue.

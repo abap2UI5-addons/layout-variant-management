@@ -5,7 +5,7 @@
 [![auto_renaming](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_renaming.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_renaming.yaml)
 [![auto_downporting](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_downporting.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/auto_downporting.yaml)
 
-# Layout-Variant-Management
+# abap2UI5-layout-variant-management
 
 In classic SAP GUI development, one of the most frequently used features was variant management for selection screens and layout management for ALVs. Storing input values and user-specific table output settings greatly enhances the user experience. This add-on brings back these essential functionalities.
 

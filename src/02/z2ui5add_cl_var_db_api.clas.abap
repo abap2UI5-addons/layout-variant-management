@@ -5,8 +5,6 @@ CLASS z2ui5add_cl_var_db_api DEFINITION
 
   PUBLIC SECTION.
 
-
-  "test
     CLASS-METHODS factory
       IMPORTING
         report        TYPE string
@@ -34,7 +32,6 @@ CLASS z2ui5add_cl_var_db_api DEFINITION
 
     METHODS db_read.
     METHODS db_save.
-
 
     CLASS-METHODS hlp_db_delete_by_handle
       IMPORTING

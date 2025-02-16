@@ -9,7 +9,7 @@
 
 In classic SAP GUI development, one of the most frequently used features was variant management for selection screens and layout management for ALVs. Storing input values and user-specific table output settings greatly enhances the user experience. This add-on brings back these functionalities.
 
-#### Functionality
+#### Key Features
 * Layout
 * Variants
   
@@ -22,6 +22,9 @@ In classic SAP GUI development, one of the most frequently used features was var
 #### Dependencies
 
 #### Limitations
+
+#### Contribution & Support
+Pull Requests are welcome! Whether you're fixing a bug, adding new functionality, or improving the documentation, your contributions are always appreciated. If you run into problems, feel free to open an issue.
 
 #### Demo
 

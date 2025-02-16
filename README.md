@@ -9,7 +9,7 @@
 
 In classic SAP GUI development, one of the most frequently used features was variant management for selection screens and layout management for ALVs. Storing input values and user-specific table output settings greatly enhances the user experience. This add-on brings back these functionalities.
 
-#### Content
+#### Functionality
 * Layout
 * Variants
   
@@ -19,7 +19,7 @@ In classic SAP GUI development, one of the most frequently used features was var
 * S/4 Private Cloud or On-Premise (ABAP for Cloud, Standard ABAP)
 * R/3 NetWeaver AS ABAP 7.50 or higher (Standard ABAP)
 
-#### Required Projects
+#### Dependencies
 
 #### Limitations
 

@@ -20,6 +20,9 @@ jobs:
     - run: npm ci
     - run: npm run downport
 
+    - name: Switch to Branch 702
+      run: git checkout -b 702
+      
     - name: Commit and Push Changes
       uses: ad-m/github-push-action@v0.6.0
       with:

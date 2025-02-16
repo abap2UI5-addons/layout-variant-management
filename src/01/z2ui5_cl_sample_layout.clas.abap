@@ -17,7 +17,7 @@ CLASS z2ui5_cl_sample_layout DEFINITION
         storage_location TYPE string,
         quantity         TYPE i,
       END OF ty_s_tab.
-    TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH DEFAULT KEY.
+    TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
 
   PROTECTED SECTION.
     DATA client            TYPE REF TO z2ui5_if_client.
@@ -63,17 +63,11 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
 
   METHOD render_main.
 
-    DATA view TYPE REF TO z2ui5_cl_xml_view.
-    DATA page TYPE REF TO z2ui5_cl_xml_view.
-    DATA temp1 TYPE xsdboolean.
-    view = z2ui5_cl_xml_view=>factory( )->shell( ).
+    DATA(view) = z2ui5_cl_xml_view=>factory( )->shell( ).
 
-    
-    
-    temp1 = boolc( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL ).
-    page = view->page( title          = 'Layout'
+    DATA(page) = view->page( title          = 'Layout'
                              navbuttonpress = client->_event( 'BACK' )
-                             shownavbutton  = temp1
+                             shownavbutton  = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL )
                              class          = 'sapUiContentPadding' ).
 *
 *    page->header_content( )->scroll_container( height   = '70%'
@@ -107,44 +101,30 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
   METHOD get_data.
 
     FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
-    DATA temp1 TYPE ty_t_table.
-    DATA temp2 LIKE LINE OF temp1.
 
     CREATE DATA mt_table TYPE ty_t_table.
     ASSIGN mt_table->* TO <table>.
 
-    
-    CLEAR temp1.
-    
-    temp2-create_date = `01.01.2023`.
-    temp2-create_by = `Peter`.
-    temp2-storage_location = `AREA_001`.
-    temp2-quantity = 400.
-    temp2-product = 'table'.
-    INSERT temp2 INTO TABLE temp1.
-    temp2-product = 'chair'.
-    INSERT temp2 INTO TABLE temp1.
-    temp2-product = 'sofa'.
-    INSERT temp2 INTO TABLE temp1.
-    temp2-product = 'computer'.
-    INSERT temp2 INTO TABLE temp1.
-    temp2-product = 'oven'.
-    INSERT temp2 INTO TABLE temp1.
-    temp2-product = 'table2'.
-    INSERT temp2 INTO TABLE temp1.
-    <table> = temp1.
+    <table> = VALUE ty_t_table( create_date      = `01.01.2023`
+                                create_by        = `Peter`
+                                storage_location = `AREA_001`
+                                quantity         = 400
+                                ( product = 'table' )
+                                ( product = 'chair' )
+                                ( product = 'sofa' )
+                                ( product = 'computer' )
+                                ( product = 'oven' )
+                                ( product = 'table2' ) ).
 
   ENDMETHOD.
 
   METHOD init_layout.
-    DATA class TYPE abap_abstypename.
 
     IF mo_layout IS BOUND.
       RETURN.
     ENDIF.
 
-    
-    class = cl_abap_classdescr=>get_class_name( me ).
+    DATA(class) = cl_abap_classdescr=>get_class_name( me ).
     SHIFT class LEFT DELETING LEADING '\CLASS='.
 
     mo_layout = z2ui5_cl_layout=>factory( control  = z2ui5_cl_layout=>m_table
@@ -157,15 +137,10 @@ CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD on_after_navigation.
-        DATA temp3 TYPE REF TO z2ui5_cl_pop_layout.
-        DATA app LIKE temp3.
 
     TRY.
 
-        
-        temp3 ?= client->get_app( client->get( )-s_draft-id_prev_app ).
-        
-        app = temp3.
+        DATA(app) = CAST z2ui5_cl_pop_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
         mo_layout = app->mo_layout.
 
         IF app->mv_rerender = abap_true.

@@ -12,7 +12,7 @@ CLASS z2ui5_cl_sample_variant_01 DEFINITION PUBLIC.
         storage_location TYPE string,
         quantity         TYPE i,
       END OF ty_s_tab.
-    TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH DEFAULT KEY.
+    TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
 
     DATA mv_tabname TYPE string.
     DATA mr_table   TYPE REF TO data.

@@ -74,7 +74,7 @@ CLASS z2ui5_cl_pop_layout_w_sel IMPLEMENTATION.
 
   METHOD factory.
 
-    CREATE OBJECT r_result.
+    r_result = NEW #( ).
     r_result->title             = i_title.
     r_result->sort_field        = i_sort_field.
     r_result->descending        = i_descending.
@@ -98,18 +98,14 @@ CLASS z2ui5_cl_pop_layout_w_sel IMPLEMENTATION.
 
   METHOD Render_main.
 
-    DATA popup TYPE REF TO z2ui5_cl_xml_view.
-    DATA temp1 LIKE REF TO mv_search_value.
-    popup = z2ui5_cl_xml_view=>factory_popup( )->dialog( title      = title
+    DATA(popup) = z2ui5_cl_xml_view=>factory_popup( )->dialog( title      = title
                                                                afterclose = client->_event( 'CANCEL' )  ).
 
-    
-    GET REFERENCE OF mv_search_value INTO temp1.
-z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
+    z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
                                            i_xml          = popup
                                            i_client       = client
                                            i_layout       = mo_layout
-                                           i_search_value = temp1
+                                           i_search_value = REF #( mv_search_value )
                                            i_col_type     = 'Navigation'
                                            i_col_bind_to  = 'ZZROW_ID' ).
 
@@ -170,8 +166,6 @@ z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
 
 
   METHOD on_after_layout.
-        DATA temp2 TYPE REF TO z2ui5_cl_pop_layout.
-        DATA app LIKE temp2.
 
     IF client->get( )-check_on_navigated = abap_false.
       RETURN.
@@ -179,10 +173,7 @@ z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
 
     TRY.
 
-        
-        temp2 ?= client->get_app( client->get( )-s_draft-id_prev_app ).
-        
-        app = temp2.
+        DATA(app) = CAST z2ui5_cl_pop_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
 
         mo_layout = app->mo_layout.
 
@@ -197,41 +188,21 @@ z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
   METHOD confirm.
 
     FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
-    DATA t_arg TYPE string_table.
-    DATA row_clicked LIKE LINE OF t_arg.
-    DATA temp1 LIKE LINE OF t_arg.
-    DATA temp2 LIKE sy-tabix.
-    FIELD-SYMBOLS <line> TYPE ANY.
-      FIELD-SYMBOLS <row_id> TYPE any.
-        FIELD-SYMBOLS <any> TYPE data.
 
     ASSIGN mr_out->* TO <tab>.
-    
-    t_arg = client->get( )-t_event_arg.
-    
-    
-    
-    temp2 = sy-tabix.
-    READ TABLE t_arg INDEX 1 INTO temp1.
-    sy-tabix = temp2.
-    IF sy-subrc <> 0.
-      ASSERT 1 = 0.
-    ENDIF.
-    row_clicked = temp1.
+    DATA(t_arg) = client->get( )-t_event_arg.
+    DATA(row_clicked) = t_arg[ 1 ].
 
-    
-    LOOP AT <tab> ASSIGNING <line>.
+    LOOP AT <tab> ASSIGNING FIELD-SYMBOL(<line>).
 
-      
-      ASSIGN COMPONENT 'ZZROW_ID' OF STRUCTURE <line> TO <row_id>.
+      ASSIGN COMPONENT 'ZZROW_ID' OF STRUCTURE <line> TO FIELD-SYMBOL(<row_id>).
 
       IF <row_id> IS NOT ASSIGNED.
         CONTINUE.
       ENDIF.
 
       IF <row_id> = row_clicked.
-        
-        ASSIGN ms_result-row->* TO <any>.
+        ASSIGN ms_result-row->* TO FIELD-SYMBOL(<any>).
         MOVE-CORRESPONDING <line> TO <any>.
         EXIT.
       ENDIF.
@@ -252,20 +223,12 @@ z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
 
   METHOD set_output_table.
 
-    DATA t_comp TYPE abap_component_tab.
-        DATA new_struct_desc TYPE REF TO cl_abap_structdescr.
-        DATA new_table_desc TYPE REF TO cl_abap_tabledescr.
-    FIELD-SYMBOLS <in> TYPE data.
-    FIELD-SYMBOLS <out> TYPE data.
-    FIELD-SYMBOLS <out_tmp> TYPE data.
-    t_comp = get_comp( ).
+    DATA(t_comp) = get_comp( ).
     TRY.
 
-        
-        new_struct_desc = cl_abap_structdescr=>create( t_comp ).
+        DATA(new_struct_desc) = cl_abap_structdescr=>create( t_comp ).
 
-        
-        new_table_desc = cl_abap_tabledescr=>create( p_line_type  = new_struct_desc
+        DATA(new_table_desc) = cl_abap_tabledescr=>create( p_line_type  = new_struct_desc
                                                            p_table_kind = cl_abap_tabledescr=>tablekind_std ).
 
         CREATE DATA mr_out     TYPE HANDLE new_table_desc.
@@ -275,10 +238,8 @@ z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
 
     ENDTRY.
 
-    
-    ASSIGN mr_tab->* TO <in>.
-    
-    ASSIGN mr_out->* TO <out>.
+    ASSIGN mr_tab->* TO FIELD-SYMBOL(<in>).
+    ASSIGN mr_out->* TO FIELD-SYMBOL(<out>).
 
     z2ui5_cl_util=>itab_corresponding(
       EXPORTING
@@ -288,8 +249,7 @@ z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
 
     set_row_id( ).
 
-    
-    ASSIGN mr_out_tmp->* TO <out_tmp>.
+    ASSIGN mr_out_tmp->* TO FIELD-SYMBOL(<out_tmp>).
     <out_tmp> = <out>.
 
   ENDMETHOD.
@@ -298,14 +258,12 @@ z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
   METHOD set_row_id.
     FIELD-SYMBOLS <tab>  TYPE STANDARD TABLE.
     FIELD-SYMBOLS <line> TYPE any.
-      FIELD-SYMBOLS <row> TYPE any.
 
     ASSIGN mr_out->* TO <tab>.
 
     LOOP AT <tab> ASSIGNING <line>.
 
-      
-      ASSIGN COMPONENT 'ZZROW_ID' OF STRUCTURE <line> TO <row>.
+      ASSIGN COMPONENT 'ZZROW_ID' OF STRUCTURE <line> TO FIELD-SYMBOL(<row>).
       IF <row> IS ASSIGNED.
         <row> = sy-tabix.
       ENDIF.
@@ -315,35 +273,17 @@ z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
 
   METHOD get_comp.
     DATA index TYPE int4.
-        DATA comp TYPE abap_component_tab.
-        DATA temp3 LIKE sy-subrc.
-        DATA temp1 TYPE xsdboolean.
-          DATA temp4 TYPE cl_abap_structdescr=>component_table.
-          DATA temp5 LIKE LINE OF temp4.
-          DATA temp6 TYPE REF TO cl_abap_datadescr.
 
 *    DATA selkz TYPE abap_bool.
 
     TRY.
 
-        
-        comp = z2ui5_cl_util=>rtti_get_t_attri_by_any( mr_tab ).
+        DATA(comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( mr_tab ).
 
-        
-        READ TABLE comp WITH KEY name = 'ZZROW_ID' TRANSPORTING NO FIELDS.
-        temp3 = sy-subrc.
-        
-        temp1 = boolc( temp3 = 0 ).
-        IF temp1 = abap_false.
-          
-          CLEAR temp4.
-          
-          temp5-name = 'ZZROW_ID'.
-          
-          temp6 ?= cl_abap_datadescr=>describe_by_data( index ).
-          temp5-type = temp6.
-          INSERT temp5 INTO TABLE temp4.
-          APPEND LINES OF temp4 TO result.
+        IF xsdbool( line_exists( comp[ name = 'ZZROW_ID' ] ) ) = abap_false.
+          APPEND LINES OF VALUE cl_abap_structdescr=>component_table(
+                                    ( name = 'ZZROW_ID'
+                                      type = CAST #( cl_abap_datadescr=>describe_by_data( index ) ) ) ) TO result.
         ENDIF.
 *        IF xsdbool( line_exists( comp[ name = 'SELKZ' ] ) ) = abap_false.
 *          APPEND LINES OF VALUE cl_abap_structdescr=>component_table(
@@ -363,10 +303,6 @@ z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
 
     FIELD-SYMBOLS <tab>     TYPE STANDARD TABLE.
     FIELD-SYMBOLS <tab_tmp> TYPE STANDARD TABLE.
-    FIELD-SYMBOLS <f_row> TYPE ANY.
-      DATA lv_row TYPE string.
-      DATA lv_index TYPE i.
-        FIELD-SYMBOLS <field> TYPE any.
 
     ASSIGN mr_out->* TO <tab>.
     ASSIGN mr_out_tmp->* TO <tab_tmp>.
@@ -379,15 +315,11 @@ z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
       RETURN.
     ENDIF.
 
-    
-    LOOP AT <tab> ASSIGNING <f_row>.
-      
-      lv_row = ``.
-      
-      lv_index = 1.
+    LOOP AT <tab> ASSIGNING FIELD-SYMBOL(<f_row>).
+      DATA(lv_row) = ``.
+      DATA(lv_index) = 1.
       DO.
-        
-        ASSIGN COMPONENT lv_index OF STRUCTURE <f_row> TO <field>.
+        ASSIGN COMPONENT lv_index OF STRUCTURE <f_row> TO FIELD-SYMBOL(<field>).
         IF sy-subrc <> 0.
           EXIT.
         ENDIF.

@@ -35,23 +35,23 @@ CLASS z2ui5_cl_sample_variant_01 IMPLEMENTATION.
 
   METHOD on_event.
 
-    CASE client->get( )-event.
-
-      WHEN 'LIST_OPEN'.
-        mo_multiselect = z2ui5add_cl_var_selscreen=>factory( mt_filter ).
-        mo_multiselect->on_event( client ).
-        RETURN.
-
-      WHEN `BUTTON_START`.
-        set_data( ).
-        client->view_model_update( ).
-
-      WHEN `PREVIEW_FILTER`.
-        client->nav_app_call( z2ui5_cl_pop_get_range_m=>factory( mt_filter ) ).
-
-      WHEN 'BACK'.
-        client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
-    ENDCASE.
+*    CASE client->get( )-event.
+*
+*      WHEN 'LIST_OPEN'.
+*        mo_multiselect = z2ui5add_cl_var_selscreen=>factory( mt_filter ).
+*        mo_multiselect->on_event( client ).
+*        RETURN.
+*
+*      WHEN `BUTTON_START`.
+*        set_data( ).
+*        client->view_model_update( ).
+*
+*      WHEN `PREVIEW_FILTER`.
+*        client->nav_app_call( z2ui5_cl_pop_get_range_m=>factory( mt_filter ) ).
+*
+*      WHEN 'BACK'.
+*        client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
+*    ENDCASE.
 
   ENDMETHOD.
 
@@ -114,90 +114,90 @@ CLASS z2ui5_cl_sample_variant_01 IMPLEMENTATION.
 
   METHOD view_display.
 
-    DATA(view) = z2ui5_cl_xml_view=>factory( ).
-
-    view = view->shell( )->page( id             = `page_main`
-                                 title          = 'abap2UI5 - Select-Options'
-                                 navbuttonpress = client->_event( 'BACK' )
-                                 shownavbutton  = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL ) ).
-
-    DATA(vbox) = view->vbox( )->input( value       = client->_bind_edit( mv_tabname )
-                                       description = `Tablename` ).
-
-    vbox->button( text  = `GO`
-                  press = client->_event( 'TAB' ) ).
-
-    DATA(lo_multiselect) = z2ui5add_cl_var_selscreen=>factory( mt_filter ).
-
-    lo_multiselect->set_output2( t_filter = mt_filter
-                                 client2  = client
-                                 view     = vbox ).
-
-    ASSIGN mr_table->* TO FIELD-SYMBOL(<table>).
-    DATA(tab) = vbox->table( items = client->_bind( val = <table> )
-           )->header_toolbar(
-             )->overflow_toolbar(
-                 )->toolbar_spacer(
-*                 )->button( text = `Filter` press = client->_event( `PREVIEW_FILTER` ) icon = `sap-icon://filter`
-           )->button( text  = `Go`
-                      press = client->_event( `BUTTON_START` )
-                      type  = `Emphasized`
-            )->get_parent( )->get_parent( ).
-
-    DATA(lo_columns) = tab->columns( ).
-    lo_columns->column( )->text( text = `Product` ).
-    lo_columns->column( )->text( text = `Date` ).
-    lo_columns->column( )->text( text = `Name` ).
-    lo_columns->column( )->text( text = `Location` ).
-    lo_columns->column( )->text( text = `Quantity` ).
-
-    DATA(lo_cells) = tab->items( )->column_list_item( ).
-    lo_cells->text( `{PRODUCT}` ).
-    lo_cells->text( `{CREATE_DATE}` ).
-    lo_cells->text( `{CREATE_BY}` ).
-    lo_cells->text( `{STORAGE_LOCATION}` ).
-    lo_cells->text( `{QUANTITY}` ).
-
-    client->view_display( view->stringify( ) ).
+*    DATA(view) = z2ui5_cl_xml_view=>factory( ).
+*
+*    view = view->shell( )->page( id             = `page_main`
+*                                 title          = 'abap2UI5 - Select-Options'
+*                                 navbuttonpress = client->_event( 'BACK' )
+*                                 shownavbutton  = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL ) ).
+*
+*    DATA(vbox) = view->vbox( )->input( value       = client->_bind_edit( mv_tabname )
+*                                       description = `Tablename` ).
+*
+*    vbox->button( text  = `GO`
+*                  press = client->_event( 'TAB' ) ).
+*
+*    DATA(lo_multiselect) = z2ui5add_cl_var_selscreen=>factory( mt_filter ).
+*
+*    lo_multiselect->set_output2( t_filter = mt_filter
+*                                 client2  = client
+*                                 view     = vbox ).
+*
+*    ASSIGN mr_table->* TO FIELD-SYMBOL(<table>).
+*    DATA(tab) = vbox->table( items = client->_bind( val = <table> )
+*           )->header_toolbar(
+*             )->overflow_toolbar(
+*                 )->toolbar_spacer(
+**                 )->button( text = `Filter` press = client->_event( `PREVIEW_FILTER` ) icon = `sap-icon://filter`
+*           )->button( text  = `Go`
+*                      press = client->_event( `BUTTON_START` )
+*                      type  = `Emphasized`
+*            )->get_parent( )->get_parent( ).
+*
+*    DATA(lo_columns) = tab->columns( ).
+*    lo_columns->column( )->text( text = `Product` ).
+*    lo_columns->column( )->text( text = `Date` ).
+*    lo_columns->column( )->text( text = `Name` ).
+*    lo_columns->column( )->text( text = `Location` ).
+*    lo_columns->column( )->text( text = `Quantity` ).
+*
+*    DATA(lo_cells) = tab->items( )->column_list_item( ).
+*    lo_cells->text( `{PRODUCT}` ).
+*    lo_cells->text( `{CREATE_DATE}` ).
+*    lo_cells->text( `{CREATE_BY}` ).
+*    lo_cells->text( `{STORAGE_LOCATION}` ).
+*    lo_cells->text( `{QUANTITY}` ).
+*
+*    client->view_display( view->stringify( ) ).
 
   ENDMETHOD.
 
   METHOD z2ui5_if_app~main.
 
-    me->client = client.
-
-    IF mv_check_initialized = abap_false.
-      mv_check_initialized = abap_true.
-      mv_tabname = `T100`.
-
-      FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
-*      TYPES ty_T_t100 TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
-      CREATE DATA mr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
-      ASSIGN mr_table->* TO <table>.
-      mt_filter = z2ui5_cl_util=>filter_get_multi_by_data( <table> ).
-*       DELETE mt_filter WHERE name = `SELKZ`.
-      view_display( ).
-      RETURN.
-    ENDIF.
-
-    IF client->get( )-check_on_navigated = abap_true.
-      TRY.
-          DATA(lo_popup) = CAST z2ui5_cl_pop_get_range( client->get_app( client->get( )-s_draft-id_prev_app ) ).
-          IF lo_popup->result( )-check_confirmed = abap_true.
-            FIELD-SYMBOLS <tab> TYPE z2ui5_cl_util=>ty_s_filter_multi.
-            ASSIGN mt_filter[ name = mo_multiselect->mv_popup_name ] TO <tab>.
-            <tab>-t_range = lo_popup->result( )-t_range.
-            <tab>-t_token = z2ui5_cl_util=>filter_get_token_t_by_range_t( <tab>-t_range ).
-            client->view_model_update( ).
-          ENDIF.
-        CATCH cx_root.
-      ENDTRY.
-      RETURN.
-    ENDIF.
-
-    IF client->get( )-event IS NOT INITIAL.
-      on_event( ).
-    ENDIF.
+*    me->client = client.
+*
+*    IF mv_check_initialized = abap_false.
+*      mv_check_initialized = abap_true.
+*      mv_tabname = `T100`.
+*
+*      FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+**      TYPES ty_T_t100 TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
+*      CREATE DATA mr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
+*      ASSIGN mr_table->* TO <table>.
+*      mt_filter = z2ui5_cl_util=>filter_get_multi_by_data( <table> ).
+**       DELETE mt_filter WHERE name = `SELKZ`.
+*      view_display( ).
+*      RETURN.
+*    ENDIF.
+*
+*    IF client->get( )-check_on_navigated = abap_true.
+*      TRY.
+*          DATA(lo_popup) = CAST z2ui5_cl_pop_get_range( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+*          IF lo_popup->result( )-check_confirmed = abap_true.
+*            FIELD-SYMBOLS <tab> TYPE z2ui5_cl_util=>ty_s_filter_multi.
+*            ASSIGN mt_filter[ name = mo_multiselect->mv_popup_name ] TO <tab>.
+*            <tab>-t_range = lo_popup->result( )-t_range.
+*            <tab>-t_token = z2ui5_cl_util=>filter_get_token_t_by_range_t( <tab>-t_range ).
+*            client->view_model_update( ).
+*          ENDIF.
+*        CATCH cx_root.
+*      ENDTRY.
+*      RETURN.
+*    ENDIF.
+*
+*    IF client->get( )-event IS NOT INITIAL.
+*      on_event( ).
+*    ENDIF.
 
   ENDMETHOD.
 

@@ -7,8 +7,6 @@
 
 # Layout-Variant-Management
 
-<i class="fa-brands fa-github"></i> [Layout-Variant Addon on GitHub](https://github.com/abap2UI5-addons/layout-variant-management)<br>
-
 In classic SAP GUI development, one of the most frequently used features was variant management for selection screens and layout management for ALVs. Storing input values and user-specific table output settings greatly enhances the user experience. This add-on brings back these essential functionalities.
 
 #### Layout Management

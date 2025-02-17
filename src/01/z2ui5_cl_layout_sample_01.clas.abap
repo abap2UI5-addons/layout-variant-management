@@ -57,21 +57,21 @@ CLASS z2ui5_cl_layout_sample_01 IMPLEMENTATION.
 
   METHOD set_data.
 
-     DATA lt_range TYPE rs_t_rscedst.
+*     DATA lt_range TYPE rs_t_rscedst.
 
-     LOOP AT mt_filter INTO DATA(ls_filter).
-       LOOP AT ls_filter-t_range INTO DATA(ls_range).
-
-         INSERT VALUE #(
-             fnam = ls_filter-name
-             sign = ls_range-sign
-             option = ls_range-option
-             low = ls_range-low
-             high = ls_range-high
-          ) INTO TABLE lt_range.
-
-       ENDLOOP.
-     ENDLOOP.
+*     LOOP AT mt_filter INTO DATA(ls_filter).
+*       LOOP AT ls_filter-t_range INTO DATA(ls_range).
+*
+*         INSERT VALUE #(
+*             fnam = ls_filter-name
+*             sign = ls_range-sign
+*             option = ls_range-option
+*             low = ls_range-low
+*             high = ls_range-high
+*          ) INTO TABLE lt_range.
+*
+*       ENDLOOP.
+*     ENDLOOP.
 
 *     DATA lv_result TYPE string.
 **     data lt_where type rsdmd_t_where.

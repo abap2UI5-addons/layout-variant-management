@@ -88,12 +88,12 @@ CLASS z2ui5_cl_layout_sample_01 IMPLEMENTATION.
 **        others    = 2
 *       .
 
-     select from (mv_tabname)
-      fields
-        *
+    SELECT FROM (mv_tabname)
+     FIELDS
+       *
 *      where (lv_result)
-      into table @mr_table->*
-      up to 100 rows.
+     INTO TABLE @mr_table->*
+     UP TO 100 ROWS.
 
   ENDMETHOD.
 
@@ -154,9 +154,20 @@ CLASS z2ui5_cl_layout_sample_01 IMPLEMENTATION.
       mv_check_initialized = abap_true.
       mv_tabname = `T100`.
 
+
+      " Generate structure description object for components of the DDIC table SFLIGHTS
+      DATA(struct_desc) = cl_abap_structdescr=>describe_by_name( mv_tabname ).
+
+      DATA   gr_dyntable_typ TYPE REF TO  cl_abap_tabledescr.
+
+      gr_dyntable_typ = cl_abap_tabledescr=>create( p_line_type = CAST #( struct_desc ) ).
+
+
+
       FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
 *      TYPES ty_T_t100 TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
-      CREATE DATA mr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
+*      CREATE DATA mr_table TYPE STANDARD TABLE OF (mv_tabname) WITH EMPTY KEY.
+      CREATE DATA mr_table TYPE HANDLE gr_dyntable_typ.
       ASSIGN mr_table->* TO <table>.
       mt_filter = z2ui5_cl_util=>filter_get_multi_by_data( <table> ).
 *       DELETE mt_filter WHERE name = `SELKZ`.

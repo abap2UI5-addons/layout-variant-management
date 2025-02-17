@@ -73,43 +73,27 @@ CLASS z2ui5_cl_layout_sample_01 IMPLEMENTATION.
        ENDLOOP.
      ENDLOOP.
 
-     DATA lv_result TYPE string.
-*     data lt_where type rsdmd_t_where.
-     CALL FUNCTION 'RSDS_RANGE_TO_WHERE'
-       EXPORTING
-         i_t_range = lt_range
-*        i_th_range     =
-*        i_r_renderer   =
-       IMPORTING
-         e_where   = lv_result
-*        e_t_where = lt_where
-*  EXCEPTIONS
-*        internal_error = 1
-*        others    = 2
-       .
+*     DATA lv_result TYPE string.
+**     data lt_where type rsdmd_t_where.
+*     CALL FUNCTION 'RSDS_RANGE_TO_WHERE'
+*       EXPORTING
+*         i_t_range = lt_range
+**        i_th_range     =
+**        i_r_renderer   =
+*       IMPORTING
+*         e_where   = lv_result
+**        e_t_where = lt_where
+**  EXCEPTIONS
+**        internal_error = 1
+**        others    = 2
+*       .
 
      select from (mv_tabname)
       fields
         *
-      where (lv_result)
+*      where (lv_result)
       into table @mr_table->*
       up to 100 rows.
-*
-*     mt_table = VALUE #(
-*         ( product = 'table'    create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
-*         ( product = 'chair'    create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
-*         ( product = 'sofa'     create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
-*         ( product = 'computer' create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
-*         ( product = 'oven'     create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
-*         ( product = 'table2'   create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
-*     ).
-*
-*     z2ui5_cl_util=>filter_itab(
-*       EXPORTING
-*         filter = mt_filter
-*       CHANGING
-*         val    = mt_table
-*     ).
 
   ENDMETHOD.
 

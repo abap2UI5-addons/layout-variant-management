@@ -1,4 +1,4 @@
-CLASS z2ui5_cl_layout_sample_02 DEFINITION PUBLIC.
+CLASS z2ui5_cl_layo_sample_02 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
 
@@ -29,7 +29,7 @@ CLASS z2ui5_cl_layout_sample_02 DEFINITION PUBLIC.
 ENDCLASS.
 
 
-CLASS z2ui5_cl_layout_sample_02 IMPLEMENTATION.
+CLASS z2ui5_cl_layo_sample_02 IMPLEMENTATION.
 
 
   METHOD on_event.
@@ -39,7 +39,7 @@ CLASS z2ui5_cl_layout_sample_02 IMPLEMENTATION.
         set_data( ).
         client->view_model_update( ).
       WHEN `PREVIEW_FILTER`.
-        client->nav_app_call( z2ui5add_cl_var_pop_ranges=>factory( mt_filter ) ).
+        client->nav_app_call( z2ui5_cl_layo_var_pop_ranges=>factory( mt_filter ) ).
       WHEN 'BACK'.
         client->nav_app_leave( ).
     ENDCASE.
@@ -112,7 +112,7 @@ CLASS z2ui5_cl_layout_sample_02 IMPLEMENTATION.
 
     IF client->check_on_init( ).
 
-      mt_filter = z2ui5add_cl_var_pop_ranges=>read_default(
+      mt_filter = z2ui5_cl_layo_var_pop_ranges=>read_default(
 *        EXPORTING
 *          var_handle1 = SY-REPID
 *          var_handle2 =
@@ -136,7 +136,7 @@ CLASS z2ui5_cl_layout_sample_02 IMPLEMENTATION.
 
     IF client->check_on_navigated( ).
       TRY.
-          DATA(lo_value_help) = CAST z2ui5add_cl_var_pop_ranges( client->get_app_prev( ) ).
+          DATA(lo_value_help) = CAST z2ui5_cl_layo_var_pop_ranges( client->get_app_prev( ) ).
           IF lo_value_help->result( )-check_confirmed = abap_true.
             mt_filter = lo_value_help->result( )-t_filter.
             set_data( ).

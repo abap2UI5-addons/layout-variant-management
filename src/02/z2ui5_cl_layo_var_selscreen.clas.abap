@@ -1,4 +1,4 @@
-CLASS z2ui5add_cl_var_selscreen DEFINITION
+CLASS z2ui5_cl_layo_var_selscreen DEFINITION
   PUBLIC FINAL
   CREATE PUBLIC.
 
@@ -11,7 +11,7 @@ CLASS z2ui5add_cl_var_selscreen DEFINITION
       IMPORTING
         val             TYPE z2ui5_cl_util=>ty_t_filter_multi
       RETURNING
-        VALUE(r_result) TYPE REF TO z2ui5add_cl_var_selscreen.
+        VALUE(r_result) TYPE REF TO z2ui5_cl_layo_var_selscreen.
 
     TYPES:
       BEGIN OF ty_s_result,
@@ -53,7 +53,7 @@ ENDCLASS.
 
 
 
-CLASS z2ui5add_cl_var_selscreen IMPLEMENTATION.
+CLASS z2ui5_cl_layo_var_selscreen IMPLEMENTATION.
 
   METHOD factory.
 

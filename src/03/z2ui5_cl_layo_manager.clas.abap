@@ -1,4 +1,4 @@
-CLASS z2ui5_cl_layout DEFINITION
+CLASS z2ui5_cl_layo_manager DEFINITION
   PUBLIC FINAL
   CREATE PUBLIC.
 
@@ -59,13 +59,13 @@ CLASS z2ui5_cl_layout DEFINITION
         handle03      TYPE clike OPTIONAL
         handle04      TYPE clike OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5_cl_layout.
+        VALUE(result) TYPE REF TO z2ui5_cl_layo_manager.
 
     CLASS-METHODS factory_by_guid
       IMPORTING
         layout_guid   TYPE clike
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5_cl_layout.
+        VALUE(result) TYPE REF TO z2ui5_cl_layo_manager.
 
     CLASS-METHODS select_layouts
       IMPORTING
@@ -76,50 +76,50 @@ CLASS z2ui5_cl_layout DEFINITION
         handle03      TYPE clike
         handle04      TYPE clike
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layout=>ty_t_head.
+        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_t_head.
 
     CLASS-METHODS select_layout_components
       IMPORTING
         layout_guid   TYPE clike
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layout=>ty_t_positions.
+        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_t_positions.
 
     CLASS-METHODS set_text
       IMPORTING
-        !layout       TYPE z2ui5_cl_layout=>ty_s_positions
+        !layout       TYPE z2ui5_cl_layo_manager=>ty_s_positions
       RETURNING
         VALUE(result) TYPE string.
 
     CLASS-METHODS sort_by_seqence
       IMPORTING
-        !Pos          TYPE z2ui5_cl_layout=>ty_t_positions
+        !Pos          TYPE z2ui5_cl_layo_manager=>ty_t_positions
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layout=>ty_t_positions.
+        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_t_positions.
 
     CLASS-METHODS set_sub_columns
       IMPORTING
-        !layout       TYPE z2ui5_cl_layout=>ty_t_positions
+        !layout       TYPE z2ui5_cl_layo_manager=>ty_t_positions
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layout=>ty_t_positions.
+        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_t_positions.
 
     CLASS-METHODS get_controls
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layout=>ty_t_controls.
+        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_t_controls.
 
     CLASS-METHODS default_layout
       IMPORTING
-        t_layout      TYPE z2ui5_cl_layout=>ty_t_positions
+        t_layout      TYPE z2ui5_cl_layo_manager=>ty_t_positions
         !control      TYPE clike
         handle01      TYPE clike
         handle02      TYPE clike
         handle03      TYPE clike
         handle04      TYPE clike
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5_cl_layout.
+        VALUE(result) TYPE REF TO z2ui5_cl_layo_manager.
 
     CLASS-METHODS choose_layout
       IMPORTING
-        !control      TYPE z2ui5_cl_layout=>control DEFAULT z2ui5_cl_layout=>m_table
+        !control      TYPE z2ui5_cl_layo_manager=>control DEFAULT z2ui5_cl_layo_manager=>m_table
         handle01      TYPE clike                    OPTIONAL
         handle02      TYPE clike                    OPTIONAL
         handle03      TYPE clike                    OPTIONAL
@@ -138,34 +138,34 @@ CLASS z2ui5_cl_layout DEFINITION
         handle03      TYPE clike       OPTIONAL
         handle04      TYPE clike       OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5_cl_layout.
+        VALUE(result) TYPE REF TO z2ui5_cl_layo_manager.
 
 ENDCLASS.
 
 
-CLASS z2ui5_cl_layout IMPLEMENTATION.
+CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   METHOD get_controls.
 
     result = VALUE #( active = abap_true
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'VISIBLE' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'MERGE' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'HALIGN' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'IMPORTANCE' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'WIDTH' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'ALTERNATIVE_TEXT' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'SEQUENCE' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'SUBCOLUMN' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'REFERENCE_FIELD' )
-                      ( control = z2ui5_cl_layout=>ui_table attribute = 'VISIBLE' )
-                      ( control = z2ui5_cl_layout=>ui_table attribute = 'ALTERNATIVE_TEXT' )
-                      ( control = z2ui5_cl_layout=>ui_table attribute = 'HALIGN' )
-                      ( control = z2ui5_cl_layout=>ui_table attribute = 'WIDTH' )
-                      ( control = z2ui5_cl_layout=>others   attribute = 'VISIBLE' )
-                      ( control = z2ui5_cl_layout=>others   attribute = 'SEQUENCE' )
-                      ( control = z2ui5_cl_layout=>others   attribute = 'ALTERNATIVE_TEXT' )
-                      ( control = z2ui5_cl_layout=>others   attribute = 'REFERENCE_FIELD' )
-                      ( control = z2ui5_cl_layout=>others   attribute = 'WIDTH' ) ).
+                      ( control = z2ui5_cl_layo_manager=>m_table  attribute = 'VISIBLE' )
+                      ( control = z2ui5_cl_layo_manager=>m_table  attribute = 'MERGE' )
+                      ( control = z2ui5_cl_layo_manager=>m_table  attribute = 'HALIGN' )
+                      ( control = z2ui5_cl_layo_manager=>m_table  attribute = 'IMPORTANCE' )
+                      ( control = z2ui5_cl_layo_manager=>m_table  attribute = 'WIDTH' )
+                      ( control = z2ui5_cl_layo_manager=>m_table  attribute = 'ALTERNATIVE_TEXT' )
+                      ( control = z2ui5_cl_layo_manager=>m_table  attribute = 'SEQUENCE' )
+                      ( control = z2ui5_cl_layo_manager=>m_table  attribute = 'SUBCOLUMN' )
+                      ( control = z2ui5_cl_layo_manager=>m_table  attribute = 'REFERENCE_FIELD' )
+                      ( control = z2ui5_cl_layo_manager=>ui_table attribute = 'VISIBLE' )
+                      ( control = z2ui5_cl_layo_manager=>ui_table attribute = 'ALTERNATIVE_TEXT' )
+                      ( control = z2ui5_cl_layo_manager=>ui_table attribute = 'HALIGN' )
+                      ( control = z2ui5_cl_layo_manager=>ui_table attribute = 'WIDTH' )
+                      ( control = z2ui5_cl_layo_manager=>others   attribute = 'VISIBLE' )
+                      ( control = z2ui5_cl_layo_manager=>others   attribute = 'SEQUENCE' )
+                      ( control = z2ui5_cl_layo_manager=>others   attribute = 'ALTERNATIVE_TEXT' )
+                      ( control = z2ui5_cl_layo_manager=>others   attribute = 'REFERENCE_FIELD' )
+                      ( control = z2ui5_cl_layo_manager=>others   attribute = 'WIDTH' ) ).
 
   ENDMETHOD.
 

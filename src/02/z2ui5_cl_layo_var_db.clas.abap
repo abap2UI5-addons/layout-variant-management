@@ -1,4 +1,4 @@
-CLASS z2ui5add_cl_var_db_api DEFINITION
+CLASS z2ui5_cl_layo_var_db DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC .
@@ -9,7 +9,7 @@ CLASS z2ui5add_cl_var_db_api DEFINITION
       IMPORTING
         report        TYPE string
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5add_cl_var_db_api.
+        VALUE(result) TYPE REF TO z2ui5_cl_layo_var_db.
 
     TYPES ty_s_head TYPE z2ui5_t_13.
     TYPES ty_s_pos TYPE z2ui5_t_14.
@@ -56,7 +56,7 @@ ENDCLASS.
 
 
 
-CLASS z2ui5add_cl_var_db_api IMPLEMENTATION.
+CLASS z2ui5_cl_layo_var_db IMPLEMENTATION.
 
 
   METHOD obj_to_filter.

@@ -1,4 +1,4 @@
-CLASS z2ui5add_cl_var_pop_ranges DEFINITION
+CLASS z2ui5_cl_layo_var_pop_ranges DEFINITION
   PUBLIC FINAL
   CREATE PUBLIC.
 
@@ -37,7 +37,7 @@ CLASS z2ui5add_cl_var_pop_ranges DEFINITION
         var_handle2     TYPE clike OPTIONAL
         var_handle3     TYPE clike OPTIONAL
       RETURNING
-        VALUE(r_result) TYPE REF TO z2ui5add_cl_var_pop_ranges.
+        VALUE(r_result) TYPE REF TO z2ui5_cl_layo_var_pop_ranges.
 
     TYPES:
       BEGIN OF ty_s_result,
@@ -80,7 +80,7 @@ ENDCLASS.
 
 
 
-CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
+CLASS z2ui5_cl_layo_var_pop_ranges IMPLEMENTATION.
 
 
   METHOD db_read.
@@ -435,7 +435,7 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
   METHOD read_default.
     TRY.
 
-        DATA(r_result) = NEW z2ui5add_cl_var_pop_ranges( ).
+        DATA(r_result) = NEW z2ui5_cl_layo_var_pop_ranges( ).
 *    r_result->ms_result-t_filter = val.
 *    r_result->check_db_active = check_db_active.
 

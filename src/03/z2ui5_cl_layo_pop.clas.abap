@@ -1,4 +1,4 @@
-CLASS z2ui5_cl_pop_layout DEFINITION
+CLASS z2ui5_cl_layo_pop DEFINITION
   PUBLIC FINAL
   CREATE PUBLIC.
 
@@ -22,8 +22,8 @@ CLASS z2ui5_cl_pop_layout DEFINITION
     TYPES END OF ty_s_layo.
     TYPES ty_t_layo TYPE STANDARD TABLE OF ty_s_layo WITH EMPTY KEY.
 
-    DATA mo_layout           TYPE REF TO z2ui5_cl_layout.
-    DATA mt_controls         TYPE z2ui5_cl_layout=>ty_t_controls.
+    DATA mo_layout           TYPE REF TO z2ui5_cl_layo_manager.
+    DATA mt_controls         TYPE z2ui5_cl_layo_manager=>ty_t_controls.
     DATA mt_Head             TYPE ty_t_layo.
     DATA mv_descr            TYPE string.
     DATA mv_layout           TYPE string.
@@ -39,23 +39,23 @@ CLASS z2ui5_cl_pop_layout DEFINITION
     CLASS-METHODS on_event_layout
       IMPORTING
         !client TYPE REF TO z2ui5_if_client
-        !layout TYPE REF TO z2ui5_cl_layout.
+        !layout TYPE REF TO z2ui5_cl_layo_manager.
 
     CLASS-METHODS render_layout_function
       IMPORTING
         !xml          TYPE REF TO z2ui5_cl_xml_view
         !client       TYPE REF TO z2ui5_if_client
-        !layout       TYPE REF TO z2ui5_cl_layout
+        !layout       TYPE REF TO z2ui5_cl_layo_manager
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_xml_view.
 
     CLASS-METHODS factory
       IMPORTING
-        !layout       TYPE REF TO z2ui5_cl_layout
+        !layout       TYPE REF TO z2ui5_cl_layo_manager
         open_layout   TYPE abap_bool OPTIONAL
         delete_layout TYPE abap_bool OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5_cl_pop_layout.
+        VALUE(result) TYPE REF TO z2ui5_cl_layo_pop.
 
   PROTECTED SECTION.
     DATA client  TYPE REF TO z2ui5_if_client.
@@ -107,7 +107,7 @@ CLASS z2ui5_cl_pop_layout DEFINITION
 ENDCLASS.
 
 
-CLASS z2ui5_cl_pop_layout IMPLEMENTATION.
+CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
   METHOD z2ui5_if_app~main.
 
@@ -133,7 +133,7 @@ CLASS z2ui5_cl_pop_layout IMPLEMENTATION.
   METHOD on_init.
 
     CASE Control.
-      WHEN z2ui5_cl_layout=>m_table.
+      WHEN z2ui5_cl_layo_manager=>m_table.
         mt_halign = VALUE #( ( low = 'Begin'     ddtext = 'Locale-specific positioning at the beginning of the line' )
                              ( low = 'Center'    ddtext = 'Centered text alignment'                                  )
                              ( low = 'End'       ddtext = 'Locale-specific positioning at the end of the line'       )
@@ -141,7 +141,7 @@ CLASS z2ui5_cl_pop_layout IMPLEMENTATION.
                              ( low = 'Left'      ddtext = 'Hard option for left alignment'                           )
                              ( low = 'Right'     ddtext = 'Hard option for right alignment'                          ) ).
 
-      WHEN z2ui5_cl_layout=>ui_table.
+      WHEN z2ui5_cl_layo_manager=>ui_table.
         mt_halign = VALUE #( ( low = 'Begin'     ddtext = 'Locale-specific positioning at the beginning of the line' )
                              ( low = 'Center'    ddtext = 'Centered text alignment'                                  )
                              ( low = 'End'       ddtext = 'Locale-specific positioning at the end of the line'       )
@@ -154,7 +154,7 @@ CLASS z2ui5_cl_pop_layout IMPLEMENTATION.
                              ( low = 'Medium' ddtext = 'Medium priority'        )
                              ( low = 'None'   ddtext = 'Default, none priority' ) ).
 
-    mt_controls = z2ui5_cl_layout=>get_controls( ).
+    mt_controls = z2ui5_cl_layo_manager=>get_controls( ).
 
   ENDMETHOD.
 
@@ -744,7 +744,7 @@ CLASS z2ui5_cl_pop_layout IMPLEMENTATION.
 *      WHERE guid = @Head-guid
 *      INTO CORRESPONDING FIELDS OF TABLE @mo_layout->ms_layout-t_layout  ##SUBRC_OK.
 
-    mo_layout = z2ui5_cl_layout=>factory_by_guid( layout_guid = head-guid ).
+    mo_layout = z2ui5_cl_layo_manager=>factory_by_guid( layout_guid = head-guid ).
 
 
   ENDMETHOD.

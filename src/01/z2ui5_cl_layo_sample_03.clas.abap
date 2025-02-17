@@ -1,4 +1,4 @@
-CLASS z2ui5_cl_layout_sample_03 DEFINITION
+CLASS z2ui5_cl_layo_sample_03 DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -6,7 +6,7 @@ CLASS z2ui5_cl_layout_sample_03 DEFINITION
     INTERFACES z2ui5_if_app.
 
     DATA mt_table  TYPE REF TO data.
-    DATA mo_layout TYPE REF TO z2ui5_cl_layout.
+    DATA mo_layout TYPE REF TO z2ui5_cl_layo_manager.
 
     TYPES:
       BEGIN OF ty_s_tab,
@@ -35,7 +35,7 @@ CLASS z2ui5_cl_layout_sample_03 DEFINITION
 ENDCLASS.
 
 
-CLASS z2ui5_cl_layout_sample_03 IMPLEMENTATION.
+CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
 
   METHOD on_event.
 
@@ -46,7 +46,7 @@ CLASS z2ui5_cl_layout_sample_03 IMPLEMENTATION.
 
       WHEN OTHERS.
 
-        z2ui5_cl_pop_layout=>on_event_layout( client = client
+        z2ui5_cl_layo_pop=>on_event_layout( client = client
                                                       layout = mo_layout ).
 
     ENDCASE.
@@ -127,7 +127,7 @@ CLASS z2ui5_cl_layout_sample_03 IMPLEMENTATION.
     DATA(class) = cl_abap_classdescr=>get_class_name( me ).
     SHIFT class LEFT DELETING LEADING '\CLASS='.
 
-    mo_layout = z2ui5_cl_layout=>factory( control  = z2ui5_cl_layout=>m_table
+    mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>m_table
                                           data     = mt_table
                                           handle01 = class
                                           handle02 = 'Z2UI5_T_01'
@@ -140,7 +140,7 @@ CLASS z2ui5_cl_layout_sample_03 IMPLEMENTATION.
 
     TRY.
 
-        DATA(app) = CAST z2ui5_cl_pop_layout( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+        DATA(app) = CAST z2ui5_cl_layo_pop( client->get_app( client->get( )-s_draft-id_prev_app ) ).
         mo_layout = app->mo_layout.
 
         IF app->mv_rerender = abap_true.

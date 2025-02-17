@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>Z2UI5ADD_CL_VAR_SELSCREEN</CLSNAME>
+    <CLSNAME>Z2UI5_CL_LAYO_SAMPLE_01</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>ui - popup get range multi</DESCRIPT>
+    <DESCRIPT>variant - integrated ranges</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

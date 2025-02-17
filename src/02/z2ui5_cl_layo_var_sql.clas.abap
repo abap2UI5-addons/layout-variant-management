@@ -14,7 +14,8 @@ CLASS z2ui5_cl_layo_var_sql DEFINITION PUBLIC.
     METHODS read.
     METHODS count.
 
-
+  PROTECTED SECTION.
+  PRIVATE SECTION.
 ENDCLASS.
 
 CLASS z2ui5_cl_layo_var_sql IMPLEMENTATION.

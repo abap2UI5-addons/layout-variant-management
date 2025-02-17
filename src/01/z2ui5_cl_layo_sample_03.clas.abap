@@ -73,7 +73,7 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
 *    page->header_content( )->scroll_container( height   = '70%'
 *                                               vertical = abap_true ).
 
-    z2ui5_cl_xml_builder=>xml_build_table( i_data   = mt_table
+    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = mt_table
                                            i_xml    = page
                                            i_client = client
                                            i_layout = mo_layout ).

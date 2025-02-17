@@ -28,7 +28,6 @@ CLASS z2ui5add_cl_var_pop_ranges DEFINITION
 
     DATA ms_variant_save TYPE ty_s_variant_out.
 
-
     CLASS-METHODS factory
       IMPORTING
         val             TYPE z2ui5_cl_util=>ty_t_filter_multi
@@ -52,6 +51,14 @@ CLASS z2ui5add_cl_var_pop_ranges DEFINITION
       RETURNING
         VALUE(result) TYPE ty_s_result.
 
+    CLASS-METHODS read_default
+      IMPORTING
+        var_handle1   TYPE clike DEFAULT sy-repid
+        var_handle2   TYPE clike OPTIONAL
+        var_handle3   TYPE clike OPTIONAL
+      RETURNING
+        VALUE(result) TYPE ty_s_result.
+
   PROTECTED SECTION.
     DATA check_db_active  TYPE abap_bool.
     DATA client                 TYPE REF TO z2ui5_if_client.
@@ -65,6 +72,8 @@ CLASS z2ui5add_cl_var_pop_ranges DEFINITION
     METHODS db_read.
     METHODS db_save.
     METHODS save_variant.
+
+
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -81,7 +90,7 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
         CLEAR mt_variant.
 
         DATA lt_variant_user TYPE ty_t_variant_out.
-        z2ui5add_cl_var_db_api=>hlp_db_load_by_handle(
+        z2ui5_cl_util_db=>load_by_handle(
             EXPORTING
                 uname   = ms_variant-uname
                 handle  = ms_variant-handle1
@@ -92,7 +101,7 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
         INSERT LINES OF lt_variant_user INTO TABLE mt_variant.
 
         DATA lt_variant TYPE ty_t_variant_out.
-        z2ui5add_cl_var_db_api=>hlp_db_load_by_handle(
+        z2ui5_cl_util_db=>load_by_handle(
             EXPORTING
                 handle  = ms_variant-handle1
                 handle2 = ms_variant-handle2
@@ -112,7 +121,7 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
     DATA(lt_variant_user) = mt_variant.
     DELETE lt_variant_user WHERE s_variant-uname IS INITIAL.
-    z2ui5add_cl_var_db_api=>hlp_db_save(
+    z2ui5_cl_util_db=>save(
         uname   = ms_variant-uname
         handle  = ms_variant-handle1
         handle2 = ms_variant-handle2
@@ -122,7 +131,7 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
     DATA(lt_variant) = mt_variant.
     DELETE lt_variant WHERE s_variant-uname IS NOT INITIAL.
-    z2ui5add_cl_var_db_api=>hlp_db_save(
+    z2ui5_cl_util_db=>save(
         handle  = ms_variant-handle1
         handle2 = ms_variant-handle2
         handle3 = ms_variant-handle3
@@ -251,16 +260,16 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
                 press = client->_event( 'OPEN_SELECT' )
                 type  = 'Emphasized' ).
 
-         dialog->buttons(
-             )->button(
-                text  = 'Back'
-                icon  = 'sap-icon://nav-back'
-                press = client->_event( 'DB_READ_CLOSE' )
-          )->button(
-                text  = 'Open'
-                icon  = 'sap-icon://accept'
-                press = client->_event( 'OPEN_SELECT' )
-                type  = 'Emphasized' ).
+    dialog->buttons(
+        )->button(
+           text  = 'Back'
+           icon  = 'sap-icon://nav-back'
+           press = client->_event( 'DB_READ_CLOSE' )
+     )->button(
+           text  = 'Open'
+           icon  = 'sap-icon://accept'
+           press = client->_event( 'OPEN_SELECT' )
+           type  = 'Emphasized' ).
 
     client->popup_display( popup->stringify( ) ).
 
@@ -314,16 +323,16 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
                 type  = 'Success'
                 icon  = 'sap-icon://save' ).
 
-         dialog->buttons(
-             )->button(
-                text  = 'Back'
-                icon  = 'sap-icon://nav-back'
-                press = client->_event( 'DB_SAVE_CLOSE' )
-          )->button(
-                text  = 'Save'
-                press = client->_event( 'DB_SAVE' )
-                type  = 'Success'
-                icon  = 'sap-icon://save' ).
+    dialog->buttons(
+        )->button(
+           text  = 'Back'
+           icon  = 'sap-icon://nav-back'
+           press = client->_event( 'DB_SAVE_CLOSE' )
+     )->button(
+           text  = 'Save'
+           press = client->_event( 'DB_SAVE' )
+           type  = 'Success'
+           icon  = 'sap-icon://save' ).
 
     client->popup_display( popup->get_root( )->xml_get( ) ).
 
@@ -422,4 +431,28 @@ CLASS z2ui5add_cl_var_pop_ranges IMPLEMENTATION.
 
     ENDCASE.
   ENDMETHOD.
+
+  METHOD read_default.
+    TRY.
+
+        DATA(r_result) = NEW z2ui5add_cl_var_pop_ranges( ).
+*    r_result->ms_result-t_filter = val.
+*    r_result->check_db_active = check_db_active.
+
+        r_result->ms_variant = VALUE #(
+*        uname  = COND #( WHEN var_check_user = abap_true THEN sy-uname )
+            handle1 = var_handle1
+            handle2 = var_handle2
+            handle3 = var_handle3
+        ).
+
+
+        r_result->db_read( ).
+
+        result-t_filter = r_result->mt_variant[ check_default = abap_true ]-t_filter.
+
+      CATCH cx_root.
+    ENDTRY.
+  ENDMETHOD.
+
 ENDCLASS.

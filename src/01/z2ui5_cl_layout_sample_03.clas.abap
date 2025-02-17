@@ -1,4 +1,4 @@
-CLASS z2ui5_cl_sample_layout DEFINITION
+CLASS z2ui5_cl_layout_sample_03 DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -35,7 +35,7 @@ CLASS z2ui5_cl_sample_layout DEFINITION
 ENDCLASS.
 
 
-CLASS z2ui5_cl_sample_layout IMPLEMENTATION.
+CLASS z2ui5_cl_layout_sample_03 IMPLEMENTATION.
 
   METHOD on_event.
 

@@ -1,4 +1,4 @@
-CLASS z2ui5_cl_sample_variant_02 DEFINITION PUBLIC.
+CLASS z2ui5_cl_layout_sample_02 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
 
@@ -29,7 +29,7 @@ CLASS z2ui5_cl_sample_variant_02 DEFINITION PUBLIC.
 ENDCLASS.
 
 
-CLASS z2ui5_cl_sample_variant_02 IMPLEMENTATION.
+CLASS z2ui5_cl_layout_sample_02 IMPLEMENTATION.
 
 
   METHOD on_event.
@@ -41,7 +41,7 @@ CLASS z2ui5_cl_sample_variant_02 IMPLEMENTATION.
       WHEN `PREVIEW_FILTER`.
         client->nav_app_call( z2ui5add_cl_var_pop_ranges=>factory( mt_filter ) ).
       WHEN 'BACK'.
-        client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
+        client->nav_app_leave( ).
     ENDCASE.
 
   ENDMETHOD.
@@ -61,7 +61,7 @@ CLASS z2ui5_cl_sample_variant_02 IMPLEMENTATION.
       EXPORTING
        filter = mt_filter
       CHANGING
-        val    = mt_table ).
+        val   = mt_table ).
 
   ENDMETHOD.
 
@@ -110,17 +110,33 @@ CLASS z2ui5_cl_sample_variant_02 IMPLEMENTATION.
 
     me->client = client.
 
-    IF mv_check_initialized = abap_false.
-      mv_check_initialized = abap_true.
-      mt_filter = z2ui5_cl_util=>filter_get_multi_by_data( mt_table ).
-      DELETE mt_filter WHERE name = `SELKZ`.
+    IF client->check_on_init( ).
+
+      mt_filter = z2ui5add_cl_var_pop_ranges=>read_default(
+*        EXPORTING
+*          var_handle1 = SY-REPID
+*          var_handle2 =
+*          var_handle3 =
+*        RECEIVING
+*          result      =
+       )-t_filter.
+
+      IF mt_filter IS INITIAL.
+
+        mt_filter = z2ui5_cl_util=>filter_get_multi_by_data( mt_table ).
+        DELETE mt_filter WHERE name = `SELKZ`.
+
+      ELSE.
+        set_data( ).
+      ENDIF.
+
       view_display( ).
       RETURN.
     ENDIF.
 
-    IF client->get( )-check_on_navigated = abap_true.
+    IF client->check_on_navigated( ).
       TRY.
-          DATA(lo_value_help) = CAST z2ui5add_cl_var_pop_ranges( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+          DATA(lo_value_help) = CAST z2ui5add_cl_var_pop_ranges( client->get_app_prev( ) ).
           IF lo_value_help->result( )-check_confirmed = abap_true.
             mt_filter = lo_value_help->result( )-t_filter.
             set_data( ).

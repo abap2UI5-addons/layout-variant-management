@@ -14,7 +14,7 @@ In classic SAP GUI development, one of the most frequently used features is vari
 #### Compatibility
 * S/4 Public Cloud and BTP ABAP Environment (ABAP for Cloud)
 * S/4 Private Cloud or On-Premise (ABAP for Cloud, Standard ABAP)
-* R/3 NetWeaver AS ABAP 7.02 or higher (Standard ABAP)
+* R/3 NetWeaver AS ABAP 7.50 or higher (Standard ABAP)
 
 #### Dependencies
 * [abap2UI5](https://github.com/abap2UI5/abap2UI5)

@@ -27,7 +27,7 @@ CLASS z2ui5_cl_layo_sample_01 DEFINITION PUBLIC.
     METHODS set_data.
 
   PRIVATE SECTION.
-    DATA mo_multiselect TYPE REF TO z2ui5_cl_layo_var_selscreen.
+    DATA mo_multiselect TYPE REF TO z2ui5_cl_layo_selscreen.
 ENDCLASS.
 
 
@@ -38,7 +38,7 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN 'LIST_OPEN'.
-        mo_multiselect = z2ui5_cl_layo_var_selscreen=>factory( mt_filter ).
+        mo_multiselect = z2ui5_cl_layo_selscreen=>factory( mt_filter ).
         mo_multiselect->on_event( client ).
         RETURN.
 
@@ -112,7 +112,7 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
     vbox->button( text  = `GO`
                   press = client->_event( 'TAB' ) ).
 
-    DATA(lo_multiselect) = z2ui5_cl_layo_var_selscreen=>factory( mt_filter ).
+    DATA(lo_multiselect) = z2ui5_cl_layo_selscreen=>factory( mt_filter ).
 
     lo_multiselect->set_output2( t_filter = mt_filter
                                  client2  = client

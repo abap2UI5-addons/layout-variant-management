@@ -31,6 +31,7 @@
     "parser_error": true,
     "superclass_final": true,
     "unknown_types": true,
-    "xml_consistency": true
+    "xml_consistency": true,
+    "prefix_is_current_class": true
   }
 }

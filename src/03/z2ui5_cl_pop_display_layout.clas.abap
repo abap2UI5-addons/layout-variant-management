@@ -37,13 +37,13 @@ CLASS z2ui5_cl_pop_display_layout DEFINITION
     DATA mv_rerender    TYPE abap_bool.
 
     DATA mv_xl_label    TYPE int4.
-    DATA mv_xl_value  TYPE int4.
+    DATA mv_xl_value    TYPE int4.
     DATA mv_l_label     TYPE int4.
-    DATA mv_l_value   TYPE int4.
+    DATA mv_l_value     TYPE int4.
     DATA mv_m_label     TYPE int4.
-    DATA mv_m_value   TYPE int4.
+    DATA mv_m_value     TYPE int4.
     DATA mv_s_label     TYPE int4.
-    DATA mv_s_value   TYPE int4.
+    DATA mv_s_value     TYPE int4.
 
     CLASS-METHODS on_event_layout
       IMPORTING
@@ -176,6 +176,10 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
     mt_controls = z2ui5_cl_layout=>get_controls( ).
 
+    delete mt_controls where control ne mo_layout->ms_layout-s_head-control.
+    delete mt_controls where active ne abap_true.
+    sort mt_controls by index ASCENDING.
+
   ENDMETHOD.
 
   METHOD render_edit.
@@ -199,24 +203,22 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
 
     DATA(lt_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( mo_layout->ms_layout-t_layout ).
 
-    DATA(col) = columns->column( '7rem' )->header( `` ).
-    col->text( `Row` ).
+    LOOP AT mt_controls REFERENCE INTO DATA(control).
 
-    LOOP AT lt_comp REFERENCE INTO DATA(comp).
-
-      READ TABLE mt_controls INTO DATA(control) WITH KEY control   = mo_layout->ms_layout-s_head-control
-                                                         attribute = comp->name
-                                                         active    = abap_true.
+      READ TABLE lt_comp INTO DATA(comp) WITH KEY name =  control->attribute.
       IF sy-subrc <> 0.
         CONTINUE.
       ENDIF.
 
-      CASE control-attribute.
+      CASE control->attribute.
+        WHEN 'TLABEL'.
+          DATA(col) = columns->column( '7rem' )->header( `` ).
+          col->text( `Row` ).
         WHEN 'VISIBLE'.
-          col = columns->column( '4.5rem' )->header( `` ).
+          col = columns->column( '3.5rem' )->header( `` ).
           col->text( 'Visible' ).
         WHEN 'MERGE'.
-          col = columns->column( '4.5rem' )->header( `` ).
+          col = columns->column( '3.5rem' )->header( `` ).
           col->text( 'Merge' ).
         WHEN 'HALIGN'.
           col = columns->column( `4.5rem` )->header( `` ).
@@ -228,7 +230,7 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
           col = columns->column( `7rem` )->header( `` ).
           col->text( 'Width in rem' ).
         WHEN 'SEQUENCE'.
-          col = columns->column( `5rem` )->header( `` ).
+          col = columns->column( `3.5rem` )->header( `` ).
           col->text( 'Sequence' ).
         WHEN 'ALTERNATIVE_TEXT'.
           col = columns->column( `7rem` )->header( `` ).
@@ -242,77 +244,76 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
         WHEN 'GRID_LAYOUT'.
           col = columns->column( `7rem` )->header( `` ).
           col->text( 'Layout' ).
+        WHEN 'NO_LEADING_ZERO'.
+          col = columns->column( `3.5rem` )->header( `` ).
+          col->text( 'no Leading Zeros' ).
       ENDCASE.
 
     ENDLOOP.
 
-    LOOP AT lt_comp REFERENCE INTO comp.
+   LOOP AT mt_controls REFERENCE INTO control.
 
-      IF comp->name = 'FNAME'.
-        cells->text( |\{{ comp->name }\} { cl_abap_char_utilities=>cr_lf } \{TLABEL\} | ).
-      ENDIF.
-
-      READ TABLE mt_controls INTO control WITH KEY control   = mo_layout->ms_layout-s_head-control
-                                                   attribute = comp->name
-                                                   active    = abap_true.
-
+      READ TABLE lt_comp INTO comp WITH KEY name =  control->attribute.
       IF sy-subrc <> 0.
         CONTINUE.
       ENDIF.
 
-      CASE comp->name.
+      CASE comp-name.
+        WHEN 'TLABEL'.
 
-        WHEN 'VISIBLE' OR 'MERGE'.
+          cells->text( |\{FNAME\} { cl_abap_char_utilities=>cr_lf } \{TLABEL\} | ).
+
+        WHEN 'VISIBLE' OR 'MERGE' OR 'NO_LEADING_ZERO'.
 
           cells->switch( type  = 'AcceptReject'
-                         state = |\{{ comp->name }\}|     ).
+                         state = |\{{ comp-name }\}|     ).
 
         WHEN 'HALIGN'.
 
-          cells->combobox( selectedkey = |\{{ comp->name }\}|
+          cells->combobox( selectedkey = |\{{ comp-name }\}|
                            items       = client->_bind_local( mt_halign )
                         )->item( key  = '{LOW}'
                                  text = '{LOW} - {DDTEXT}' ).
 
         WHEN 'IMPORTANCE'.
 
-          cells->combobox( selectedkey = |\{{ comp->name }\}|
+          cells->combobox( selectedkey = |\{{ comp-name }\}|
                            items       = client->_bind_local( mt_importance )
                         )->item( key  = '{LOW}'
                                  text = '{LOW} - {DDTEXT}' ).
 
         WHEN 'WIDTH'.
 
-          cells->input( value     = |\{{ comp->name }\}|
+          cells->input( value     = |\{{ comp-name }\}|
                         maxLength = `7` ).
 
         WHEN 'SEQUENCE'.
 
-          cells->input( value     = |\{{ comp->name }\}|
+          cells->input( value     = |\{{ comp-name }\}|
                         maxLength = `5`
                         width     = `3rem` ).
 
         WHEN 'ALTERNATIVE_TEXT'.
 
-          cells->input( |\{{ comp->name }\}| ).
+          cells->input( |\{{ comp-name }\}| ).
 
         WHEN 'SUBCOLUMN'.
 
-          cells->button( text  = |\{{ comp->name }\}|
+          cells->button( text  = |\{{ comp-name }\}|
                          icon  = `sap-icon://add`
                          press = client->_event( val   = 'CALL_SUBCOLUMN'
                                                  t_arg = VALUE #( ( `${FNAME}` ) ) ) ).
 
         WHEN 'REFERENCE_FIELD'.
 
-          cells->combobox( selectedkey = |\{{ comp->name }\}|
+          cells->combobox( selectedkey = |\{{ comp-name }\}|
                            items       = client->_bind_edit( mo_layout->ms_layout-t_layout )
                         )->item( key  = '{FNAME}'
                                  text = '{FNAME} - {TLABEL}' ).
 
         WHEN 'GRID_LAYOUT'.
 
-          cells->button( text  = |\{{ comp->name }\}|
+          cells->button( text  = |\{{ comp-name }\}|
                          icon  = `sap-icon://grid`
                          press = client->_event( val   = 'CALL_GRIDLAYOUT'
                                                  t_arg = VALUE #( ( `${FNAME}` ) ) ) ).
@@ -1018,6 +1019,11 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
         RETURN.
       ENDIF.
 
+      IF layout-no_leading_zero <> layout_tmp-no_leading_zero.
+        mv_rerender = abap_true.
+        RETURN.
+      ENDIF.
+
       IF    layout-grid_value_xl <> layout_tmp-grid_value_xl
          OR layout-grid_value_l  <> layout_tmp-grid_value_l
          OR layout-grid_value_m  <> layout_tmp-grid_value_m
@@ -1087,10 +1093,10 @@ CLASS z2ui5_cl_pop_display_layout IMPLEMENTATION.
           layout->grid_value_m  = mv_m_value.
           layout->grid_value_s  = mv_s_value.
 
-          layout->grid_label_xl   = mv_xl_label.
-          layout->grid_label_l    = mv_l_label.
-          layout->grid_label_m    = mv_m_label.
-          layout->grid_label_s    = mv_s_label.
+          layout->grid_label_xl = mv_xl_label.
+          layout->grid_label_l  = mv_l_label.
+          layout->grid_label_m  = mv_m_label.
+          layout->grid_label_s  = mv_s_label.
 
           init_edit( ).
           render_edit( ).

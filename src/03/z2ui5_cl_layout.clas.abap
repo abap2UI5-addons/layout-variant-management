@@ -13,7 +13,7 @@ CLASS z2ui5_cl_layout DEFINITION
         attribute TYPE string,
         control   TYPE control,
         active    TYPE abap_bool,
-        others    TYPE abap_bool,
+        index     TYPE int4,
       END OF ty_s_controls.
     TYPES ty_t_controls TYPE STANDARD TABLE OF ty_s_controls WITH EMPTY KEY.
 
@@ -38,6 +38,7 @@ CLASS z2ui5_cl_layout DEFINITION
              t_sub_col         TYPE ty_t_sub_columns,
              grid_layout       TYPE char20,
              grid_layout_label TYPE char20,
+*             type_kind         type abap_typekind ,
            END OF ty_s_positions.
     TYPES ty_t_positions TYPE STANDARD TABLE OF ty_s_positions WITH EMPTY KEY.
 
@@ -164,30 +165,35 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
   METHOD get_controls.
 
     result = VALUE #( active = abap_true
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'VISIBLE' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'MERGE' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'HALIGN' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'IMPORTANCE' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'WIDTH' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'ALTERNATIVE_TEXT' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'SEQUENCE' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'SUBCOLUMN' )
-                      ( control = z2ui5_cl_layout=>m_table  attribute = 'REFERENCE_FIELD' )
-                      ( control = z2ui5_cl_layout=>ui_table attribute = 'VISIBLE' )
-                      ( control = z2ui5_cl_layout=>ui_table attribute = 'ALTERNATIVE_TEXT' )
-                      ( control = z2ui5_cl_layout=>ui_table attribute = 'HALIGN' )
-                      ( control = z2ui5_cl_layout=>ui_table attribute = 'WIDTH' )
-                      ( control = z2ui5_cl_layout=>others   attribute = 'VISIBLE' )
-                      ( control = z2ui5_cl_layout=>others   attribute = 'SEQUENCE' )
-                      ( control = z2ui5_cl_layout=>others   attribute = 'ALTERNATIVE_TEXT' )
-                      ( control = z2ui5_cl_layout=>others   attribute = 'REFERENCE_FIELD' )
-                      ( control = z2ui5_cl_layout=>others   attribute = 'WIDTH' )
-                      ( control = z2ui5_cl_layout=>ui_simpleform   attribute = 'VISIBLE' )
-                      ( control = z2ui5_cl_layout=>ui_simpleform   attribute = 'SEQUENCE' )
-                      ( control = z2ui5_cl_layout=>ui_simpleform   attribute = 'ALTERNATIVE_TEXT' )
-                      ( control = z2ui5_cl_layout=>ui_simpleform   attribute = 'REFERENCE_FIELD' )
-                      ( control = z2ui5_cl_layout=>ui_simpleform   attribute = 'GRID_LAYOUT' ) ).
-
+                      ( control = z2ui5_cl_layout=>m_table       index = 1 attribute = 'TLABEL' )
+                      ( control = z2ui5_cl_layout=>m_table       index = 2 attribute = 'VISIBLE' )
+                      ( control = z2ui5_cl_layout=>m_table       index = 3 attribute = 'MERGE' )
+                      ( control = z2ui5_cl_layout=>m_table       index = 4 attribute = 'HALIGN' )
+                      ( control = z2ui5_cl_layout=>m_table       index = 5 attribute = 'IMPORTANCE' )
+                      ( control = z2ui5_cl_layout=>m_table       index = 6 attribute = 'WIDTH' )
+                      ( control = z2ui5_cl_layout=>m_table       index = 7 attribute = 'ALTERNATIVE_TEXT' )
+                      ( control = z2ui5_cl_layout=>m_table       index = 8 attribute = 'SEQUENCE' )
+                      ( control = z2ui5_cl_layout=>m_table       index = 9 attribute = 'SUBCOLUMN' )
+                      ( control = z2ui5_cl_layout=>m_table       index = 10 attribute = 'REFERENCE_FIELD' )
+                      ( control = z2ui5_cl_layout=>m_table       index = 11 attribute = 'NO_LEADING_ZERO' )
+                      ( control = z2ui5_cl_layout=>ui_table      index = 1 attribute = 'TLABEL' )
+                      ( control = z2ui5_cl_layout=>ui_table      index = 2 attribute = 'VISIBLE' )
+                      ( control = z2ui5_cl_layout=>ui_table      index = 3 attribute = 'ALTERNATIVE_TEXT' )
+                      ( control = z2ui5_cl_layout=>ui_table      index = 4 attribute = 'HALIGN' )
+                      ( control = z2ui5_cl_layout=>ui_table      index = 5 attribute = 'WIDTH' )
+                      ( control = z2ui5_cl_layout=>others        index = 1 attribute = 'TLABEL' )
+                      ( control = z2ui5_cl_layout=>others        index = 2 attribute = 'VISIBLE' )
+                      ( control = z2ui5_cl_layout=>others        index = 3 attribute = 'SEQUENCE' )
+                      ( control = z2ui5_cl_layout=>others        index = 4 attribute = 'ALTERNATIVE_TEXT' )
+                      ( control = z2ui5_cl_layout=>others        index = 5 attribute = 'REFERENCE_FIELD' )
+                      ( control = z2ui5_cl_layout=>others        index = 6 attribute = 'WIDTH' )
+                      ( control = z2ui5_cl_layout=>ui_simpleform index = 1 attribute = 'TLABEL' )
+                      ( control = z2ui5_cl_layout=>ui_simpleform index = 2 attribute = 'VISIBLE' )
+                      ( control = z2ui5_cl_layout=>ui_simpleform index = 3 attribute = 'SEQUENCE' )
+                      ( control = z2ui5_cl_layout=>ui_simpleform index = 4 attribute = 'ALTERNATIVE_TEXT' )
+                      ( control = z2ui5_cl_layout=>ui_simpleform index = 5 attribute = 'REFERENCE_FIELD' )
+                      ( control = z2ui5_cl_layout=>ui_simpleform index = 6 attribute = 'NO_LEADING_ZERO' )
+                      ( control = z2ui5_cl_layout=>ui_simpleform index = 7 attribute = 'GRID_LAYOUT' ) ).
   ENDMETHOD.
 
   METHOD factory.
@@ -273,7 +279,8 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
            grid_label_m,
            grid_value_m,
            grid_label_s,
-           grid_value_s
+           grid_value_s,
+           no_leading_zero
       FROM z2ui5_layo_t_02
       WHERE guid = @layout_guid
       INTO CORRESPONDING FIELDS OF TABLE @result ##SUBRC_OK.
@@ -407,7 +414,8 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
              grid_label_m,
              grid_value_m,
              grid_label_s,
-             grid_value_s
+             grid_value_s,
+             no_leading_zero
         FROM z2ui5_layo_t_02
         WHERE guid = @def-guid
         INTO TABLE @DATA(t_pos) ##SUBRC_OK.
@@ -423,6 +431,7 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
 
         layout = CORRESPONDING #( pos->* ).
         layout-tlabel = set_text( layout ).
+*        layout-type_kind = t_comp[ name = pos->fname ]-type->type_kind.
 
         APPEND layout TO result->ms_layout-t_layout.
 
@@ -496,6 +505,11 @@ CLASS z2ui5_cl_layout IMPLEMENTATION.
     result-handle04 = handle04.
     result-fname    = comp->name.
     result-rollname = comp->type->get_relative_name( ).
+
+    IF    comp->type->type_kind = cl_abap_elemdescr=>typekind_num.
+*       OR comp->type->type_kind = cl_abap_elemdescr=>typekind_char.
+      result-no_leading_zero = abaP_true.
+    ENDIF.
 
     TRY.
         DATA(pos_guid) = cl_system_uuid=>create_uuid_c32_static( ).

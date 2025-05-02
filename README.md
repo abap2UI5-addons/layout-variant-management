@@ -5,11 +5,8 @@
 
 # layout-variant-management
 
-In classic SAP GUI development, one of the most frequently used features is variant management for selection screens and layout management for ALVs. Storing input values and user-specific table output settings greatly enhances the user experience. This add-on brings back these functionalities.
-
 #### Key Features
-* Layouts
-* Variants
+* Layout-Management
   
 #### Compatibility
 * S/4 Public Cloud and BTP ABAP Environment (ABAP for Cloud)

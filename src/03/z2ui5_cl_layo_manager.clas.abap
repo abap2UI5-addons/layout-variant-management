@@ -81,39 +81,39 @@ CLASS z2ui5_cl_layo_manager DEFINITION
         handle03      TYPE clike OPTIONAL
         handle04      TYPE clike OPTIONAL
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_t_head.
+        VALUE(result) TYPE  ty_t_head.
 
     CLASS-METHODS select_layout_components
       IMPORTING
         layout_guid   TYPE clike
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_t_positions.
+        VALUE(result) TYPE  ty_t_positions.
 
     CLASS-METHODS set_text
       IMPORTING
-        !layout       TYPE z2ui5_cl_layo_manager=>ty_s_positions
+        !layout       TYPE  ty_s_positions
       RETURNING
         VALUE(result) TYPE string.
 
     CLASS-METHODS sort_by_seqence
       IMPORTING
-        !Pos          TYPE z2ui5_cl_layo_manager=>ty_t_positions
+        !Pos          TYPE  ty_t_positions
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_t_positions.
+        VALUE(result) TYPE  ty_t_positions.
 
     CLASS-METHODS set_sub_columns
       IMPORTING
-        !layout       TYPE z2ui5_cl_layo_manager=>ty_t_positions
+        !layout       TYPE  ty_t_positions
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_t_positions.
+        VALUE(result) TYPE  ty_t_positions.
 
     CLASS-METHODS get_controls
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_t_controls.
+        VALUE(result) TYPE  ty_t_controls.
 
     CLASS-METHODS choose_layout
       IMPORTING
-        !control      TYPE z2ui5_cl_layo_manager=>control DEFAULT z2ui5_cl_layo_manager=>m_table
+        !control      TYPE  control DEFAULT  m_table
         handle01      TYPE clike                          OPTIONAL
         handle02      TYPE clike                          OPTIONAL
         handle03      TYPE clike                          OPTIONAL
@@ -141,9 +141,9 @@ CLASS z2ui5_cl_layo_manager DEFINITION
         handle02      TYPE clike
         handle01      TYPE clike
         layout_guid   TYPE clike
-        !head         TYPE z2ui5_cl_layo_manager=>ty_t_head
+        !head         TYPE  ty_t_head
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_s_head.
+        VALUE(result) TYPE  ty_s_head.
 
     CLASS-METHODS build_default_positions
       IMPORTING
@@ -151,19 +151,19 @@ CLASS z2ui5_cl_layo_manager DEFINITION
         guid          TYPE sysuuid_c32
         !index        TYPE i
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_s_positions.
+        VALUE(result) TYPE  ty_s_positions.
 
     CLASS-METHODS check_zeros_option
       IMPORTING
         i_typekind TYPE abap_typekind
       CHANGING
-        c_layout   TYPE z2ui5_cl_layo_manager=>ty_s_positions.
+        c_layout   TYPE  ty_s_positions.
 
     CLASS-METHODS default_grid_layout
       IMPORTING
-        !position     TYPE z2ui5_cl_layo_manager=>ty_s_positions
+        !position     TYPE  ty_s_positions
       RETURNING
-        VALUE(result) TYPE z2ui5_cl_layo_manager=>ty_s_positions.
+        VALUE(result) TYPE  ty_s_positions.
 
 ENDCLASS.
 
@@ -173,32 +173,32 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
   METHOD get_controls.
 
     result = VALUE #( active = abap_true
-                      ( control = z2ui5_cl_layo_manager=>m_table       index = 1 attribute = 'TLABEL' )
-                      ( control = z2ui5_cl_layo_manager=>m_table       index = 2 attribute = 'VISIBLE' )
-                      ( control = z2ui5_cl_layo_manager=>m_table       index = 3 attribute = 'MERGE' )
-                      ( control = z2ui5_cl_layo_manager=>m_table       index = 6 attribute = 'WIDTH' )
-                      ( control = z2ui5_cl_layo_manager=>m_table       index = 7 attribute = 'ALTERNATIVE_TEXT' )
-                      ( control = z2ui5_cl_layo_manager=>m_table       index = 8 attribute = 'SEQUENCE' )
-                      ( control = z2ui5_cl_layo_manager=>m_table       index = 9 attribute = 'SUBCOLUMN' )
-                      ( control = z2ui5_cl_layo_manager=>m_table       index = 10 attribute = 'REFERENCE_FIELD' )
-                      ( control = z2ui5_cl_layo_manager=>m_table       index = 11 attribute = 'NO_LEADING_ZERO' )
-                      ( control = z2ui5_cl_layo_manager=>ui_table      index = 1 attribute = 'TLABEL' )
-                      ( control = z2ui5_cl_layo_manager=>ui_table      index = 2 attribute = 'VISIBLE' )
-                      ( control = z2ui5_cl_layo_manager=>ui_table      index = 3 attribute = 'ALTERNATIVE_TEXT' )
-                      ( control = z2ui5_cl_layo_manager=>ui_table      index = 5 attribute = 'WIDTH' )
-                      ( control = z2ui5_cl_layo_manager=>others        index = 1 attribute = 'TLABEL' )
-                      ( control = z2ui5_cl_layo_manager=>others        index = 2 attribute = 'VISIBLE' )
-                      ( control = z2ui5_cl_layo_manager=>others        index = 3 attribute = 'SEQUENCE' )
-                      ( control = z2ui5_cl_layo_manager=>others        index = 4 attribute = 'ALTERNATIVE_TEXT' )
-                      ( control = z2ui5_cl_layo_manager=>others        index = 5 attribute = 'REFERENCE_FIELD' )
-                      ( control = z2ui5_cl_layo_manager=>others        index = 6 attribute = 'WIDTH' )
-                      ( control = z2ui5_cl_layo_manager=>ui_simpleform index = 1 attribute = 'TLABEL' )
-                      ( control = z2ui5_cl_layo_manager=>ui_simpleform index = 2 attribute = 'VISIBLE' )
-                      ( control = z2ui5_cl_layo_manager=>ui_simpleform index = 3 attribute = 'SEQUENCE' )
-                      ( control = z2ui5_cl_layo_manager=>ui_simpleform index = 4 attribute = 'ALTERNATIVE_TEXT' )
-                      ( control = z2ui5_cl_layo_manager=>ui_simpleform index = 5 attribute = 'REFERENCE_FIELD' )
-                      ( control = z2ui5_cl_layo_manager=>ui_simpleform index = 6 attribute = 'NO_LEADING_ZERO' )
-                      ( control = z2ui5_cl_layo_manager=>ui_simpleform index = 7 attribute = 'GRID_LAYOUT' ) ).
+                      ( control =  m_table       index = 1 attribute = 'TLABEL' )
+                      ( control =  m_table       index = 2 attribute = 'VISIBLE' )
+                      ( control =  m_table       index = 3 attribute = 'MERGE' )
+                      ( control =  m_table       index = 6 attribute = 'WIDTH' )
+                      ( control =  m_table       index = 7 attribute = 'ALTERNATIVE_TEXT' )
+                      ( control =  m_table       index = 8 attribute = 'SEQUENCE' )
+                      ( control =  m_table       index = 9 attribute = 'SUBCOLUMN' )
+                      ( control =  m_table       index = 10 attribute = 'REFERENCE_FIELD' )
+                      ( control =  m_table       index = 11 attribute = 'NO_LEADING_ZERO' )
+                      ( control =  ui_table      index = 1 attribute = 'TLABEL' )
+                      ( control =  ui_table      index = 2 attribute = 'VISIBLE' )
+                      ( control =  ui_table      index = 3 attribute = 'ALTERNATIVE_TEXT' )
+                      ( control =  ui_table      index = 5 attribute = 'WIDTH' )
+                      ( control =  others        index = 1 attribute = 'TLABEL' )
+                      ( control =  others        index = 2 attribute = 'VISIBLE' )
+                      ( control =  others        index = 3 attribute = 'SEQUENCE' )
+                      ( control =  others        index = 4 attribute = 'ALTERNATIVE_TEXT' )
+                      ( control =  others        index = 5 attribute = 'REFERENCE_FIELD' )
+                      ( control =  others        index = 6 attribute = 'WIDTH' )
+                      ( control =  ui_simpleform index = 1 attribute = 'TLABEL' )
+                      ( control =  ui_simpleform index = 2 attribute = 'VISIBLE' )
+                      ( control =  ui_simpleform index = 3 attribute = 'SEQUENCE' )
+                      ( control =  ui_simpleform index = 4 attribute = 'ALTERNATIVE_TEXT' )
+                      ( control =  ui_simpleform index = 5 attribute = 'REFERENCE_FIELD' )
+                      ( control =  ui_simpleform index = 6 attribute = 'NO_LEADING_ZERO' )
+                      ( control =  ui_simpleform index = 7 attribute = 'GRID_LAYOUT' ) ).
   ENDMETHOD.
 
   METHOD factory.

@@ -68,9 +68,7 @@ CLASS z2ui5_cl_layo_pop_w_sel DEFINITION
 ENDCLASS.
 
 
-
 CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
-
 
   METHOD factory.
 
@@ -95,13 +93,12 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
   ENDMETHOD.
 
-
   METHOD Render_main.
 
     DATA(popup) = z2ui5_cl_xml_view=>factory_popup( )->dialog( title      = title
                                                                afterclose = client->_event( 'CANCEL' )  ).
 
-    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data         = mr_out
+    z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
                                            i_xml          = popup
                                            i_client       = client
                                            i_layout       = mo_layout
@@ -112,7 +109,6 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
     client->popup_display( popup->stringify( ) ).
 
   ENDMETHOD.
-
 
   METHOD z2ui5_if_app~main.
 
@@ -134,7 +130,6 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
     on_after_layout( ).
 
   ENDMETHOD.
-
 
   METHOD on_event.
 
@@ -164,7 +159,6 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
   ENDMETHOD.
 
-
   METHOD on_after_layout.
 
     IF client->get( )-check_on_navigated = abap_false.
@@ -184,7 +178,6 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
   ENDMETHOD.
 
-
   METHOD confirm.
 
     FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
@@ -202,8 +195,7 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
       ENDIF.
 
       IF <row_id> = row_clicked.
-        ASSIGN ms_result-row->* TO FIELD-SYMBOL(<any>).
-        MOVE-CORRESPONDING <line> TO <any>.
+        ms_result-row->* = CORRESPONDING #( <line> ).
         EXIT.
       ENDIF.
 
@@ -213,13 +205,11 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
   ENDMETHOD.
 
-
   METHOD result.
 
     result = ms_result.
 
   ENDMETHOD.
-
 
   METHOD set_output_table.
 
@@ -238,22 +228,13 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
     ENDTRY.
 
-    ASSIGN mr_tab->* TO FIELD-SYMBOL(<in>).
-    ASSIGN mr_out->* TO FIELD-SYMBOL(<out>).
-
-    z2ui5_cl_util=>itab_corresponding(
-      EXPORTING
-        val = <in>
-      CHANGING
-        tab = <out> ).
+    mr_out->* = CORRESPONDING #( mr_tab->* ).
 
     set_row_id( ).
 
-    ASSIGN mr_out_tmp->* TO FIELD-SYMBOL(<out_tmp>).
-    <out_tmp> = <out>.
+    mr_out_tmp->* = mr_out->*.
 
   ENDMETHOD.
-
 
   METHOD set_row_id.
     FIELD-SYMBOLS <tab>  TYPE STANDARD TABLE.
@@ -269,7 +250,6 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
-
 
   METHOD get_comp.
     DATA index TYPE int4.
@@ -297,7 +277,6 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
       CATCH cx_root.
     ENDTRY.
   ENDMETHOD.
-
 
   METHOD on_event_search.
 
@@ -333,4 +312,5 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+
 ENDCLASS.

@@ -119,7 +119,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
         handle03      TYPE clike                          OPTIONAL
         handle04      TYPE clike                          OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5_cl_pop_to_sel_w_layout.
+        VALUE(result) TYPE REF TO z2ui5_cl_Layo_pop_w_sel.
 
   PRIVATE SECTION.
     CLASS-METHODS create_layout_obj
@@ -346,7 +346,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                                     handle03 = handle03
                                     handle04 = handle04  ).
 
-    result = z2ui5_cl_pop_to_sel_w_layout=>factory( i_tab   = layouts
+    result = z2ui5_cl_Layo_pop_w_sel=>factory( i_tab   = layouts
                                                     i_title = 'Layouts' ).
 
   ENDMETHOD.

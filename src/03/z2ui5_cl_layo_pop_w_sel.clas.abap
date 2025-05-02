@@ -98,7 +98,7 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
     DATA(popup) = z2ui5_cl_xml_view=>factory_popup( )->dialog( title      = title
                                                                afterclose = client->_event( 'CANCEL' )  ).
 
-    z2ui5_cl_xml_builder=>xml_build_table( i_data         = mr_out
+    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data         = mr_out
                                            i_xml          = popup
                                            i_client       = client
                                            i_layout       = mo_layout

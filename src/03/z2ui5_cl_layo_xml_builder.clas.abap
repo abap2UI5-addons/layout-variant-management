@@ -123,12 +123,12 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
       columns->column( visible         = i_client->_bind( val       = layout->visible
                                                           tab       = i_layout->ms_layout-t_layout
                                                           tab_index = lv_index )
-                       halign          = i_client->_bind( val       = layout->halign
-                                                          tab       = i_layout->ms_layout-t_layout
-                                                          tab_index = lv_index )
-                       importance      = i_client->_bind( val       = layout->importance
-                                                          tab       = i_layout->ms_layout-t_layout
-                                                          tab_index = lv_index )
+*                       halign          = i_client->_bind( val       = layout->halign
+*                                                          tab       = i_layout->ms_layout-t_layout
+*                                                          tab_index = lv_index )
+*                       importance      = i_client->_bind( val       = layout->importance
+*                                                          tab       = i_layout->ms_layout-t_layout
+*                                                          tab_index = lv_index )
                        mergeduplicates = i_client->_bind( val       = layout->merge
                                                           tab       = i_layout->ms_layout-t_layout
                                                           tab_index = lv_index )

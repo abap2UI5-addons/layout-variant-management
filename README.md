@@ -3,10 +3,12 @@
 <br>
 [![auto_rename](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/rename_test.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/rename_test.yaml)
 
-# layout-variant-management
+# layout-management
 
 #### Key Features
-* Layout-Management
+* Customize the output of tables
+* Persist layout variants to the database
+* Load default layouts at startup
   
 #### Compatibility
 * S/4 Public Cloud and BTP ABAP Environment (ABAP for Cloud)

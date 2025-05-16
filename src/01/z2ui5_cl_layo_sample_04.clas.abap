@@ -5,7 +5,7 @@ CLASS z2ui5_cl_layo_sample_04 DEFINITION
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
-    DATA ms_data type usr01.
+    DATA ms_data TYPE z2ui5_cl_util=>ty_usr01.
     DATA mo_layout TYPE REF TO z2ui5_cl_layo_manager.
 
 
@@ -64,7 +64,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
 *                                               vertical = abap_true ).
 
     z2ui5_cl_layo_xml_builder=>xml_build_simple_form(
-      i_data   = ref #( ms_data )
+      i_data   = REF #( ms_data )
       i_xml    = page
       i_client = client
       i_layout = mo_layout
@@ -92,7 +92,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
 
   METHOD get_data.
 
-    data(lv_tab) = `USR01`.
+    DATA(lv_tab) = `USR01`.
     SELECT SINGLE * FROM (lv_tab) INTO ms_data.
 
   ENDMETHOD.
@@ -105,7 +105,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
 
     DATA(class) = z2ui5_cl_util=>rtti_get_classname_by_ref( me ).
     mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>ui_simpleform
-                                                data     = ref #( ms_data )
+                                                data     = REF #( ms_data )
                                                 handle01 = class
                                                 handle02 = 'USR01'
                                                 handle03 = ''

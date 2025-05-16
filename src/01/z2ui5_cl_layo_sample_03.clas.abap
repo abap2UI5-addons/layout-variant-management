@@ -10,7 +10,8 @@ CLASS z2ui5_cl_layo_sample_03 DEFINITION
 
     TYPES:
       BEGIN OF ty_s_tab.
-        INCLUDE TYPE  usr01.
+*        INCLUDE TYPE  usr01.
+        INCLUDE TYPE  z2ui5_cl_util=>ty_usr01.
     TYPES:
         selkz TYPE abap_bool,
 

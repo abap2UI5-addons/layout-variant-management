@@ -103,7 +103,8 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
     CREATE DATA mt_table TYPE ty_t_table.
     ASSIGN mt_table->* TO <table>.
 
-    SELECT * FROM usr01 INTO TABLE <table> UP TO 10 ROWS.
+    data(lv_tab) = `USR01`.
+    SELECT * FROM (lv_tab) INTO TABLE <table> UP TO 10 ROWS.
 
   ENDMETHOD.
 
@@ -113,9 +114,7 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(class) = cl_abap_classdescr=>get_class_name( me ).
-    SHIFT class LEFT DELETING LEADING '\CLASS='.
-
+    DATA(class) = z2ui5_cl_util=>rtti_get_classname_by_ref( me ).
     mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>m_table
                                                 data     = mt_table
                                                 handle01 = class

@@ -92,7 +92,8 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
 
   METHOD get_data.
 
-    SELECT SINGLE * FROM usr01 INTO ms_data.
+    data(lv_tab) = `USR01`.
+    SELECT SINGLE * FROM (lv_tab) INTO ms_data.
 
   ENDMETHOD.
 
@@ -102,9 +103,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(class) = cl_abap_classdescr=>get_class_name( me ).
-    SHIFT class LEFT DELETING LEADING '\CLASS='.
-
+    DATA(class) = z2ui5_cl_util=>rtti_get_classname_by_ref( me ).
     mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>ui_simpleform
                                                 data     = ref #( ms_data )
                                                 handle01 = class

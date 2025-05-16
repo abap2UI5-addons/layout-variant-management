@@ -168,7 +168,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
         LOOP AT layout->t_sub_col INTO DATA(subcol).
 
-          index += 1.
+          index = index + 1.
 
           READ TABLE i_layout->ms_layout-t_layout INTO DATA(line) WITH KEY fname = subcol-fname.
 

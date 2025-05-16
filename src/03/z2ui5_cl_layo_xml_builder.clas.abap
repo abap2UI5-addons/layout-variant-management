@@ -30,6 +30,10 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
   METHOD xml_build_simple_form.
 
+    z2ui5_cl_layo_pop=>render_layout_function( client = i_client
+                                               xml    = i_xml
+                                               layout = i_layout ).
+
     DATA(form) = i_xml->simple_form( title                   = i_title
                                      editable                = abap_true
                                      layout                  = `ResponsiveGridLayout`
@@ -112,8 +116,8 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
     ENDIF.
 
     z2ui5_cl_layo_pop=>render_layout_function( client = i_client
-                                                         xml    = toolbar
-                                                         layout = i_layout ).
+                                               xml    = toolbar
+                                               layout = i_layout ).
 
     DATA(columns) = table->columns( ).
 
@@ -124,11 +128,11 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                                                           tab       = i_layout->ms_layout-t_layout
                                                           tab_index = lv_index )
 *                       halign          = i_client->_bind( val       = layout->halign
-*                                                          tab       = i_layout->ms_layout-t_layout
-*                                                          tab_index = lv_index )
+*                       tab             = i_layout->ms_layout-t_layout
+*                       tab_index       = lv_index )
 *                       importance      = i_client->_bind( val       = layout->importance
-*                                                          tab       = i_layout->ms_layout-t_layout
-*                                                          tab_index = lv_index )
+*                       tab             = i_layout->ms_layout-t_layout
+*                       tab_index       = lv_index )
                        mergeduplicates = i_client->_bind( val       = layout->merge
                                                           tab       = i_layout->ms_layout-t_layout
                                                           tab_index = lv_index )
@@ -164,7 +168,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
         LOOP AT layout->t_sub_col INTO DATA(subcol).
 
-          index = index + 1.
+          index += 1.
 
           READ TABLE i_layout->ms_layout-t_layout INTO DATA(line) WITH KEY fname = subcol-fname.
 

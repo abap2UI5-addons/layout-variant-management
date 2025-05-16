@@ -1,21 +1,13 @@
-CLASS z2ui5_cl_layo_sample_03 DEFINITION
+CLASS z2ui5_cl_layo_sample_04 DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
-    DATA mt_table  TYPE REF TO data.
+    DATA ms_data type usr01.
     DATA mo_layout TYPE REF TO z2ui5_cl_layo_manager.
 
-    TYPES:
-      BEGIN OF ty_s_tab.
-        INCLUDE TYPE  usr01.
-    TYPES:
-        selkz TYPE abap_bool,
-
-      END OF ty_s_tab.
-    TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
 
   PROTECTED SECTION.
     DATA client            TYPE REF TO z2ui5_if_client.
@@ -33,7 +25,7 @@ CLASS z2ui5_cl_layo_sample_03 DEFINITION
 ENDCLASS.
 
 
-CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
+CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
 
   METHOD on_event.
 
@@ -71,10 +63,12 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
 *    page->header_content( )->scroll_container( height   = '70%'
 *                                               vertical = abap_true ).
 
-    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = mt_table
-                                                i_xml    = page
-                                                i_client = client
-                                                i_layout = mo_layout ).
+    z2ui5_cl_layo_xml_builder=>xml_build_simple_form(
+      i_data   = ref #( ms_data )
+      i_xml    = page
+      i_client = client
+      i_layout = mo_layout
+    ).
 
     client->view_display( view->stringify( ) ).
 
@@ -98,12 +92,7 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
 
   METHOD get_data.
 
-    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
-
-    CREATE DATA mt_table TYPE ty_t_table.
-    ASSIGN mt_table->* TO <table>.
-
-    SELECT * FROM usr01 INTO TABLE <table> UP TO 10 ROWS.
+    SELECT SINGLE * FROM usr01 INTO ms_data.
 
   ENDMETHOD.
 
@@ -116,10 +105,10 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
     DATA(class) = cl_abap_classdescr=>get_class_name( me ).
     SHIFT class LEFT DELETING LEADING '\CLASS='.
 
-    mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>m_table
-                                                data     = mt_table
+    mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>ui_simpleform
+                                                data     = ref #( ms_data )
                                                 handle01 = class
-                                                handle02 = 'Z2UI5_T_01'
+                                                handle02 = 'USR01'
                                                 handle03 = ''
                                                 handle04 = '' ).
 

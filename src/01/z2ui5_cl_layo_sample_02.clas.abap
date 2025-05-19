@@ -1,22 +1,13 @@
-CLASS z2ui5_cl_layo_sample_03 DEFINITION
+CLASS z2ui5_cl_layo_sample_02 DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
-    DATA mt_table  TYPE REF TO data.
+    DATA ms_data TYPE z2ui5_cl_util=>ty_usr01.
     DATA mo_layout TYPE REF TO z2ui5_cl_layo_manager.
 
-    TYPES:
-      BEGIN OF ty_s_tab.
-*        INCLUDE TYPE  usr01.
-        INCLUDE TYPE  z2ui5_cl_util=>ty_usr01.
-    TYPES:
-        selkz TYPE abap_bool,
-
-      END OF ty_s_tab.
-    TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
 
   PROTECTED SECTION.
     DATA client            TYPE REF TO z2ui5_if_client.
@@ -34,14 +25,14 @@ CLASS z2ui5_cl_layo_sample_03 DEFINITION
 ENDCLASS.
 
 
-CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
+CLASS z2ui5_cl_layo_sample_02 IMPLEMENTATION.
 
   METHOD on_event.
 
     CASE client->get( )-event.
 
       WHEN 'BACK'.
-        client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
+        client->nav_app_leave( ).
 
       WHEN OTHERS.
 
@@ -72,10 +63,12 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
 *    page->header_content( )->scroll_container( height   = '70%'
 *                                               vertical = abap_true ).
 
-    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = mt_table
-                                                i_xml    = page
-                                                i_client = client
-                                                i_layout = mo_layout ).
+    z2ui5_cl_layo_xml_builder=>xml_build_simple_form(
+      i_data   = REF #( ms_data )
+      i_xml    = page
+      i_client = client
+      i_layout = mo_layout
+    ).
 
     client->view_display( view->stringify( ) ).
 
@@ -99,13 +92,8 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
 
   METHOD get_data.
 
-    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
-
-    CREATE DATA mt_table TYPE ty_t_table.
-    ASSIGN mt_table->* TO <table>.
-
-    data(lv_tab) = `USR01`.
-    SELECT * FROM (lv_tab) INTO TABLE <table> UP TO 10 ROWS.
+    DATA(lv_tab) = `USR01`.
+    SELECT SINGLE * FROM (lv_tab) INTO ms_data.
 
   ENDMETHOD.
 
@@ -116,10 +104,10 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
     ENDIF.
 
     DATA(class) = z2ui5_cl_util=>rtti_get_classname_by_ref( me ).
-    mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>m_table
-                                                data     = mt_table
+    mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>ui_simpleform
+                                                data     = REF #( ms_data )
                                                 handle01 = class
-                                                handle02 = 'Z2UI5_T_01'
+                                                handle02 = 'USR01'
                                                 handle03 = ''
                                                 handle04 = '' ).
 

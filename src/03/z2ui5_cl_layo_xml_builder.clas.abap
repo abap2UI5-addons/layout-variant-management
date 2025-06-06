@@ -153,7 +153,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
       set_layout_for_element( i_xml = line
                               span  = grid_layout-label ).
 
-      IF layout->rollname = `Z2UI5_XML_S_ICON`.
+      IF layout->rollname CP `*_XML_S_ICON`.
 
         DATA(hbox) = line->hbox( rendertype = `Bare`
                                  visible    = I_client->_bind( val       = layout->visible
@@ -168,7 +168,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                         I_client = I_client
                         i_xml    = hbox ).
 
-      ELSEIF layout->rollname = `Z2UI5_XML_S_PROGRESSINDICATOR`.
+      ELSEIF layout->rollname CP `*_XML_S_PROGRESSINDICATOR`.
 
         hbox = line->hbox( rendertype = `Bare`
                            visible    = I_client->_bind( val       = layout->visible
@@ -183,7 +183,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                                       I_client = I_client
                                       i_xml    = hbox ).
 
-      ELSEIF layout->rollname = `Z2UI5_XML_S_GENERICTAG`.
+      ELSEIF layout->rollname CP `*_XML_S_GENERICTAG`.
 
         hbox = line->hbox( rendertype = `Bare`
                            visible    = I_client->_bind( val       = layout->visible
@@ -198,7 +198,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                                I_client = I_client
                                i_xml    = hbox ).
 
-      ELSEIF layout->rollname = `Z2UI5_XML_S_STATUSINDICATOR`.
+      ELSEIF layout->rollname CP `*_XML_S_STATUSINDICATOR`.
 
         hbox = line->hbox( rendertype = `Bare`
                            visible    = I_client->_bind( val       = layout->visible
@@ -213,7 +213,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                                     i_layout = layout
                                     i_xml    = hbox ).
 
-      ELSEIF layout->rollname = `Z2UI5_XML_S_RADIALMICROCHART`.
+      ELSEIF layout->rollname CP `*_XML_S_RADIALMICROCHART`.
 
         hbox = line->hbox( rendertype = `Bare`
                            visible    = I_client->_bind( val       = layout->visible
@@ -421,31 +421,31 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
       lv_index = sy-tabix.
 
-      IF layout->rollname = `Z2UI5_XML_S_ICON`.
+      IF layout->rollname CP `*_XML_S_ICON`.
 
         xml_build_icon( I_client = I_client
                         i_layout = layout
                         i_xml    = cells ).
 
-      ELSEIF layout->rollname = `Z2UI5_XML_S_RADIALMICROCHART`.
+      ELSEIF layout->rollname CP `*_XML_S_RADIALMICROCHART`.
 
         xml_build_radial_microchart( i_layout = layout
                                      I_client = I_client
                                      i_xml    = cells ).
 
-      ELSEIF layout->rollname = `Z2UI5_XML_S_PROGRESSINDICATOR`.
+      ELSEIF layout->rollname CP `*_XML_S_PROGRESSINDICATOR`.
 
         xml_build_progress_indicator( i_layout = layout
                                       I_client = I_client
                                       i_xml    = cells ).
 
-      ELSEIF layout->rollname = `Z2UI5_XML_S_STATUSINDICATOR`.
+      ELSEIF layout->rollname CP `*_XML_S_STATUSINDICATOR`.
 
         xml_build_status_indicator( i_layout = layout
                                     I_client = I_client
                                     i_xml    = cells ).
 
-      ELSEIF layout->rollname = `Z2UI5_XML_S_GENERICTAG`.
+      ELSEIF layout->rollname CP `*_XML_S_GENERICTAG`.
 
         xml_build_generic_tag( i_layout = layout
                                I_client = I_client

@@ -5,18 +5,19 @@ CLASS z2ui5_cl_layo_sample_01 DEFINITION
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
-    DATA mt_table  TYPE REF TO data.
-    DATA mo_layout TYPE REF TO z2ui5_cl_layo_manager.
-
-    TYPES:
-      BEGIN OF ty_s_tab.
-*        INCLUDE TYPE  usr01.
-        INCLUDE TYPE  z2ui5_cl_util=>ty_usr01.
-    TYPES:
-        selkz TYPE abap_bool,
-
-      END OF ty_s_tab.
+    TYPES  BEGIN OF ty_s_tab.
+    TYPES:   Names             TYPE string,
+             icon              TYPE z2ui5_xml_s_icon,
+             generictag        TYPE z2ui5_xml_s_generictag,
+             progressindicator TYPE z2ui5_xml_s_progressindicator,
+             radialmicrochart  TYPE z2ui5_xml_s_radialmicrochart,
+             statusindicator   TYPE z2ui5_xml_s_statusindicator,
+             selkz             TYPE abap_bool,
+           END OF ty_s_tab.
     TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
+
+    DATA mt_table  TYPE ty_t_table.
+    DATA mo_layout TYPE REF TO z2ui5_cl_layo_manager.
 
   PROTECTED SECTION.
     DATA client            TYPE REF TO z2ui5_if_client.
@@ -68,11 +69,8 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
                              navbuttonpress = client->_event( 'BACK' )
                              shownavbutton  = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL )
                              class          = 'sapUiContentPadding' ).
-*
-*    page->header_content( )->scroll_container( height   = '70%'
-*                                               vertical = abap_true ).
 
-    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = mt_table
+    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = REF #( mt_table )
                                                 i_xml    = page
                                                 i_client = client
                                                 i_layout = mo_layout ).
@@ -99,13 +97,47 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
 
   METHOD get_data.
 
-    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+    mt_table = VALUE #( ( names             = 'Viktor'
+                          icon              = VALUE #( src       = 'sap-icon://customer'
+                                                       icon_size = '2rem' )
+                          generictag        = VALUE #( text   = 'Viktor'
+                                                       status = 'Warning'
+                                                       design = 'StatusIconHidden' )
+                          progressindicator = VALUE #( percentvalue = '70'
+                                                       state        = 'Warning'  )
+                          radialmicrochart  = VALUE #( percentage = '70'
+                                                       valuecolor = 'Critical'
+                                                       size       = 'S' )
+                          statusindicator   = VALUE #( value              = '70'
+                                                       fillcolor_error    = '100'
+                                                       fillcolor_critical = '80'
+                                                       fillcolor_good     = '40'
+                                                       shapeid            = 'tool'
+                                                       size               = 'Medium' )
 
-    CREATE DATA mt_table TYPE ty_t_table.
-    ASSIGN mt_table->* TO <table>.
+     )
+ ( names             = 'Lars'
+                          icon              = VALUE #( src       = 'sap-icon://end-user-experience-monitoring'
+                                                       icon_size = '2rem' )
+                          generictag        = VALUE #( text   = 'Lars'
+                                                       status = 'Success'
+                                                       design = 'StatusIconHidden' )
+                          progressindicator = VALUE #( percentvalue = '20'
+                                                       state        = 'Success'  )
+                          radialmicrochart  = VALUE #( percentage = '20'
+                                                       valuecolor = 'Good'
+                                                       size       = 'S' )
+                          statusindicator   = VALUE #( value              = '20'
+                                                       fillcolor_error    = '100'
+                                                       fillcolor_critical = '80'
+                                                       fillcolor_good     = '40'
+                                                       shapeid            = 'tool'
+                                                       size               = 'Medium' )
 
-    data(lv_tab) = `USR01`.
-    SELECT * FROM (lv_tab) INTO TABLE <table> UP TO 10 ROWS.
+     )
+
+
+     ).
 
   ENDMETHOD.
 
@@ -115,9 +147,11 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(class) = z2ui5_cl_util=>rtti_get_classname_by_ref( me ).
+    DATA(class) = cl_abap_classdescr=>get_class_name( me ).
+    SHIFT class LEFT DELETING LEADING '\CLASS='.
+
     mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>m_table
-                                                data     = mt_table
+                                                data     = REF #( mt_table )
                                                 handle01 = class
                                                 handle02 = 'Z2UI5_T_01'
                                                 handle03 = ''

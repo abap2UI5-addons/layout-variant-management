@@ -550,14 +550,14 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
     IF i_data IS NOT  SUPPLIED. " Table case
 
-      i_xml->radial_micro_chart( size         = |\{{ i_layout->fname }/SIZE\}|
+      i_xml->radial_micro_chart( size         = |\{{ i_layout->fname }/RADIALMICROCHART_SIZE\}|
                                  percentage   = |\{{ i_layout->fname }/PERCENTAGE\}|
                                  valuecolor   = |\{{ i_layout->fname }/VALUECOLOR\}|
                                  hideonnodata = |\{{ i_layout->fname }/HIDEONNODATA\}| ).
 
     ELSE.
 
-      ASSIGN COMPONENT |{ i_layout->fname }-SIZE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<size>).
+      ASSIGN COMPONENT |{ i_layout->fname }-RADIALMICROCHART_SIZE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<size>).
       IF <size> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
@@ -641,7 +641,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
     IF i_data IS NOT SUPPLIED. " We want to build a Table!
 
       DATA(status_indicator) = i_xml->status_indicator( class = |\{{ i_layout->fname }/CLASS\}|
-                                                        size  = |\{{ i_layout->fname }/SIZE\}|
+                                                        size  = |\{{ i_layout->fname }/STATUSINDICATOR_SIZE\}|
                                                         value = |\{{ i_layout->fname }/VALUE\}| ).
 
       DATA(thresholds) = status_indicator->property_thresholds( ).
@@ -669,7 +669,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
         RETURN.
       ENDIF.
 
-      ASSIGN COMPONENT |{ i_layout->fname }-SIZE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<size>).
+      ASSIGN COMPONENT |{ i_layout->fname }-STATUSINDICATOR_SIZE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<size>).
       IF <size> IS NOT ASSIGNED.
         RETURN.
       ENDIF.

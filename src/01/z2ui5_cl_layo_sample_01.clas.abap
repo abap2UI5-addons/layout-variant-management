@@ -105,18 +105,16 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
                                                        design = 'StatusIconHidden' )
                           progressindicator = VALUE #( percentvalue = '70'
                                                        state        = 'Warning'  )
-                          radialmicrochart  = VALUE #( percentage = '70'
-                                                       valuecolor = 'Critical'
-                                                       size       = 'S' )
-                          statusindicator   = VALUE #( value              = '70'
-                                                       fillcolor_error    = '100'
-                                                       fillcolor_critical = '80'
-                                                       fillcolor_good     = '40'
-                                                       shapeid            = 'tool'
-                                                       size               = 'Medium' )
-
-     )
- ( names             = 'Lars'
+                          radialmicrochart  = VALUE #( percentage            = '70'
+                                                       valuecolor            = 'Critical'
+                                                       radialmicrochart_size = 'S' )
+                          statusindicator   = VALUE #( value                = '70'
+                                                       fillcolor_error      = '100'
+                                                       fillcolor_critical   = '80'
+                                                       fillcolor_good       = '40'
+                                                       shapeid              = 'tool'
+                                                       statusindicator_size = 'Medium' ) )
+                        ( names             = 'Lars'
                           icon              = VALUE #( src       = 'sap-icon://end-user-experience-monitoring'
                                                        icon_size = '2rem' )
                           generictag        = VALUE #( text   = 'Lars'
@@ -124,20 +122,15 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
                                                        design = 'StatusIconHidden' )
                           progressindicator = VALUE #( percentvalue = '20'
                                                        state        = 'Success'  )
-                          radialmicrochart  = VALUE #( percentage = '20'
-                                                       valuecolor = 'Good'
-                                                       size       = 'S' )
-                          statusindicator   = VALUE #( value              = '20'
-                                                       fillcolor_error    = '100'
-                                                       fillcolor_critical = '80'
-                                                       fillcolor_good     = '40'
-                                                       shapeid            = 'tool'
-                                                       size               = 'Medium' )
-
-     )
-
-
-     ).
+                          radialmicrochart  = VALUE #( percentage            = '20'
+                                                       valuecolor            = 'Good'
+                                                       radialmicrochart_size = 'S' )
+                          statusindicator   = VALUE #( value                = '20'
+                                                       fillcolor_error      = '100'
+                                                       fillcolor_critical   = '80'
+                                                       fillcolor_good       = '40'
+                                                       shapeid              = 'tool'
+                                                       statusindicator_size = 'Medium' ) ) ).
 
   ENDMETHOD.
 
@@ -160,6 +153,8 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD on_after_navigation.
+
+    CHECK client->check_on_navigated( ).
 
     TRY.
 

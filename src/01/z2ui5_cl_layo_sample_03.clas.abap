@@ -5,12 +5,12 @@ CLASS z2ui5_cl_layo_sample_03 DEFINITION
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
-    DATA mt_table  TYPE REF TO data.
+    DATA mt_table  TYPE STANDARD TABLE OF I_BusinessPartner.
     DATA mo_layout TYPE REF TO z2ui5_cl_layo_manager.
 
     TYPES:
       BEGIN OF ty_s_tab.
-        INCLUDE TYPE  usr01.
+        INCLUDE TYPE  I_BusinessPartner.
     TYPES:
         selkz TYPE abap_bool,
 
@@ -68,7 +68,7 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
                              shownavbutton  = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL )
                              class          = 'sapUiContentPadding' ).
 
-    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = mt_table
+    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = ref #( mt_table )
                                                 i_xml    = page
                                                 i_client = client
                                                 i_layout = mo_layout ).
@@ -95,12 +95,8 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
 
   METHOD get_data.
 
-    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
 
-    CREATE DATA mt_table TYPE ty_t_table.
-    ASSIGN mt_table->* TO <table>.
-
-    SELECT * FROM usr01 INTO TABLE <table> UP TO 10 ROWS.
+    SELECT * FROM I_BusinessPartner INTO TABLE @mt_table UP TO 10 ROWS.
 
   ENDMETHOD.
 
@@ -114,7 +110,7 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
     SHIFT class LEFT DELETING LEADING '\CLASS='.
 
     mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>m_table
-                                                data     = mt_table
+                                                data     = ref #( mt_table )
                                                 handle01 = class
                                                 handle02 = 'Z2UI5_T_01'
                                                 handle03 = ''

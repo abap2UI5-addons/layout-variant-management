@@ -81,7 +81,7 @@ CLASS z2ui5_cl_layo_xml_builder DEFINITION
 
     CLASS-METHODS get_grid_layout
       IMPORTING
-        layout        TYPE REF TO z2ui5_cl_layo_manager=>ty_s_positions
+        !layout       TYPE REF TO z2ui5_cl_layo_manager=>ty_s_positions
       RETURNING
         VALUE(result) TYPE ty_s_grid_layout.
 
@@ -93,14 +93,14 @@ CLASS z2ui5_cl_layo_xml_builder DEFINITION
     CLASS-METHODS value_formatter
       IMPORTING
         I_client      TYPE REF TO z2ui5_if_client
-        value         TYPE any
+        !value        TYPE any
         no_zero       TYPE abap_bool
       RETURNING
         VALUE(result) TYPE string.
 
     CLASS-METHODS table_value_formatter
       IMPORTING
-        position      TYPE z2ui5_cl_layo_manager=>ty_s_positions
+        !position     TYPE z2ui5_cl_layo_manager=>ty_s_positions
       RETURNING
         VALUE(result) TYPE string.
 
@@ -342,7 +342,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
   METHOD set_layout_for_element.
 
-    mv_element_counter += 1.
+    mv_element_counter = mv_element_counter + 1.
     IF span IS INITIAL.
 
       RETURN.
@@ -460,7 +460,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
           LOOP AT layout->t_sub_col INTO DATA(subcol).
 
-            index += 1.
+            index = index + 1.
 
             READ TABLE i_layout->ms_layout-t_layout INTO DATA(line) WITH KEY fname = subcol-fname.
 

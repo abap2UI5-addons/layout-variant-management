@@ -5,7 +5,7 @@ CLASS z2ui5_cl_layo_sample_04 DEFINITION
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
-    DATA ms_data   TYPE usr01.
+    DATA ms_data   TYPE I_BusinessPartner.
     DATA mo_layout TYPE REF TO z2ui5_cl_layo_manager.
 
   PROTECTED SECTION.
@@ -87,7 +87,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
 
   METHOD get_data.
 
-    SELECT SINGLE * FROM usr01 INTO ms_data.
+    SELECT SINGLE * FROM I_BusinessPartner INTO @ms_data.
 
   ENDMETHOD.
 

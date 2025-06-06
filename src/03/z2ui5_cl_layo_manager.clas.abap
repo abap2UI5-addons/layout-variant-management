@@ -521,6 +521,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
           DATA(layout) = VALUE ty_s_positions( ).
 
           layout = CORRESPONDING #( pos->* ).
+          layout-rollname = r_comp->type->get_relative_name( ).
           layout-tlabel = set_text( layout ).
 
           DATA(typekind) = t_comp[ name = pos->fname ]-type->type_kind.

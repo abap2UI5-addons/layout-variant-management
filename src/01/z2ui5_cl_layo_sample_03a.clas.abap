@@ -1,4 +1,4 @@
-CLASS z2ui5_cl_layo_sample_03 DEFINITION
+CLASS z2ui5_cl_layo_sample_03a DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
@@ -32,7 +32,7 @@ CLASS z2ui5_cl_layo_sample_03 DEFINITION
 ENDCLASS.
 
 
-CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
+CLASS z2ui5_cl_layo_sample_03a IMPLEMENTATION.
 
   METHOD on_event.
 
@@ -67,10 +67,14 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
                              shownavbutton  = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL )
                              class          = 'sapUiContentPadding' ).
 
-    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = REF #( mt_table )
-                                                i_xml    = page
-                                                i_client = client
-                                                i_layout = mo_layout ).
+    z2ui5_cl_layo_pop=>render_layout_function( client = client
+                                               xml    = page
+                                               layout = mo_layout ).
+
+*    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = REF #( mt_table )
+*                                                i_xml    = page
+*                                                i_client = client
+*                                                i_layout = mo_layout ).
 
     client->view_display( view->stringify( ) ).
 

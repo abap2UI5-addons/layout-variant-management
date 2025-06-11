@@ -3,18 +3,14 @@ CLASS z2ui5_cl_layo_pop DEFINITION
   CREATE PUBLIC.
 
   PUBLIC SECTION.
-    INTERFACES if_serializable_object.
     INTERFACES z2ui5_if_app.
 
     TYPES:
-      BEGIN OF fixvalue,
-        low        TYPE string,
-        high       TYPE string,
-        option     TYPE string,
-        ddlanguage TYPE string,
-        ddtext     TYPE string,
-      END OF fixvalue.
-    TYPES fixvalues TYPE STANDARD TABLE OF fixvalue WITH EMPTY KEY.
+      BEGIN OF ty_s_sorting,
+        sorting TYPE string,
+        descr   TYPE string,
+      END OF ty_s_sorting.
+    TYPES ty_t_sorting TYPE STANDARD TABLE OF ty_s_sorting WITH EMPTY KEY.
 
     TYPES BEGIN OF ty_s_layo.
             INCLUDE TYPE z2ui5_t_11.
@@ -34,8 +30,7 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     DATA mv_usr         TYPE abap_bool.
     DATA mv_open        TYPE abap_bool.
     DATA mv_delete      TYPE abap_bool.
-    DATA mt_halign      TYPE fixvalues.
-    DATA mt_importance  TYPE fixvalues.
+    DATA mt_sorting     TYPE ty_t_sorting.
     DATA mv_active_line TYPE string.
     DATA mv_rerender    TYPE abap_bool.
 
@@ -84,9 +79,7 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     METHODS on_event_subcoloumns.
     METHODS check_rerender_necessary.
 
-    METHODS on_init
-      IMPORTING
-        !control TYPE clike.
+    METHODS on_init.
 
     METHODS render_open
       IMPORTING
@@ -140,7 +133,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     IF mv_init = abap_false.
       mv_init = abap_true.
 
-      on_init( mo_layout->ms_layout-s_head-control ).
+      on_init( ).
 
       init_edit( ).
 
@@ -157,10 +150,14 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD on_init.
-    " TODO: parameter CONTROL is never used (ABAP cleaner)
 
     IF mt_controls IS INITIAL.
       mt_controls = z2ui5_cl_layo_manager=>get_controls( ).
+
+      mt_sorting = VALUE #( ( sorting = 'ASCENDING' descr = 'Ascending'  )
+                            ( sorting = 'DESCENDING' descr = 'Descending'  )
+                            ( sorting = `` descr = ``  ) ).
+
     ENDIF.
 
   ENDMETHOD.
@@ -241,6 +238,9 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
         WHEN 'NO_LEADING_ZERO'.
           col = columns->column( `5rem` )->header( `` ).
           col->text( 'no Leading Zeros' ).
+        WHEN 'SORTING'.
+          col = columns->column( `5rem` )->header( `` ).
+          col->text( 'Sorting' ).
       ENDCASE.
 
     ENDLOOP.
@@ -265,7 +265,8 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
         WHEN 'NO_LEADING_ZERO'.
 
           cells->vbox( visible = |\{SHOW_NO_ZEROS\}|
-          )->switch( type    = 'AcceptReject'
+
+          )->switch(   type    = 'AcceptReject'
                      state   = |\{{ comp-name }\}|
                      enabled = |\{SHOW_NO_ZEROS\}| ).
 
@@ -290,13 +291,23 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
           cells->button( text  = |\{{ comp-name }\}|
                          icon  = `sap-icon://add`
+                         width       = '5rem'
                          press = client->_event( val   = 'CALL_SUBCOLUMN'
                                                  t_arg = VALUE #( ( `${FNAME}` ) ) ) ).
+
+        WHEN 'SORTING'.
+
+          cells->combobox( selectedkey = |\{{ comp-name }\}|
+                           items       = client->_bind_edit( mt_sorting )
+                           width       = '5rem'
+                        )->item( key  = '{SORTING}'
+                                 text = '{DESCR}' ).
 
         WHEN 'REFERENCE_FIELD'.
 
           cells->combobox( selectedkey = |\{{ comp-name }\}|
                            items       = client->_bind_edit( mo_layout->ms_layout-t_layout )
+                           width       = '10rem'
                         )->item( key  = '{FNAME}'
                                  text = '{FNAME} - {TLABEL}' ).
 
@@ -304,6 +315,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
           cells->button( text  = |\{{ comp-name }\}|
                          icon  = `sap-icon://grid`
+                           width       = '5rem'
                          press = client->_event( val   = 'CALL_GRIDLAYOUT'
                                                  t_arg = VALUE #( ( `${FNAME}` ) ) ) ).
 

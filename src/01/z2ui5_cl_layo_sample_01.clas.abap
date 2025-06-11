@@ -89,6 +89,8 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
 
     on_event( ).
 
+    mo_layout->sort( i_data = ref #( mt_table ) ).
+
     IF client->get( )-check_on_navigated = abap_true.
       on_after_navigation( ).
     ENDIF.
@@ -161,8 +163,10 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
         DATA(app) = CAST z2ui5_cl_layo_pop( client->get_app( client->get( )-s_draft-id_prev_app ) ).
         mo_layout = app->mo_layout.
 
+        mo_layout->sort( i_data = REF #( mt_table ) ).
+
         IF app->mv_rerender = abap_true.
-          " subcolumns need rerendering to work ..
+          "e.g. subcolumns need rerendering to work ..
           render_main( ).
         ELSE.
           "  for all other changes in Layout View Model Update is enough.

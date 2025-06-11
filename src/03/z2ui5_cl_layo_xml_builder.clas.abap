@@ -25,6 +25,11 @@ CLASS z2ui5_cl_layo_xml_builder DEFINITION
         i_layout TYPE REF TO z2ui5_cl_layo_manager
         i_title  TYPE string OPTIONAL.
 
+  PROTECTED SECTION.
+
+
+
+
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_s_grid_layout,
              label    TYPE string,
@@ -168,7 +173,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                         I_client = I_client
                         i_xml    = hbox ).
 
-      ELSEIF layout->rollname CP `*_XML_S_PROGRESSINDICATOR`.
+      ELSEIF layout->rollname CP `*_XML_S_PROGRESSIND`.
 
         hbox = line->hbox( rendertype = `Bare`
                            visible    = I_client->_bind( val       = layout->visible
@@ -198,7 +203,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                                I_client = I_client
                                i_xml    = hbox ).
 
-      ELSEIF layout->rollname CP `*_XML_S_STATUSINDICATOR`.
+      ELSEIF layout->rollname CP `*_XML_S_STATUSIND`.
 
         hbox = line->hbox( rendertype = `Bare`
                            visible    = I_client->_bind( val       = layout->visible
@@ -213,7 +218,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                                     i_layout = layout
                                     i_xml    = hbox ).
 
-      ELSEIF layout->rollname CP `*_XML_S_RADIALMICROCHART`.
+      ELSEIF layout->rollname CP `*_XML_S_RADIALCHART`.
 
         hbox = line->hbox( rendertype = `Bare`
                            visible    = I_client->_bind( val       = layout->visible
@@ -427,19 +432,19 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                         i_layout = layout
                         i_xml    = cells ).
 
-      ELSEIF layout->rollname CP `*_XML_S_RADIALMICROCHART`.
+      ELSEIF layout->rollname CP `*_XML_S_RADIALCHART`.
 
         xml_build_radial_microchart( i_layout = layout
                                      I_client = I_client
                                      i_xml    = cells ).
 
-      ELSEIF layout->rollname CP `*_XML_S_PROGRESSINDICATOR`.
+      ELSEIF layout->rollname CP `*_XML_S_PROGRESSIND`.
 
         xml_build_progress_indicator( i_layout = layout
                                       I_client = I_client
                                       i_xml    = cells ).
 
-      ELSEIF layout->rollname CP `*_XML_S_STATUSINDICATOR`.
+      ELSEIF layout->rollname CP `*_XML_S_STATUSIND`.
 
         xml_build_status_indicator( i_layout = layout
                                     I_client = I_client
@@ -758,5 +763,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                      ELSE I_client->_bind( value ) ).
 
   ENDMETHOD.
+
+
 
 ENDCLASS.

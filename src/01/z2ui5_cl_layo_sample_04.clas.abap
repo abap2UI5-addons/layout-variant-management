@@ -1,21 +1,11 @@
-CLASS z2ui5_cl_layo_sample_02 DEFINITION
+CLASS z2ui5_cl_layo_sample_04 DEFINITION
   PUBLIC
   CREATE PUBLIC.
 
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
-    TYPES  BEGIN OF ty_s_tab.
-    TYPES:   Names             TYPE string,
-             icon              TYPE z2ui5_xml_s_icon,
-             generictag        TYPE z2ui5_xml_s_generictag,
-             progressindicator TYPE z2ui5_xml_s_progressind,
-             radialmicrochart  TYPE z2ui5_xml_s_radialchart,
-             statusindicator   TYPE z2ui5_xml_s_statusind,
-             selkz             TYPE abap_bool,
-           END OF ty_s_tab.
-
-    DATA ms_data   TYPE ty_s_tab.
+    DATA ms_data   TYPE Z2UI5_T_11.
     DATA mo_layout TYPE REF TO z2ui5_cl_layo_manager.
 
   PROTECTED SECTION.
@@ -34,7 +24,7 @@ CLASS z2ui5_cl_layo_sample_02 DEFINITION
 ENDCLASS.
 
 
-CLASS z2ui5_cl_layo_sample_02 IMPLEMENTATION.
+CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
 
   METHOD on_event.
 
@@ -59,7 +49,6 @@ CLASS z2ui5_cl_layo_sample_02 IMPLEMENTATION.
 
     render_main( ).
   ENDMETHOD.
-
 
   METHOD render_main.
 
@@ -98,23 +87,7 @@ CLASS z2ui5_cl_layo_sample_02 IMPLEMENTATION.
 
   METHOD get_data.
 
-    ms_data = VALUE #( names             = 'Viktor'
-                       icon              = VALUE #( src       = 'sap-icon://customer'
-                                                    icon_size = '2rem' )
-                       generictag        = VALUE #( text   = 'Viktor'
-                                                    status = 'Warning'
-                                                    design = 'StatusIconHidden' )
-                       progressindicator = VALUE #( percentvalue = '70'
-                                                    state        = 'Warning'  )
-                       radialmicrochart  = VALUE #( percentage = '70'
-                                                    valuecolor = 'Critical'
-                                                    radialmicrochart_size       = 'S' )
-                       statusindicator   = VALUE #( value              = '70'
-                                                    fillcolor_error    = '100'
-                                                    fillcolor_critical = '80'
-                                                    fillcolor_good     = '40'
-                                                    shapeid            = 'tool'
-                                                    statusindicator_size               = 'Medium' ) ).
+    SELECT SINGLE * FROM Z2UI5_T_11 INTO @ms_data.
 
   ENDMETHOD.
 
@@ -134,25 +107,9 @@ CLASS z2ui5_cl_layo_sample_02 IMPLEMENTATION.
                                                 handle03 = ''
                                                 handle04 = '' ).
 
-    LOOP AT mo_layout->ms_layout-t_layout REFERENCE INTO DATA(layout).
-
-      layout->grid_label_xl = '4'.
-      layout->grid_label_l  = '4'.
-      layout->grid_label_m  = '4'.
-      layout->grid_label_s  = '4'.
-
-      layout->grid_value_xl = '8'.
-      layout->grid_value_l  = '8'.
-      layout->grid_value_m  = '8'.
-      layout->grid_value_s  = '8'.
-
-    ENDLOOP.
-
   ENDMETHOD.
 
   METHOD on_after_navigation.
-
-    CHECK client->check_on_navigated( ).
 
     TRY.
 

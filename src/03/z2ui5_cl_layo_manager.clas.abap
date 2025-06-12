@@ -52,7 +52,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     DATA ms_layout_tmp TYPE ty_s_layout.
     DATA mt_comps      TYPE ty_t_positions.
     DATA mt_sub_cols   TYPE ty_t_sub_columns.
-*    DATA mt_sub_cols_tmp TYPE ty_t_sub_columns.
+      DATA mr_data type ref to data.
 
     CLASS-METHODS factory
       IMPORTING
@@ -113,15 +113,21 @@ CLASS z2ui5_cl_layo_manager DEFINITION
 
     CLASS-METHODS choose_layout
       IMPORTING
-        !control      TYPE  control DEFAULT  m_table
-        handle01      TYPE clike                          OPTIONAL
-        handle02      TYPE clike                          OPTIONAL
-        handle03      TYPE clike                          OPTIONAL
-        handle04      TYPE clike                          OPTIONAL
+        !control      TYPE control DEFAULT  m_table
+        handle01      TYPE clike   OPTIONAL
+        handle02      TYPE clike   OPTIONAL
+        handle03      TYPE clike   OPTIONAL
+        handle04      TYPE clike   OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_Layo_pop_w_sel.
 
+    METHODS sort.
+
   PRIVATE SECTION.
+
+
+
+
     CLASS-METHODS create_layout_obj
       IMPORTING
         layout_guid   TYPE clike       OPTIONAL
@@ -181,7 +187,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                       ( control =  m_table       index = 8 attribute = 'SEQUENCE' )
                       ( control =  m_table       index = 9 attribute = 'SUBCOLUMN' )
                       ( control =  m_table       index = 10 attribute = 'REFERENCE_FIELD' )
-                      ( control =  m_table       index = 11 attribute = 'NO_LEADING_ZERO' )
+                      ( control =  m_table       index = 11 attribute = 'SORTING' )
+                      ( control =  m_table       index = 12 attribute = 'NO_LEADING_ZERO' )
                       ( control =  ui_table      index = 1 attribute = 'TLABEL' )
                       ( control =  ui_table      index = 2 attribute = 'VISIBLE' )
                       ( control =  ui_table      index = 3 attribute = 'ALTERNATIVE_TEXT' )
@@ -209,6 +216,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                                 handle02 = handle02
                                 handle03 = handle03
                                 handle04 = handle04 ).
+
+   result->mr_data = data.
 
   ENDMETHOD.
 
@@ -258,7 +267,6 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     SELECT guid,
            pos_guid,
-
            fname,
            rollname,
            visible,
@@ -278,7 +286,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
            grid_value_m,
            grid_label_s,
            grid_value_s,
-           no_leading_zero
+           no_leading_zero,
+           sorting
       FROM z2ui5_t_12
       WHERE guid = @layout_guid
       INTO CORRESPONDING FIELDS OF TABLE @result ##SUBRC_OK.
@@ -347,7 +356,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                                     handle04 = handle04  ).
 
     result = z2ui5_cl_Layo_pop_w_sel=>factory( i_tab   = layouts
-                                                    i_title = 'Layouts' ).
+                                               i_title = 'Layouts' ).
 
   ENDMETHOD.
 
@@ -376,31 +385,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    SELECT guid,
-           pos_guid,
-           fname,
-           rollname,
-           visible,
-           merge,
-           halign,
-           importance,
-           width,
-           sequence,
-           alternative_text,
-           reference_field,
-           subcolumn,
-           grid_label_xl,
-           grid_value_xl,
-           grid_label_l,
-           grid_value_l,
-           grid_label_m,
-           grid_value_m,
-           grid_label_s,
-           grid_value_s,
-           no_leading_zero
-      FROM z2ui5_t_12
-      WHERE guid = @layout_guid
-      INTO TABLE @DATA(t_pos) ##SUBRC_OK.
+    DATA(t_pos) = select_layout_components( layout_guid ).
 
     IF sy-subrc <> 0.
       RETURN.
@@ -474,31 +459,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     IF def-layout IS NOT INITIAL.
 
-      SELECT guid,
-             pos_guid,
-             fname,
-             rollname,
-             visible,
-             merge,
-             halign,
-             importance,
-             width,
-             sequence,
-             alternative_text,
-             reference_field,
-             subcolumn,
-             grid_label_xl,
-             grid_value_xl,
-             grid_label_l,
-             grid_value_l,
-             grid_label_m,
-             grid_value_m,
-             grid_label_s,
-             grid_value_s,
-             no_leading_zero
-        FROM z2ui5_t_12
-        WHERE guid = @def-guid
-        INTO TABLE @DATA(t_pos) ##SUBRC_OK.
+      DATA(t_pos) = select_layout_components( def-guid ).
 
       " Structure was changed - Field Added
       LOOP AT t_comp REFERENCE INTO DATA(r_comp).
@@ -521,7 +482,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
           DATA(layout) = VALUE ty_s_positions( ).
 
           layout = CORRESPONDING #( pos->* ).
-          layout-tlabel = set_text( layout ).
+          layout-rollname = r_comp->type->get_relative_name( ).
+          layout-tlabel   = set_text( layout ).
 
           DATA(typekind) = t_comp[ name = pos->fname ]-type->type_kind.
 
@@ -655,6 +617,31 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                             handle03 = handle03
                             handle04 = handle04
                             def      = abap_true ] OPTIONAL ).
+
+  ENDMETHOD.
+
+  METHOD sort.
+
+    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+
+    DATA(sortorder) = VALUE abap_sortorder_tab(
+                                FOR layout IN ms_layout-t_layout  WHERE ( sorting <> space )
+                                ( descending = COND #( WHEN layout-sorting = 'DESCENDING' THEN abap_true )
+                                  name       = layout-fname ) ).
+
+    IF sortorder IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    TRY.
+
+        ASSIGN mr_data->* TO <table>.
+
+        SORT <table>
+             BY (sortorder).
+      CATCH cx_sy_dyn_table_ill_comp_val. "##NO_HANDLER
+      catch cx_root.
+    ENDTRY.
 
   ENDMETHOD.
 

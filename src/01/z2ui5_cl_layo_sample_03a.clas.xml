@@ -3,13 +3,13 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>Z2UI5_CL_LAYO_SAMPLE_02</CLSNAME>
+    <CLSNAME>Z2UI5_CL_LAYO_SAMPLE_03A</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Layout - Simple Form with Indicators</DESCRIPT>
+    <DESCRIPT>Layout - Table</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
-    <UNICODE>X</UNICODE>
+    <UNICODE>5</UNICODE>
    </VSEOCLASS>
   </asx:values>
  </asx:abap>

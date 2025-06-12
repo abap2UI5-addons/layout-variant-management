@@ -9,9 +9,9 @@ CLASS z2ui5_cl_layo_sample_01 DEFINITION
     TYPES:   Names             TYPE string,
              icon              TYPE z2ui5_xml_s_icon,
              generictag        TYPE z2ui5_xml_s_generictag,
-             progressindicator TYPE z2ui5_xml_s_progressindicator,
-             radialmicrochart  TYPE z2ui5_xml_s_radialmicrochart,
-             statusindicator   TYPE z2ui5_xml_s_statusindicator,
+             progressindicator TYPE z2ui5_xml_s_progressind,
+             radialmicrochart  TYPE z2ui5_xml_s_radialchart,
+             statusindicator   TYPE z2ui5_xml_s_statusind,
              selkz             TYPE abap_bool,
            END OF ty_s_tab.
     TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
@@ -89,7 +89,7 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
 
     on_event( ).
 
-    mo_layout->sort( i_data = ref #( mt_table ) ).
+    mo_layout->sort(  ).
 
     IF client->get( )-check_on_navigated = abap_true.
       on_after_navigation( ).
@@ -162,8 +162,6 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
 
         DATA(app) = CAST z2ui5_cl_layo_pop( client->get_app( client->get( )-s_draft-id_prev_app ) ).
         mo_layout = app->mo_layout.
-
-        mo_layout->sort( i_data = REF #( mt_table ) ).
 
         IF app->mv_rerender = abap_true.
           "e.g. subcolumns need rerendering to work ..

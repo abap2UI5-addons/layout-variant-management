@@ -9,9 +9,9 @@ CLASS z2ui5_cl_layo_sample_02 DEFINITION
     TYPES:   Names             TYPE string,
              icon              TYPE z2ui5_xml_s_icon,
              generictag        TYPE z2ui5_xml_s_generictag,
-             progressindicator TYPE z2ui5_xml_s_progressindicator,
-             radialmicrochart  TYPE z2ui5_xml_s_radialmicrochart,
-             statusindicator   TYPE z2ui5_xml_s_statusindicator,
+             progressindicator TYPE z2ui5_xml_s_progressind,
+             radialmicrochart  TYPE z2ui5_xml_s_radialchart,
+             statusindicator   TYPE z2ui5_xml_s_statusind,
              selkz             TYPE abap_bool,
            END OF ty_s_tab.
 

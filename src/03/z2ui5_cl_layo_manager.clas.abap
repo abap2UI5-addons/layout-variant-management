@@ -640,6 +640,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
         SORT <table>
              BY (sortorder).
       CATCH cx_sy_dyn_table_ill_comp_val. "##NO_HANDLER
+      catch cx_root.
     ENDTRY.
 
   ENDMETHOD.

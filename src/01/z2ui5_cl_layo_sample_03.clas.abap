@@ -123,8 +123,6 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
         DATA(app) = CAST z2ui5_cl_layo_pop( client->get_app( client->get( )-s_draft-id_prev_app ) ).
         mo_layout = app->mo_layout.
 
-        mo_layout->sort(  ).
-
         IF app->mv_rerender = abap_true.
           " e.g. subcolumns need rerendering to work ..
           render_main( ).

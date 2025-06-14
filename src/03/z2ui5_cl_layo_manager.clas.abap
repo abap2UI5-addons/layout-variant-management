@@ -37,8 +37,8 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     TYPES:   tlabel            TYPE string,
              t_sub_col         TYPE ty_t_sub_columns,
              show_no_zeros     TYPE abap_bool,
-             grid_layout       TYPE char20,
-             grid_layout_label TYPE char20,
+             grid_layout       TYPE string,
+             grid_layout_label TYPE string,
            END OF ty_s_positions.
     TYPES ty_t_positions TYPE STANDARD TABLE OF ty_s_positions WITH EMPTY KEY.
 

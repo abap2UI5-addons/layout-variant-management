@@ -33,12 +33,12 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     TYPES ty_t_sub_columns TYPE STANDARD TABLE OF ty_s_sub_columns WITH EMPTY KEY.
 
     TYPES  BEGIN OF ty_s_positions.
-             INCLUDE TYPE z2ui5_t_12.
-    TYPES:   tlabel            TYPE string,
-             t_sub_col         TYPE ty_t_sub_columns,
-             show_no_zeros     TYPE abap_bool,
-             grid_layout       TYPE string,
-             grid_layout_label TYPE string,
+    INCLUDE TYPE z2ui5_t_12.
+    TYPES: tlabel            TYPE string,
+           t_sub_col         TYPE ty_t_sub_columns,
+           show_no_zeros     TYPE abap_bool,
+           grid_layout       TYPE string,
+           grid_layout_label TYPE string,
            END OF ty_s_positions.
     TYPES ty_t_positions TYPE STANDARD TABLE OF ty_s_positions WITH EMPTY KEY.
 
@@ -52,7 +52,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     DATA ms_layout_tmp TYPE ty_s_layout.
     DATA mt_comps      TYPE ty_t_positions.
     DATA mt_sub_cols   TYPE ty_t_sub_columns.
-      DATA mr_data type ref to data.
+    DATA mr_data TYPE REF TO data.
 
     CLASS-METHODS factory
       IMPORTING
@@ -124,9 +124,6 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     METHODS sort.
 
   PRIVATE SECTION.
-
-
-
 
     CLASS-METHODS create_layout_obj
       IMPORTING
@@ -217,7 +214,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                                 handle03 = handle03
                                 handle04 = handle04 ).
 
-   result->mr_data = data.
+    result->mr_data = data.
 
   ENDMETHOD.
 
@@ -549,6 +546,9 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     result-fname    = comp->name.
     result-rollname = comp->type->get_relative_name( ).
+    IF result-rollname   IS INITIAL.
+      result-rollname = result-fname.
+    ENDIF.
 
     check_zeros_option( EXPORTING i_typekind = comp->type->type_kind
                         CHANGING  c_layout   = result ).
@@ -640,7 +640,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
         SORT <table>
              BY (sortorder).
       CATCH cx_sy_dyn_table_ill_comp_val. "##NO_HANDLER
-      catch cx_root.
+      CATCH cx_root.
     ENDTRY.
 
   ENDMETHOD.

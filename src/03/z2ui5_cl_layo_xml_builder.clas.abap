@@ -26,6 +26,10 @@ CLASS z2ui5_cl_layo_xml_builder DEFINITION
         i_title  TYPE string OPTIONAL.
 
   PROTECTED SECTION.
+
+
+
+
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_s_grid_layout,
              label    TYPE string,
@@ -359,7 +363,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                       growingthreshold = i_growingthreshold
                       width            = 'auto'
                       mode             = COND #( WHEN i_sel_mode = space THEN `None` ELSE i_sel_mode  )
-                      items            = i_client->_bind_edit( i_data->* )
+                      items            = i_client->_bind_edit( val = i_data->* )
                       selectionchange  = i_client->_event( 'SELECTION_CHANGE' ) ).
 
     DATA(toolbar) = table->header_toolbar(

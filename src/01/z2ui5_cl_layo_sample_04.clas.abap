@@ -10,6 +10,7 @@ CLASS z2ui5_cl_layo_sample_04 DEFINITION
 
   PROTECTED SECTION.
     DATA client            TYPE REF TO z2ui5_if_client.
+    DATA check_initialized TYPE abap_bool.
 
     METHODS on_init.
     METHODS on_event.
@@ -30,22 +31,23 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN 'BACK'.
-        client->nav_app_leave( ).
+        client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
 
       WHEN OTHERS.
+
         z2ui5_cl_layo_pop=>on_event_layout( client = client
                                             layout = mo_layout ).
 
     ENDCASE.
-
   ENDMETHOD.
 
   METHOD on_init.
 
     get_data( ).
-    init_layout( ).
-    render_main( ).
 
+    init_layout( ).
+
+    render_main( ).
   ENDMETHOD.
 
   METHOD render_main.
@@ -70,13 +72,14 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
   METHOD z2ui5_if_app~main.
     me->client = client.
 
-    IF client->check_on_init( ).
+    IF check_initialized = abap_false.
+      check_initialized = abap_true.
       on_init( ).
     ENDIF.
 
     on_event( ).
 
-    IF client->check_on_navigated( ).
+    IF client->get( )-check_on_navigated = abap_true.
       on_after_navigation( ).
     ENDIF.
 
@@ -94,7 +97,9 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(class) = z2ui5_cL_util=>rtti_get_classname_by_ref( me ).
+    DATA(class) = cl_abap_classdescr=>get_class_name( me ).
+    SHIFT class LEFT DELETING LEADING '\CLASS='.
+
     mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>ui_simpleform
                                                 data     = REF #( ms_data )
                                                 handle01 = class

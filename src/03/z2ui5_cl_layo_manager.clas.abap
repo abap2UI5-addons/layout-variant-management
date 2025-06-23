@@ -33,12 +33,12 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     TYPES ty_t_sub_columns TYPE STANDARD TABLE OF ty_s_sub_columns WITH EMPTY KEY.
 
     TYPES  BEGIN OF ty_s_positions.
-    INCLUDE TYPE z2ui5_t_12.
-    TYPES: tlabel            TYPE string,
-           t_sub_col         TYPE ty_t_sub_columns,
-           show_no_zeros     TYPE abap_bool,
-           grid_layout       TYPE string,
-           grid_layout_label TYPE string,
+             INCLUDE TYPE z2ui5_t_12.
+    TYPES:   tlabel            TYPE string,
+             t_sub_col         TYPE ty_t_sub_columns,
+             show_no_zeros     TYPE abap_bool,
+             grid_layout       TYPE string,
+             grid_layout_label TYPE string,
            END OF ty_s_positions.
     TYPES ty_t_positions TYPE STANDARD TABLE OF ty_s_positions WITH EMPTY KEY.
 
@@ -52,7 +52,8 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     DATA ms_layout_tmp TYPE ty_s_layout.
     DATA mt_comps      TYPE ty_t_positions.
     DATA mt_sub_cols   TYPE ty_t_sub_columns.
-    DATA mr_data TYPE REF TO data.
+    DATA mr_data       TYPE REF TO data.
+    DATA mr_data_tmp   TYPE REF TO data.
 
     CLASS-METHODS factory
       IMPORTING
@@ -124,7 +125,6 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     METHODS sort.
 
   PRIVATE SECTION.
-
     CLASS-METHODS create_layout_obj
       IMPORTING
         layout_guid   TYPE clike       OPTIONAL
@@ -167,6 +167,15 @@ CLASS z2ui5_cl_layo_manager DEFINITION
         !position     TYPE  ty_s_positions
       RETURNING
         VALUE(result) TYPE  ty_s_positions.
+
+    CLASS-METHODS create_ref_of_data
+      IMPORTING
+        i_data  TYPE REF TO data
+        i_comp  TYPE cl_abap_structdescr=>component_table
+        !layout TYPE REF TO z2ui5_cl_layo_manager
+      RAISING
+        cx_sy_struct_creation
+        cx_sy_table_creation.
 
 ENDCLASS.
 
@@ -213,8 +222,6 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                                 handle02 = handle02
                                 handle03 = handle03
                                 handle04 = handle04 ).
-
-    result->mr_data = data.
 
   ENDMETHOD.
 
@@ -294,7 +301,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
   METHOD set_text.
 
     IF layout-alternative_text IS INITIAL.
-      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-rollname )-short.
+      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-rollname  )-short.
     ELSE.
       result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-alternative_text )-short.
     ENDIF.
@@ -433,6 +440,12 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
 
+    IF control <> others AND control <> ui_simpleform.
+      create_ref_of_data( i_data = data
+                          i_comp = t_comp
+                          layout = result ).
+    ENDIF.
+
     LOOP AT t_comp INTO DATA(comp).
       IF comp-type->type_kind = cl_abap_elemdescr=>typekind_oref.
         DELETE t_comp.
@@ -531,6 +544,21 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD create_ref_of_data.
+
+    layout->mr_data = i_data.
+
+    DATA(new_struct_desc) = cl_abap_structdescr=>create( i_comp ).
+
+    DATA(new_table_desc) = cl_abap_tabledescr=>create( p_line_type  = new_struct_desc
+
+                                                       p_table_kind = cl_abap_tabledescr=>tablekind_std ).
+    CREATE DATA layout->mr_data_tmp TYPE HANDLE new_table_desc.
+
+    layout->mr_data_tmp->* = layout->mr_data->*.
+
+  ENDMETHOD.
+
   METHOD check_zeros_option.
 
     IF    i_typekind = cl_abap_elemdescr=>typekind_num
@@ -546,7 +574,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     result-fname    = comp->name.
     result-rollname = comp->type->get_relative_name( ).
-    IF result-rollname   IS INITIAL.
+
+    IF result-rollname IS INITIAL.
       result-rollname = result-fname.
     ENDIF.
 
@@ -635,10 +664,14 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     TRY.
 
+*        IF mr_data->* <> mr_data_tmp->*.
+
         ASSIGN mr_data->* TO <table>.
 
         SORT <table>
              BY (sortorder).
+
+*        ENDIF.
       CATCH cx_sy_dyn_table_ill_comp_val. "##NO_HANDLER
       CATCH cx_root.
     ENDTRY.

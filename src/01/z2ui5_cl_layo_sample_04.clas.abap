@@ -5,11 +5,11 @@ CLASS z2ui5_cl_layo_sample_04 DEFINITION
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
-    DATA ms_data   TYPE Z2UI5_T_11.
+    DATA ms_data   TYPE z2ui5_t_11.
     DATA mo_layout TYPE REF TO z2ui5_cl_layo_manager.
 
   PROTECTED SECTION.
-    DATA client            TYPE REF TO z2ui5_if_client.
+    DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS on_init.
     METHODS on_event.
@@ -33,19 +33,20 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
         client->nav_app_leave( ).
 
       WHEN OTHERS.
+
         z2ui5_cl_layo_pop=>on_event_layout( client = client
                                             layout = mo_layout ).
 
     ENDCASE.
-
   ENDMETHOD.
 
   METHOD on_init.
 
     get_data( ).
-    init_layout( ).
-    render_main( ).
 
+    init_layout( ).
+
+    render_main( ).
   ENDMETHOD.
 
   METHOD render_main.
@@ -60,8 +61,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
     z2ui5_cl_layo_xml_builder=>xml_build_simple_form( i_data   = REF #( ms_data )
                                                       i_xml    = page
                                                       i_client = client
-                                                      i_layout = mo_layout
-    ).
+                                                      i_layout = mo_layout ).
 
     client->view_display( view->stringify( ) ).
 
@@ -76,7 +76,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
 
     on_event( ).
 
-    IF client->check_on_navigated( ).
+    IF client->get( )-check_on_navigated = abap_true.
       on_after_navigation( ).
     ENDIF.
 
@@ -84,7 +84,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
 
   METHOD get_data.
 
-    SELECT SINGLE * FROM Z2UI5_T_11 INTO @ms_data.
+    SELECT SINGLE * FROM z2ui5_t_11 INTO @ms_data.
 
   ENDMETHOD.
 
@@ -95,6 +95,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
     ENDIF.
 
     DATA(class) = z2ui5_cL_util=>rtti_get_classname_by_ref( me ).
+
     mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>ui_simpleform
                                                 data     = REF #( ms_data )
                                                 handle01 = class

@@ -26,6 +26,10 @@ CLASS z2ui5_cl_layo_xml_builder DEFINITION
         i_title  TYPE string OPTIONAL.
 
   PROTECTED SECTION.
+
+
+
+
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_s_grid_layout,
              label    TYPE string,

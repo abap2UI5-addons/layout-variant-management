@@ -13,7 +13,7 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     TYPES ty_t_sorting TYPE STANDARD TABLE OF ty_s_sorting WITH EMPTY KEY.
 
     TYPES BEGIN OF ty_s_layo.
-    INCLUDE TYPE z2ui5_t_11.
+            INCLUDE TYPE z2ui5_t_11.
     TYPES   selkz  TYPE abap_bool.
     TYPES   active TYPE c length 1.
     TYPES END OF ty_s_layo.
@@ -1133,23 +1133,22 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
   METHOD check_grid_sum.
 
     IF ( value ) > 12.
-      DATA(ls_msg) = z2ui5_cl_util=>msg_get_by_msg(
+ DATA(msg) = z2ui5_cl_util=>msg_get_by_msg(
            id     = '/scmtms/common'
            no     = '154'
            v1     = '12'
        ).
-      " MESSAGE e154(/scmtms/common) WITH '12' INTO msg.
       result = abap_true.
     ENDIF.
 
-    client->message_toast_display( ls_msg-text ).
+    client->message_toast_display( msg-text ).
 
   ENDMETHOD.
 
   METHOD render_add_gridlayout.
 
     TYPES: BEGIN OF ty_s_col,
-             col TYPE c LENGTH 2,
+             col TYPE c length 2,
            END OF ty_s_col.
 
     DATA t_col TYPE STANDARD TABLE OF ty_s_col.

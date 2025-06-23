@@ -37,8 +37,8 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     TYPES:   tlabel            TYPE string,
              t_sub_col         TYPE ty_t_sub_columns,
              show_no_zeros     TYPE abap_bool,
-             grid_layout       TYPE char20,
-             grid_layout_label TYPE char20,
+             grid_layout       TYPE string,
+             grid_layout_label TYPE string,
            END OF ty_s_positions.
     TYPES ty_t_positions TYPE STANDARD TABLE OF ty_s_positions WITH EMPTY KEY.
 
@@ -301,9 +301,9 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
   METHOD set_text.
 
     IF layout-alternative_text IS INITIAL.
-      result = z2ui5_cl_util=>rtti_get_data_element_texts( CONV #( layout-rollname ) )-short.
+      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-rollname  )-short.
     ELSE.
-      result = z2ui5_cl_util=>rtti_get_data_element_texts( CONV #( layout-alternative_text ) )-short.
+      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-alternative_text )-short.
     ENDIF.
 
     IF result IS INITIAL.
@@ -575,6 +575,10 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     result-fname    = comp->name.
     result-rollname = comp->type->get_relative_name( ).
 
+    IF result-rollname IS INITIAL.
+      result-rollname = result-fname.
+    ENDIF.
+
     check_zeros_option( EXPORTING i_typekind = comp->type->type_kind
                         CHANGING  c_layout   = result ).
 
@@ -662,10 +666,10 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
 *        IF mr_data->* <> mr_data_tmp->*.
 
-          ASSIGN mr_data->* TO <table>.
+        ASSIGN mr_data->* TO <table>.
 
-          SORT <table>
-               BY (sortorder).
+        SORT <table>
+             BY (sortorder).
 
 *        ENDIF.
       CATCH cx_sy_dyn_table_ill_comp_val. "##NO_HANDLER

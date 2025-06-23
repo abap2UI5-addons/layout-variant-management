@@ -5,12 +5,11 @@ CLASS z2ui5_cl_layo_sample_04 DEFINITION
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
-    DATA ms_data   TYPE Z2UI5_T_11.
+    DATA ms_data   TYPE z2ui5_t_11.
     DATA mo_layout TYPE REF TO z2ui5_cl_layo_manager.
 
   PROTECTED SECTION.
-    DATA client            TYPE REF TO z2ui5_if_client.
-    DATA check_initialized TYPE abap_bool.
+    DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS on_init.
     METHODS on_event.
@@ -31,7 +30,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN 'BACK'.
-        client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
+        client->nav_app_leave( ).
 
       WHEN OTHERS.
 
@@ -62,8 +61,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
     z2ui5_cl_layo_xml_builder=>xml_build_simple_form( i_data   = REF #( ms_data )
                                                       i_xml    = page
                                                       i_client = client
-                                                      i_layout = mo_layout
-    ).
+                                                      i_layout = mo_layout ).
 
     client->view_display( view->stringify( ) ).
 
@@ -72,8 +70,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
   METHOD z2ui5_if_app~main.
     me->client = client.
 
-    IF check_initialized = abap_false.
-      check_initialized = abap_true.
+    IF client->check_on_init( ).
       on_init( ).
     ENDIF.
 
@@ -87,7 +84,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
 
   METHOD get_data.
 
-    SELECT SINGLE * FROM Z2UI5_T_11 INTO @ms_data.
+    SELECT SINGLE * FROM z2ui5_t_11 INTO @ms_data.
 
   ENDMETHOD.
 
@@ -97,8 +94,7 @@ CLASS z2ui5_cl_layo_sample_04 IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(class) = cl_abap_classdescr=>get_class_name( me ).
-    SHIFT class LEFT DELETING LEADING '\CLASS='.
+    DATA(class) = z2ui5_cL_util=>rtti_get_classname_by_ref( me ).
 
     mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>ui_simpleform
                                                 data     = REF #( ms_data )

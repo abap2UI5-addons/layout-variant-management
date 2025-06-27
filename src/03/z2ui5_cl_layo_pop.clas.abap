@@ -15,7 +15,7 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     TYPES BEGIN OF ty_s_layo.
             INCLUDE TYPE z2ui5_t_11.
     TYPES   selkz  TYPE abap_bool.
-    TYPES   active TYPE c length 1.
+    TYPES   active TYPE c LENGTH 1.
     TYPES END OF ty_s_layo.
     TYPES ty_t_layo TYPE STANDARD TABLE OF ty_s_layo WITH EMPTY KEY.
 
@@ -209,37 +209,37 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
       CASE control->attribute.
         WHEN 'TLABEL'.
-          DATA(col) = columns->column( '7rem' )->header( `` ).
+          DATA(col) = columns->column( `15%` )->header( `` ).
           col->text( `Row` ).
         WHEN 'VISIBLE'.
-          col = columns->column( '3.5rem' )->header( `` ).
+          col = columns->column( `10%` )->header( `` ).
           col->text( 'Visible' ).
         WHEN 'MERGE'.
-          col = columns->column( '3.5rem' )->header( `` ).
+          col = columns->column( `10%` )->header( `` ).
           col->text( 'Merge' ).
         WHEN 'WIDTH'.
-          col = columns->column( `3.5rem` )->header( `` ).
+          col = columns->column( `10%` )->header( `` ).
           col->text( 'Width in rem' ).
         WHEN 'SEQUENCE'.
-          col = columns->column( `3.5rem` )->header( `` ).
+          col = columns->column( `10%` )->header( `` ).
           col->text( 'Sequence' ).
         WHEN 'ALTERNATIVE_TEXT'.
-          col = columns->column( `7rem` )->header( `` ).
+          col = columns->column( `10%` )->header( `` ).
           col->text( 'Alternative Text' ).
         WHEN 'REFERENCE_FIELD'.
-          col = columns->column( `7rem` )->header( `` ).
+          col = columns->column( `10%` )->header( `` ).
           col->text( 'Reference Field' ).
         WHEN 'SUBCOLUMN'.
-          col = columns->column( `3.5rem` )->header( `` ).
+          col = columns->column( `15%` )->header( `` ).
           col->text( 'Subcolumn' ).
         WHEN 'GRID_LAYOUT'.
-          col = columns->column( `7rem` )->header( `` ).
+          col = columns->column( `5%` )->header( `` ).
           col->text( 'Layout' ).
-        WHEN 'NO_LEADING_ZERO'.
-          col = columns->column( `5rem` )->header( `` ).
-          col->text( 'no Leading Zeros' ).
+        WHEN 'NO_CONVEXIT'.
+          col = columns->column( `10%` )->header( `` ).
+          col->text( 'No Conversion Exit' ).
         WHEN 'SORTING'.
-          col = columns->column( `5rem` )->header( `` ).
+          col = columns->column( `10%` )->header( `` ).
           col->text( 'Sorting' ).
       ENDCASE.
 
@@ -262,13 +262,14 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
           cells->switch( type  = 'AcceptReject'
                          state = |\{{ comp-name }\}| ).
 
-        WHEN 'NO_LEADING_ZERO'.
+        WHEN 'NO_CONVEXIT'.
 
-          cells->vbox( visible = |\{SHOW_NO_ZEROS\}|
+          cells->vbox( visible = |\{SHOW_CONVEXIT\}|
 
-          )->switch(   type    = 'AcceptReject'
-                     state   = |\{{ comp-name }\}|
-                     enabled = |\{SHOW_NO_ZEROS\}| ).
+          )->switch( "type  = 'AcceptReject'
+                     customtexton = |\{CONVEXIT\}|
+                     CUSTOMTEXTOFF = |\{CONVEXIT\}|
+                     state = |\{{ comp-name }\}| ).
 
         WHEN 'WIDTH'.
 
@@ -291,7 +292,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
           cells->button( text  = |\{{ comp-name }\}|
                          icon  = `sap-icon://add`
-                         width       = '5rem'
+                         width = '100%'
                          press = client->_event( val   = 'CALL_SUBCOLUMN'
                                                  t_arg = VALUE #( ( `${FNAME}` ) ) ) ).
 
@@ -315,7 +316,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
           cells->button( text  = |\{{ comp-name }\}|
                          icon  = `sap-icon://grid`
-                           width       = '5rem'
+                         width = '5rem'
                          press = client->_event( val   = 'CALL_GRIDLAYOUT'
                                                  t_arg = VALUE #( ( `${FNAME}` ) ) ) ).
 
@@ -1032,16 +1033,6 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
         RETURN.
       ENDIF.
 
-      IF layout-no_leading_zero <> layout_tmp-no_leading_zero.
-        mv_rerender = abap_true.
-        RETURN.
-      ENDIF.
-
-      IF layout-no_leading_zero <> layout_tmp-no_leading_zero.
-        mv_rerender = abap_true.
-        RETURN.
-      ENDIF.
-
       IF    layout-grid_value_xl <> layout_tmp-grid_value_xl
          OR layout-grid_value_l  <> layout_tmp-grid_value_l
          OR layout-grid_value_m  <> layout_tmp-grid_value_m
@@ -1131,13 +1122,12 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD check_grid_sum.
+    " TODO: parameter TYPE is never used (ABAP cleaner)
 
     IF ( value ) > 12.
- DATA(msg) = z2ui5_cl_util=>msg_get_by_msg(
-           id     = '/scmtms/common'
-           no     = '154'
-           v1     = '12'
-       ).
+      DATA(msg) = z2ui5_cl_util=>msg_get_by_msg( id = '/scmtms/common'
+                                                 no = '154'
+                                                 v1 = '12' ).
       result = abap_true.
     ENDIF.
 
@@ -1148,7 +1138,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
   METHOD render_add_gridlayout.
 
     TYPES: BEGIN OF ty_s_col,
-             col TYPE c length 2,
+             col TYPE c LENGTH 2,
            END OF ty_s_col.
 
     DATA t_col TYPE STANDARD TABLE OF ty_s_col.

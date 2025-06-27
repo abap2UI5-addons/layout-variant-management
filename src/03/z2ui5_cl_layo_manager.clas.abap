@@ -36,9 +36,10 @@ CLASS z2ui5_cl_layo_manager DEFINITION
              INCLUDE TYPE z2ui5_t_12.
     TYPES:   tlabel            TYPE string,
              t_sub_col         TYPE ty_t_sub_columns,
-             show_no_zeros     TYPE abap_bool,
              grid_layout       TYPE string,
              grid_layout_label TYPE string,
+             show_convexit     TYPE abap_bool,
+             convexit          TYPE string,
            END OF ty_s_positions.
     TYPES ty_t_positions TYPE STANDARD TABLE OF ty_s_positions WITH EMPTY KEY.
 
@@ -53,7 +54,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     DATA mt_comps      TYPE ty_t_positions.
     DATA mt_sub_cols   TYPE ty_t_sub_columns.
     DATA mr_data       TYPE REF TO data.
-    DATA mr_data_tmp   TYPE REF TO data.
+*    DATA mr_data_tmp   TYPE REF TO data.
 
     CLASS-METHODS factory
       IMPORTING
@@ -90,6 +91,10 @@ CLASS z2ui5_cl_layo_manager DEFINITION
       RETURNING
         VALUE(result) TYPE  ty_t_positions.
 
+    METHODS data_conversion
+      IMPORTING
+        !output TYPE abap_bool.
+
     CLASS-METHODS set_text
       IMPORTING
         !layout       TYPE  ty_s_positions
@@ -124,6 +129,14 @@ CLASS z2ui5_cl_layo_manager DEFINITION
 
     METHODS sort.
 
+  PROTECTED SECTION.
+    CLASS-METHODS get_conversion_exit
+      IMPORTING
+        !type         TYPE REF TO cl_abap_datadescr
+        !layout       TYPE ty_s_positions
+      RETURNING
+        VALUE(result) TYPE ty_s_positions.
+
   PRIVATE SECTION.
     CLASS-METHODS create_layout_obj
       IMPORTING
@@ -156,26 +169,11 @@ CLASS z2ui5_cl_layo_manager DEFINITION
       RETURNING
         VALUE(result) TYPE  ty_s_positions.
 
-    CLASS-METHODS check_zeros_option
-      IMPORTING
-        i_typekind TYPE abap_typekind
-      CHANGING
-        c_layout   TYPE  ty_s_positions.
-
     CLASS-METHODS default_grid_layout
       IMPORTING
         !position     TYPE  ty_s_positions
       RETURNING
         VALUE(result) TYPE  ty_s_positions.
-
-    CLASS-METHODS create_ref_of_data
-      IMPORTING
-        i_data  TYPE REF TO data
-        i_comp  TYPE cl_abap_structdescr=>component_table
-        !layout TYPE REF TO z2ui5_cl_layo_manager
-      RAISING
-        cx_sy_struct_creation
-        cx_sy_table_creation.
 
 ENDCLASS.
 
@@ -188,13 +186,13 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                       ( control =  m_table       index = 1 attribute = 'TLABEL' )
                       ( control =  m_table       index = 2 attribute = 'VISIBLE' )
                       ( control =  m_table       index = 3 attribute = 'MERGE' )
-                      ( control =  m_table       index = 6 attribute = 'WIDTH' )
-                      ( control =  m_table       index = 7 attribute = 'ALTERNATIVE_TEXT' )
-                      ( control =  m_table       index = 8 attribute = 'SEQUENCE' )
-                      ( control =  m_table       index = 9 attribute = 'SUBCOLUMN' )
-                      ( control =  m_table       index = 10 attribute = 'REFERENCE_FIELD' )
-                      ( control =  m_table       index = 11 attribute = 'SORTING' )
-                      ( control =  m_table       index = 12 attribute = 'NO_LEADING_ZERO' )
+                      ( control =  m_table       index = 4 attribute = 'WIDTH' )
+                      ( control =  m_table       index = 5 attribute = 'ALTERNATIVE_TEXT' )
+                      ( control =  m_table       index = 6 attribute = 'SEQUENCE' )
+                      ( control =  m_table       index = 7 attribute = 'SUBCOLUMN' )
+                      ( control =  m_table       index = 8 attribute = 'REFERENCE_FIELD' )
+                      ( control =  m_table       index = 9 attribute = 'SORTING' )
+                      ( control =  m_table       index = 10 attribute = 'NO_CONVEXIT' )
                       ( control =  ui_table      index = 1 attribute = 'TLABEL' )
                       ( control =  ui_table      index = 2 attribute = 'VISIBLE' )
                       ( control =  ui_table      index = 3 attribute = 'ALTERNATIVE_TEXT' )
@@ -203,15 +201,15 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                       ( control =  others        index = 2 attribute = 'VISIBLE' )
                       ( control =  others        index = 3 attribute = 'SEQUENCE' )
                       ( control =  others        index = 4 attribute = 'ALTERNATIVE_TEXT' )
-                      ( control =  others        index = 5 attribute = 'REFERENCE_FIELD' )
-                      ( control =  others        index = 6 attribute = 'WIDTH' )
+*                      ( control =  others        index = 5 attribute = 'REFERENCE_FIELD' )
+*                      ( control =  others        index = 6 attribute = 'WIDTH' )
                       ( control =  ui_simpleform index = 1 attribute = 'TLABEL' )
                       ( control =  ui_simpleform index = 2 attribute = 'VISIBLE' )
                       ( control =  ui_simpleform index = 3 attribute = 'SEQUENCE' )
                       ( control =  ui_simpleform index = 4 attribute = 'ALTERNATIVE_TEXT' )
                       ( control =  ui_simpleform index = 5 attribute = 'REFERENCE_FIELD' )
-                      ( control =  ui_simpleform index = 6 attribute = 'NO_LEADING_ZERO' )
-                      ( control =  ui_simpleform index = 7 attribute = 'GRID_LAYOUT' ) ).
+                      ( control =  ui_simpleform index = 6 attribute = 'GRID_LAYOUT' )
+                      ( control =  ui_simpleform index = 7 attribute = 'NO_CONVEXIT' ) ).
   ENDMETHOD.
 
   METHOD factory.
@@ -290,7 +288,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
            grid_value_m,
            grid_label_s,
            grid_value_s,
-           no_leading_zero,
+           no_convexit,
            sorting
       FROM z2ui5_t_12
       WHERE guid = @layout_guid
@@ -404,15 +402,15 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
       ELSE.
 
-        DATA(no_zero) = layout->no_leading_zero.
+*        DATA(no_zero) = layout->no_leading_zero.
         DATA(fname) = layout->fname.
         DATA(rollname) = layout->rollname.
 
         CLEAR layout->*.
 
-        layout->no_leading_zero = no_zero.
-        layout->fname           = fname.
-        layout->rollname        = rollname.
+*        layout->no_leading_zero = no_zero.
+        layout->fname    = fname.
+        layout->rollname = rollname.
 
         TRY.
             layout->pos_guid = cl_system_uuid=>create_uuid_c32_static( ).
@@ -438,13 +436,10 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     result = NEW #( ).
 
-    DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
+    " Save Ref for Sorting and Conversions
+    result->mr_data = data.
 
-    IF control <> others AND control <> ui_simpleform.
-      create_ref_of_data( i_data = data
-                          i_comp = t_comp
-                          layout = result ).
-    ENDIF.
+    DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
 
     LOOP AT t_comp INTO DATA(comp).
       IF comp-type->type_kind = cl_abap_elemdescr=>typekind_oref.
@@ -495,10 +490,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
           layout-rollname = r_comp->type->get_relative_name( ).
           layout-tlabel   = set_text( layout ).
 
-          DATA(typekind) = t_comp[ name = pos->fname ]-type->type_kind.
-
-          check_zeros_option( EXPORTING i_typekind = typekind
-                              CHANGING  c_layout   = layout ).
+          layout = get_conversion_exit( layout = layout
+                                        type   = r_comp->type ).
 
           APPEND layout TO result->ms_layout-t_layout.
 
@@ -544,32 +537,6 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD create_ref_of_data.
-
-    layout->mr_data = i_data.
-
-    DATA(new_struct_desc) = cl_abap_structdescr=>create( i_comp ).
-
-    DATA(new_table_desc) = cl_abap_tabledescr=>create( p_line_type  = new_struct_desc
-
-                                                       p_table_kind = cl_abap_tabledescr=>tablekind_std ).
-    CREATE DATA layout->mr_data_tmp TYPE HANDLE new_table_desc.
-
-    layout->mr_data_tmp->* = layout->mr_data->*.
-
-  ENDMETHOD.
-
-  METHOD check_zeros_option.
-
-    IF    i_typekind = cl_abap_elemdescr=>typekind_num
-       OR i_typekind = cl_abap_elemdescr=>typekind_char.
-      IF z2ui5_cl_util=>boolean_check_by_name( CONV #( c_layout-rollname ) ) = abap_false.
-        c_layout-show_no_zeros = abap_true.
-      ENDIF.
-    ENDIF.
-
-  ENDMETHOD.
-
   METHOD build_default_positions.
 
     result-fname    = comp->name.
@@ -579,8 +546,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       result-rollname = result-fname.
     ENDIF.
 
-    check_zeros_option( EXPORTING i_typekind = comp->type->type_kind
-                        CHANGING  c_layout   = result ).
+    result = get_conversion_exit( layout = result
+                                  type   = comp->type ).
 
     TRY.
         DATA(pos_guid) = cl_system_uuid=>create_uuid_c32_static( ).
@@ -664,16 +631,104 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     TRY.
 
-*        IF mr_data->* <> mr_data_tmp->*.
-
         ASSIGN mr_data->* TO <table>.
 
         SORT <table>
              BY (sortorder).
 
-*        ENDIF.
       CATCH cx_sy_dyn_table_ill_comp_val. "##NO_HANDLER
       CATCH cx_root.
+    ENDTRY.
+
+  ENDMETHOD.
+
+  METHOD data_conversion.
+
+*    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+*    FIELD-SYMBOLS <struc> TYPE any.
+*
+*    LOOP AT ms_layout-t_layout INTO DATA(layout) WHERE visible = abap_true AND no_convexit = abap_false.
+*
+*      CASE ms_layout-s_head-control.
+*        WHEN ui_table OR m_table.
+*
+*          ASSIGN mr_data->* TO <table>.
+*
+*          LOOP AT <table> ASSIGNING FIELD-SYMBOL(<line>).
+*
+*            ASSIGN COMPONENT layout-fname OF STRUCTURE <line> TO FIELD-SYMBOL(<value>).
+*            IF <value> IS NOT ASSIGNED.
+*              CONTINUE.
+*            ENDIF.
+*
+*            DATA(conex) = COND #( WHEN output = abap_true
+*                                  THEN |CONVERSION_EXIT_{ layout-convexit }_OUTPUT|
+*                                  ELSE |CONVERSION_EXIT_{ layout-convexit }_INPUT| ).
+*
+*            TRY.
+*                CALL FUNCTION conex
+*                  EXPORTING  input  = <value>
+*                  IMPORTING  output = <value>
+*                  EXCEPTIONS OTHERS = 99.
+*                IF sy-subrc <> 0.
+*                ENDIF.
+*              CATCH cx_root.
+*            ENDTRY.
+*
+*          ENDLOOP.
+*
+*        WHEN ui_simpleform.
+*
+*          ASSIGN mr_data->* TO <struc>.
+*
+*          ASSIGN COMPONENT layout-fname OF STRUCTURE <struc> TO <value>.
+*          IF <value> IS NOT ASSIGNED.
+*            CONTINUE.
+*          ENDIF.
+*
+*          conex = COND #( WHEN output = abap_true
+*                          THEN |CONVERSION_EXIT_{ layout-convexit }_OUTPUT|
+*                          ELSE |CONVERSION_EXIT_{ layout-convexit }_INPUT| ).
+*
+*          TRY.
+*              CALL FUNCTION conex
+*                EXPORTING  input  = <value>
+*                IMPORTING  output = <value>
+*                EXCEPTIONS OTHERS = 99.
+*              IF sy-subrc <> 0.
+*              ENDIF.
+*            CATCH cx_root.
+*          ENDTRY.
+*
+*      ENDCASE.
+*
+*    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD get_conversion_exit.
+
+    result = layout.
+
+    TRY.
+
+
+
+
+        type->get_ddic_object( RECEIVING  p_object     = DATA(obj)
+                               EXCEPTIONS not_found    = 1
+                                          no_ddic_type = 2 ).
+        IF sy-subrc <> 0.
+          RETURN.
+        ENDIF.
+
+        result-convexit = VALUE #( obj[ 1 ]-convexit OPTIONAL ).
+
+        IF result-convexit <> space.
+          result-show_convexit = abap_true.
+        ENDIF.
+
+      CATCH cx_root.
+        RETURN.
     ENDTRY.
 
   ENDMETHOD.

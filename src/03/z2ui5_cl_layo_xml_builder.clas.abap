@@ -99,7 +99,7 @@ CLASS z2ui5_cl_layo_xml_builder DEFINITION
       IMPORTING
         I_client      TYPE REF TO z2ui5_if_client
         !value        TYPE any
-        no_zero       TYPE abap_bool
+        !layout       type ref to z2ui5_cl_layo_manager=>ty_s_positions
       RETURNING
         VALUE(result) TYPE string.
 
@@ -238,7 +238,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
         line->input( visible = I_client->_bind( val       = layout->visible
                                                 tab       = I_layout->ms_layout-t_layout
                                                 tab_index = lv_index )
-                     value   = value_formatter( no_zero  = layout->no_leading_zero
+                     value   = value_formatter( layout  = layout
                                                 I_client = I_client
                                                 value    = <value> )
                      enabled = abap_false
@@ -258,7 +258,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
           CONTINUE.
         ENDIF.
 
-        DATA(ref_field) = VALUE #( I_layout->ms_layout-t_layout[ fname = layout->reference_field ] OPTIONAL ).
+        DATA(ref_field) = ref #( I_layout->ms_layout-t_layout[ fname = layout->reference_field ] OPTIONAL ).
         IF sy-subrc <> 0.
           CONTINUE.
         ENDIF.
@@ -269,7 +269,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
         line->input( visible = I_client->_bind( val       = layout->visible
                                                 tab       = I_layout->ms_layout-t_layout
                                                 tab_index = lv_index )
-                     value   = value_formatter( no_zero  = ref_field-no_leading_zero
+                     value   = value_formatter( layout  = ref_field
                                                 I_client = I_client
                                                 value    = <ref_value> )
                      enabled = abap_false ).
@@ -517,9 +517,11 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
   METHOD table_value_formatter.
 
-    result = COND #( WHEN position-no_leading_zero = abap_true
-                     THEN |\{path : '{ position-fname }', type : 'sap.ui.model.odata.type.String', constraints : \{  isDigitSequence : true \} \}|
-                     ELSE |\{{ position-fname }\}| ).
+*    result = COND #( WHEN position-no_leading_zero = abap_true
+*                     THEN |\{path : '{ position-fname }', type : 'sap.ui.model.odata.type.String', constraints : \{  isDigitSequence : true \} \}|
+*                     ELSE |\{{ position-fname }\}| ).
+
+ result = |\{{ position-fname }\}|.
 
   ENDMETHOD.
 
@@ -756,11 +758,13 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
   METHOD value_formatter.
 
-    result = COND #( WHEN no_zero = abap_true
-                     THEN |\{path : '{ I_client->_bind_edit(
-                                           val  = value
-                                           path = abap_true ) }', type : 'sap.ui.model.odata.type.String', constraints : \{  isDigitSequence : true \} \}|
-                     ELSE I_client->_bind( value ) ).
+*    result = COND #( WHEN no_zero = abap_true
+*                     THEN |\{path : '{ I_client->_bind_edit(
+*                                           val  = value
+*                                           path = abap_true ) }', type : 'sap.ui.model.odata.type.String', constraints : \{  isDigitSequence : true \} \}|
+*                     ELSE I_client->_bind( value ) ).
+
+result = I_client->_bind( value ).
 
   ENDMETHOD.
 

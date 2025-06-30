@@ -437,7 +437,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     result = NEW #( ).
 
     " Save Ref for Sorting and Conversions
-    result->mr_data = data.
+*    result->mr_data = data.
 
     DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
 

@@ -116,10 +116,12 @@ CLASS z2ui5_cl_layo_pop DEFINITION
   PRIVATE SECTION.
     METHODS check_grid_sum
       IMPORTING
-        !value        TYPE int4
-        !type         TYPE string
+         value        TYPE int4
+         type         TYPE string
       RETURNING
         VALUE(result) TYPE abap_bool.
+    METHODS Edit_okay.
+    METHODS Search.
 
 ENDCLASS.
 
@@ -138,8 +140,6 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
       init_edit( ).
 
       render_edit( ).
-
-      client->popup_model_update( ).
 
     ENDIF.
 
@@ -266,10 +266,10 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
           cells->vbox( visible = |\{SHOW_CONVEXIT\}|
 
-          )->switch( "type  = 'AcceptReject'
-                     customtexton = |\{CONVEXIT\}|
-                     CUSTOMTEXTOFF = |\{CONVEXIT\}|
-                     state = |\{{ comp-name }\}| ).
+          )->switch( " type  = 'AcceptReject'
+                     customtexton  = |\{CONVEXIT\}|
+                     customtextoff = |\{CONVEXIT\}|
+                     state         = |\{{ comp-name }\}| ).
 
         WHEN 'WIDTH'.
 
@@ -378,55 +378,17 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
       WHEN 'EDIT_OKAY'.
 
-        LOOP AT mo_layout->ms_layout-t_layout REFERENCE INTO DATA(layout).
-          layout->tlabel           = mo_layout->set_text( layout->* ).
-          layout->alternative_text = to_upper( layout->alternative_text ).
-          layout->width            = check_width_unit( layout->width ).
-        ENDLOOP.
-
-        mo_layout->ms_layout-t_layout = mo_layout->sort_by_seqence( mo_layout->ms_layout-t_layout ).
-
-        check_rerender_necessary( ).
-
-        client->popup_destroy( ).
-
-        client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
+        Edit_okay( ).
 
       WHEN 'BUTTON_SEARCH'.
 
-        mt_layout = mo_layout->ms_layout-t_layout.
-
-        LOOP AT mt_layout ASSIGNING <row>.
-          DATA(lv_row) = ``.
-
-          ASSIGN COMPONENT 'FNAME' OF STRUCTURE <row> TO FIELD-SYMBOL(<fname>).
-          IF sy-subrc <> 0.
-            EXIT.
-          ENDIF.
-          ASSIGN COMPONENT 'ROLLNAME' OF STRUCTURE <row> TO FIELD-SYMBOL(<rollname>).
-          IF sy-subrc <> 0.
-            EXIT.
-          ENDIF.
-          ASSIGN COMPONENT 'TLABEL' OF STRUCTURE <row> TO FIELD-SYMBOL(<tlabel>).
-          IF sy-subrc <> 0.
-            EXIT.
-          ENDIF.
-
-          lv_row = lv_row && <fname> && <rollname> && <tlabel>.
-
-          IF lv_row NS client->get_event_arg( 1 ).
-            DELETE mt_layout.
-          ENDIF.
-
-        ENDLOOP.
-
-        client->popup_model_update( ).
+        Search( ).
 
       WHEN 'CLOSE'.
 
-        client->popup_destroy( ).
-
         mo_layout->ms_layout = mo_layout->ms_layout_tmp.
+
+        client->popup_destroy( ).
 
         client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
 
@@ -444,11 +406,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
         save_layout( ).
 
-        mv_rerender = abap_true.
-
-        client->popup_destroy( ).
-
-        client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
+        Edit_okay( ).
 
       WHEN 'OPEN_SELECT'.
 
@@ -458,7 +416,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
         client->popup_destroy( ).
 
-        client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
+        client->nav_app_leave(  ).
 
       WHEN 'DELETE_SELECT'.
 
@@ -477,6 +435,62 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     ENDCASE.
 
   ENDMETHOD.
+
+  METHOD Search.
+
+    FIELD-SYMBOLS <row> TYPE any.
+
+    mt_layout = mo_layout->ms_layout-t_layout.
+
+    LOOP AT mt_layout ASSIGNING <row>.
+      DATA(lv_row) = ``.
+
+      ASSIGN COMPONENT 'FNAME' OF STRUCTURE <row> TO FIELD-SYMBOL(<fname>).
+      IF sy-subrc <> 0.
+        EXIT.
+      ENDIF.
+      ASSIGN COMPONENT 'ROLLNAME' OF STRUCTURE <row> TO FIELD-SYMBOL(<rollname>).
+      IF sy-subrc <> 0.
+        EXIT.
+      ENDIF.
+      ASSIGN COMPONENT 'TLABEL' OF STRUCTURE <row> TO FIELD-SYMBOL(<tlabel>).
+      IF sy-subrc <> 0.
+        EXIT.
+      ENDIF.
+
+      lv_row = lv_row && <fname> && <rollname> && <tlabel>.
+
+      IF lv_row NS client->get_event_arg( 1 ).
+        DELETE mt_layout.
+      ENDIF.
+
+    ENDLOOP.
+
+    client->popup_model_update( ).
+
+  ENDMETHOD.
+
+
+
+  METHOD Edit_okay.
+
+    LOOP AT mo_layout->ms_layout-t_layout REFERENCE INTO DATA(layout).
+      layout->tlabel           = mo_layout->set_text( layout->* ).
+      layout->alternative_text = to_upper( layout->alternative_text ).
+      layout->width            = check_width_unit( layout->width ).
+    ENDLOOP.
+
+    mo_layout->ms_layout-t_layout = mo_layout->sort_by_seqence( mo_layout->ms_layout-t_layout ).
+
+    check_rerender_necessary( ).
+
+    client->popup_destroy( ).
+
+    client->nav_app_leave(  ).
+
+  ENDMETHOD.
+
+
 
   METHOD factory.
 
@@ -1018,6 +1032,11 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
         CONTINUE.
       ENDIF.
 
+      IF layout-alternative_text <> layout_tmp-alternative_text.
+        mv_rerender = abap_true.
+        RETURN.
+      ENDIF.
+
       IF layout-sequence <> layout_tmp-sequence.
         mv_rerender = abap_true.
         RETURN.
@@ -1169,51 +1188,51 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     DATA(line) = form->label( text = 'XL'
                  )->combobox( selectedkey = client->_bind_edit( mv_xl_label )
                               width       = `7rem`
-                              items       = client->_bind_local( t_col  )
+                              items       = client->_bind( t_col  )
                    )->item( key  = '{COL}'
                             text = '{COL} Label Span' ).
 
     form->combobox( selectedkey = client->_bind_edit( mv_xl_value )
                     width       = `7rem`
-                    items       = client->_bind_local( t_col  )
+                    items       = client->_bind( t_col  )
 )->item( key  = '{COL}'
          text = '{COL} Value Span' ).
 
     line = form->label( text = 'L'
                   )->combobox( selectedkey = client->_bind_edit( mv_l_label )
                                width       = `7rem`
-                               items       = client->_bind_local( t_col  )
+                               items       = client->_bind( t_col  )
                     )->item( key  = '{COL}'
                              text = '{COL} Label Span' ).
     form->combobox( selectedkey = client->_bind_edit( mv_l_value )
 
-                    items       = client->_bind_local( t_col  )
+                    items       = client->_bind( t_col  )
 )->item( key  = '{COL}'
          text = '{COL} Value Span' ).
 
     line = form->label( text = 'M'
                   )->combobox( selectedkey = client->_bind_edit( mv_m_label )
                                width       = `7rem`
-                               items       = client->_bind_local( t_col  )
+                               items       = client->_bind( t_col  )
                     )->item( key  = '{COL}'
                              text = '{COL} Label Span' ).
 
     form->combobox( selectedkey = client->_bind_edit( mv_m_value )
                     width       = `7rem`
-                    items       = client->_bind_local( t_col  )
+                    items       = client->_bind( t_col  )
       )->item( key  = '{COL}'
                text = '{COL} Value Span' ).
 
     line = form->label( text = 'S'
                   )->combobox( selectedkey = client->_bind_edit( mv_s_label )
                                width       = `7rem`
-                               items       = client->_bind_local( t_col  )
+                               items       = client->_bind( t_col  )
                     )->item( key  = '{COL}'
                              text = '{COL} Label Span' ).
 
     form->combobox( selectedkey = client->_bind_edit( mv_s_value )
                     width       = `7rem`
-                    items       = client->_bind_local( t_col  )
+                    items       = client->_bind( t_col  )
       )->item( key  = '{COL}'
                text = '{COL} Value Span' ).
 

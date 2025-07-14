@@ -305,7 +305,11 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     ENDIF.
 
     IF result IS INITIAL.
-      result = layout-fname.
+      IF layout-alternative_text IS NOT INITIAL.
+        result = layout-alternative_text.
+      ELSE.
+        result = layout-fname.
+      ENDIF.
     ENDIF.
 
   ENDMETHOD.
@@ -437,7 +441,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     result = NEW #( ).
 
     " Save Ref for Sorting and Conversions
-*    result->mr_data = data.
+    result->mr_data = data.
 
     DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
 
@@ -620,6 +624,12 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
 
+    ASSIGN mr_data->* TO <table>.
+
+    IF <table> IS INITIAL.
+      RETURN.
+    ENDIF.
+
     DATA(sortorder) = VALUE abap_sortorder_tab(
                                 FOR layout IN ms_layout-t_layout  WHERE ( sorting <> space )
                                 ( descending = COND #( WHEN layout-sorting = 'DESCENDING' THEN abap_true )
@@ -630,8 +640,6 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     ENDIF.
 
     TRY.
-
-        ASSIGN mr_data->* TO <table>.
 
         SORT <table>
              BY (sortorder).
@@ -646,63 +654,121 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
 *    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
 *    FIELD-SYMBOLS <struc> TYPE any.
-*
-*    LOOP AT ms_layout-t_layout INTO DATA(layout) WHERE visible = abap_true AND no_convexit = abap_false.
-*
-*      CASE ms_layout-s_head-control.
-*        WHEN ui_table OR m_table.
-*
-*          ASSIGN mr_data->* TO <table>.
-*
-*          LOOP AT <table> ASSIGNING FIELD-SYMBOL(<line>).
-*
-*            ASSIGN COMPONENT layout-fname OF STRUCTURE <line> TO FIELD-SYMBOL(<value>).
-*            IF <value> IS NOT ASSIGNED.
-*              CONTINUE.
-*            ENDIF.
-*
-*            DATA(conex) = COND #( WHEN output = abap_true
-*                                  THEN |CONVERSION_EXIT_{ layout-convexit }_OUTPUT|
-*                                  ELSE |CONVERSION_EXIT_{ layout-convexit }_INPUT| ).
-*
-*            TRY.
-*                CALL FUNCTION conex
-*                  EXPORTING  input  = <value>
-*                  IMPORTING  output = <value>
-*                  EXCEPTIONS OTHERS = 99.
-*                IF sy-subrc <> 0.
-*                ENDIF.
-*              CATCH cx_root.
-*            ENDTRY.
-*
-*          ENDLOOP.
-*
-*        WHEN ui_simpleform.
-*
+
+    ASSIGN mr_data->* TO FIELD-SYMBOL(<any>).
+
+    IF <any> IS NOT ASSIGNED.
+      RETURN.
+    ENDIF.
+
+    IF <any> IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    LOOP AT ms_layout-t_layout INTO DATA(layout)
+         WHERE     no_convexit  = abap_false
+               AND convexit    <> space.
+
+      IF layout-visible = abap_false.
+
+        " are you an ref field?
+        IF line_exists( ms_layout-t_layout[ reference_field = layout-fname
+                                            visible         = abap_true ] ).
+          DATA(ref) = abap_true.
+        ENDIF.
+
+        LOOP AT ms_layout-t_layout INTO DATA(tmp) WHERE t_sub_col IS NOT INITIAL AND visible = abap_true.
+
+          IF line_exists( tmp-t_sub_col[ fname = layout-fname ] ).
+            ref = abap_true.
+          ENDIF.
+
+          LOOP AT tmp-t_sub_col INTO DATA(sub).
+
+            IF line_exists( ms_layout-t_layout[ fname           = sub-fname
+                                                reference_field = layout-fname ] ).
+              ref = abap_true.
+            ENDIF.
+          ENDLOOP.
+
+        ENDLOOP.
+
+        IF ref = abap_false.
+          CONTINUE.
+        ENDIF.
+
+        CLEAR ref.
+
+      ENDIF.
+
+      CASE ms_layout-s_head-control.
+        WHEN ui_table OR m_table.
+
+          LOOP AT <any> ASSIGNING FIELD-SYMBOL(<line>).
+
+            ASSIGN COMPONENT layout-fname OF STRUCTURE <line> TO FIELD-SYMBOL(<value>).
+            IF <value> IS NOT ASSIGNED.
+              CONTINUE.
+            ENDIF.
+
+            IF layout-convexit = 'CUNIT'.
+
+              CALL FUNCTION 'CONVERSION_EXIT_CUNIT_OUTPUT'
+                EXPORTING  input          = <value>
+                           language       = sy-langu
+                IMPORTING  output         = <value>
+                EXCEPTIONS unit_not_found = 1
+                           OTHERS         = 2.
+
+            ELSE.
+
+              DATA(conex) = COND #( WHEN output = abap_true
+                                    THEN |CONVERSION_EXIT_{ layout-convexit }_OUTPUT|
+                                    ELSE |CONVERSION_EXIT_{ layout-convexit }_INPUT| ).
+            ENDIF.
+
+            TRY.
+                CALL FUNCTION conex
+                  EXPORTING  input  = <value>
+                  IMPORTING  output = <value>
+                  EXCEPTIONS OTHERS = 99.
+                IF sy-subrc <> 0.
+                ENDIF.
+              CATCH cx_root.
+            ENDTRY.
+
+          ENDLOOP.
+
+        WHEN ui_simpleform.
+
 *          ASSIGN mr_data->* TO <struc>.
 *
-*          ASSIGN COMPONENT layout-fname OF STRUCTURE <struc> TO <value>.
-*          IF <value> IS NOT ASSIGNED.
+*          IF <struc> IS NOT ASSIGNED.
 *            CONTINUE.
 *          ENDIF.
-*
-*          conex = COND #( WHEN output = abap_true
-*                          THEN |CONVERSION_EXIT_{ layout-convexit }_OUTPUT|
-*                          ELSE |CONVERSION_EXIT_{ layout-convexit }_INPUT| ).
-*
-*          TRY.
-*              CALL FUNCTION conex
-*                EXPORTING  input  = <value>
-*                IMPORTING  output = <value>
-*                EXCEPTIONS OTHERS = 99.
-*              IF sy-subrc <> 0.
-*              ENDIF.
-*            CATCH cx_root.
-*          ENDTRY.
-*
-*      ENDCASE.
-*
-*    ENDLOOP.
+
+          ASSIGN COMPONENT layout-fname OF STRUCTURE <any> TO <value>.
+          IF <value> IS NOT ASSIGNED.
+            CONTINUE.
+          ENDIF.
+
+          conex = COND #( WHEN output = abap_true
+                          THEN |CONVERSION_EXIT_{ layout-convexit }_OUTPUT|
+                          ELSE |CONVERSION_EXIT_{ layout-convexit }_INPUT| ).
+
+          TRY.
+              CALL FUNCTION conex
+                EXPORTING  input  = <value>
+                IMPORTING  output = <value>
+                EXCEPTIONS OTHERS = 99.
+              IF sy-subrc <> 0.
+              ENDIF.
+            CATCH cx_root.
+          ENDTRY.
+
+      ENDCASE.
+
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD get_conversion_exit.
@@ -710,9 +776,6 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     result = layout.
 
     TRY.
-
-
-
 
         type->get_ddic_object( RECEIVING  p_object     = DATA(obj)
                                EXCEPTIONS not_found    = 1
@@ -725,6 +788,15 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
         IF result-convexit <> space.
           result-show_convexit = abap_true.
+
+          IF type->type_kind = cl_abap_elemdescr=>typekind_num.
+            IF    result-convexit = 'ALPH0'
+               OR result-convexit = 'ALPHA'.
+              " Serialization does not work with NUMC
+              result-convexit = `NUMC`.
+            ENDIF.
+
+          ENDIF.
         ENDIF.
 
       CATCH cx_root.

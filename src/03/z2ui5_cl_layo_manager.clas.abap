@@ -785,8 +785,6 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
         ENDIF.
 
         DATA(obj) = VALUE #( t_obj[ 1 ] OPTIONAL ).
-
-
         result-convexit = obj-convexit.
 
         IF result-convexit <> space.

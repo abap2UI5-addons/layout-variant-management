@@ -784,8 +784,9 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
           RETURN.
         ENDIF.
 
-        DATA(obj) = VALUE #( t_obj[ 1 ] OPTIONAL ).
-        result-convexit = obj-convexit.
+        DATA ls_obj like line of t_obj.
+        ls_obj = VALUE #( t_obj[ 1 ] OPTIONAL ).
+        result-convexit = ls_obj-convexit.
 
         IF result-convexit <> space.
           result-show_convexit = abap_true.

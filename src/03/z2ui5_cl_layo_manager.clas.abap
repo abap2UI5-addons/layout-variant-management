@@ -786,7 +786,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
         DATA(obj) = VALUE #( t_obj[ 1 ] OPTIONAL ).
 
-        result-convexit = CONV #( obj-convexit ).
+
+        result-convexit = obj-convexit.
 
         IF result-convexit <> space.
           result-show_convexit = abap_true.

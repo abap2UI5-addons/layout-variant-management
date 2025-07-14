@@ -776,15 +776,15 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     result = layout.
 
     TRY.
-
-        type->get_ddic_object( RECEIVING  p_object     = DATA(t_obj)
+        DATA t_obj TYPE dd_x031l_table.
+        type->get_ddic_object( RECEIVING  p_object     = t_obj
                                EXCEPTIONS not_found    = 1
                                           no_ddic_type = 2 ).
         IF sy-subrc <> 0.
           RETURN.
         ENDIF.
 
-        DATA ls_obj like line of t_obj.
+        DATA ls_obj LIKE LINE OF t_obj.
         ls_obj = VALUE #( t_obj[ 1 ] OPTIONAL ).
         result-convexit = ls_obj-convexit.
 

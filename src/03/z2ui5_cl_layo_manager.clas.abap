@@ -777,14 +777,16 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     TRY.
 
-        type->get_ddic_object( RECEIVING  p_object     = DATA(obj)
+        type->get_ddic_object( RECEIVING  p_object     = DATA(t_obj)
                                EXCEPTIONS not_found    = 1
                                           no_ddic_type = 2 ).
         IF sy-subrc <> 0.
           RETURN.
         ENDIF.
 
-        result-convexit = VALUE #( obj[ 1 ]-convexit OPTIONAL ).
+        DATA(obj) = VALUE #( t_obj[ 1 ] OPTIONAL ).
+
+        result-convexit = CONV #( obj-convexit ).
 
         IF result-convexit <> space.
           result-show_convexit = abap_true.

@@ -129,7 +129,19 @@ CLASS z2ui5_cl_layo_manager DEFINITION
 
     METHODS sort.
 
+    METHODS set_selektion_criteria
+      IMPORTING
+        sel_mode      TYPE string
+        sel_field     TYPE string
+        sel_key_field TYPE string.
+
+    METHODS set_selkz IMPORTING t_event_arg TYPE string_table.
+
   PROTECTED SECTION.
+    DATA mv_sel_mode      TYPE string.
+    DATA mv_sel_field     TYPE string.
+    DATA mv_sel_key_field TYPE string.
+
     CLASS-METHODS get_conversion_exit
       IMPORTING
         !type         TYPE REF TO cl_abap_datadescr
@@ -321,7 +333,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     DATA(index) = 0.
 
-    DO 99 TIMES.
+    DO 999 TIMES.
 
       index = index + 1.
 
@@ -650,6 +662,61 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD set_selkz.
+
+    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+
+    CHECK mv_sel_mode <> space.
+
+    ASSIGN mr_data->* TO <table>.
+
+    IF <table> IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    IF t_event_arg IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    DATA(id) = VALUE #( t_event_arg[ 1 ] OPTIONAL ).
+
+    LOOP AT <table> ASSIGNING FIELD-SYMBOL(<row>).
+
+      ASSIGN COMPONENT mv_sel_key_field OF STRUCTURE <row> TO FIELD-SYMBOL(<id>).
+
+      IF <id> IS NOT ASSIGNED.
+        CONTINUE.
+      ENDIF.
+
+      ASSIGN COMPONENT mv_sel_field OF STRUCTURE <row> TO FIELD-SYMBOL(<selkz>).
+      IF <selkz> IS NOT ASSIGNED.
+        CONTINUE.
+      ENDIF.
+
+      IF <id> = id.
+        <selkz> = COND #( WHEN <selkz> = abap_true THEN abap_false ELSE abap_true ).
+
+        IF mv_sel_mode = `M`.
+          EXIT.
+        ELSE.
+          " wenn deslektiert dann auch raus
+          IF <selkz> = abap_false.
+            EXIT.
+          ENDIF.
+        ENDIF.
+
+      ELSE.
+
+        IF mv_sel_mode <> `M`.
+          <selkz> = abap_false.
+        ENDIF.
+
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
   METHOD data_conversion.
 
 *    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
@@ -773,20 +840,38 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   METHOD get_conversion_exit.
 
+    DATA t_obj TYPE REF TO data.
+    DATA s_obj TYPE REF TO data.
+
+    FIELD-SYMBOLS <T_obj> TYPE STANDARD TABLE.
+
     result = layout.
 
+    CREATE DATA t_obj TYPE ('DD_X031L_TABLE').
+    CREATE DATA s_obj TYPE LINE OF ('DD_X031L_TABLE').
+    ASSIGN t_obj->* TO <T_obj>.
+    ASSIGN s_obj->* TO FIELD-SYMBOL(<obj>).
+
     TRY.
-        DATA t_obj TYPE dd_x031l_table.
-        type->get_ddic_object( RECEIVING  p_object     = t_obj
-                               EXCEPTIONS not_found    = 1
-                                          no_ddic_type = 2 ).
+        CALL METHOD type->('GET_DDIC_OBJECT')
+          RECEIVING  p_object     = <t_obj>
+          EXCEPTIONS not_found    = 1
+                     no_ddic_type = 2.
         IF sy-subrc <> 0.
           RETURN.
         ENDIF.
 
-        DATA ls_obj LIKE LINE OF t_obj.
-        ls_obj = VALUE #( t_obj[ 1 ] OPTIONAL ).
-        result-convexit = ls_obj-convexit.
+        ASSIGN <T_obj>[ 1 ] TO <obj>.
+        IF sy-subrc <> 0.
+          RETURN.
+        ENDIF.
+
+        ASSIGN COMPONENT 'CONVEXIT' OF STRUCTURE <obj> TO FIELD-SYMBOL(<conv>).
+        IF <conv> IS NOT ASSIGNED.
+          RETURN.
+        ENDIF.
+
+        result-convexit = <conv>.
 
         IF result-convexit <> space.
           result-show_convexit = abap_true.
@@ -804,6 +889,14 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       CATCH cx_root.
         RETURN.
     ENDTRY.
+
+  ENDMETHOD.
+
+  METHOD set_selektion_criteria.
+
+    mv_sel_mode      = sel_mode.
+    mv_sel_field     = sel_field.
+    mv_sel_key_field = sel_key_field.
 
   ENDMETHOD.
 

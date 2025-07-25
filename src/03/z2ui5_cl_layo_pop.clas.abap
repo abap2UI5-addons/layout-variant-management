@@ -116,10 +116,11 @@ CLASS z2ui5_cl_layo_pop DEFINITION
   PRIVATE SECTION.
     METHODS check_grid_sum
       IMPORTING
-         value        TYPE int4
-         type         TYPE string
+        !value        TYPE int4
+        !type         TYPE string
       RETURNING
         VALUE(result) TYPE abap_bool.
+
     METHODS Edit_okay.
     METHODS Search.
 
@@ -354,8 +355,6 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
   METHOD on_event.
 
-    FIELD-SYMBOLS <row> TYPE any.
-
     CASE client->get( )-event.
 
       WHEN 'LAYOUT_EDIT'.
@@ -416,7 +415,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
         client->popup_destroy( ).
 
-        client->nav_app_leave(  ).
+        client->nav_app_leave( ).
 
       WHEN 'DELETE_SELECT'.
 
@@ -470,8 +469,6 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
   ENDMETHOD.
 
-
-
   METHOD Edit_okay.
 
     LOOP AT mo_layout->ms_layout-t_layout REFERENCE INTO DATA(layout).
@@ -486,11 +483,9 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
     client->popup_destroy( ).
 
-    client->nav_app_leave(  ).
+    client->nav_app_leave( ).
 
   ENDMETHOD.
-
-
 
   METHOD factory.
 

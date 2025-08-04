@@ -187,6 +187,13 @@ CLASS z2ui5_cl_layo_manager DEFINITION
       RETURNING
         VALUE(result) TYPE  ty_s_positions.
 
+    METHODS convert
+      IMPORTING
+        i_output TYPE abap_bool
+        i_layout TYPE z2ui5_cl_layo_manager=>ty_s_positions
+      CHANGING
+        c_value  TYPE data.
+
 ENDCLASS.
 
 
@@ -719,9 +726,6 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   METHOD data_conversion.
 
-*    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
-*    FIELD-SYMBOLS <struc> TYPE any.
-
     ASSIGN mr_data->* TO FIELD-SYMBOL(<any>).
 
     IF <any> IS NOT ASSIGNED.
@@ -778,64 +782,55 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
               CONTINUE.
             ENDIF.
 
-            IF layout-convexit = 'CUNIT'.
-
-              CALL FUNCTION 'CONVERSION_EXIT_CUNIT_OUTPUT'
-                EXPORTING  input          = <value>
-                           language       = sy-langu
-                IMPORTING  output         = <value>
-                EXCEPTIONS unit_not_found = 1
-                           OTHERS         = 2.
-
-            ELSE.
-
-              DATA(conex) = COND #( WHEN output = abap_true
-                                    THEN |CONVERSION_EXIT_{ layout-convexit }_OUTPUT|
-                                    ELSE |CONVERSION_EXIT_{ layout-convexit }_INPUT| ).
-            ENDIF.
-
-            TRY.
-                CALL FUNCTION conex
-                  EXPORTING  input  = <value>
-                  IMPORTING  output = <value>
-                  EXCEPTIONS OTHERS = 99.
-                IF sy-subrc <> 0.
-                ENDIF.
-              CATCH cx_root.
-            ENDTRY.
+            convert( EXPORTING i_output = output
+                               i_layout = layout
+                     CHANGING  c_value  = <value> ).
 
           ENDLOOP.
 
         WHEN ui_simpleform.
-
-*          ASSIGN mr_data->* TO <struc>.
-*
-*          IF <struc> IS NOT ASSIGNED.
-*            CONTINUE.
-*          ENDIF.
 
           ASSIGN COMPONENT layout-fname OF STRUCTURE <any> TO <value>.
           IF <value> IS NOT ASSIGNED.
             CONTINUE.
           ENDIF.
 
-          conex = COND #( WHEN output = abap_true
-                          THEN |CONVERSION_EXIT_{ layout-convexit }_OUTPUT|
-                          ELSE |CONVERSION_EXIT_{ layout-convexit }_INPUT| ).
-
-          TRY.
-              CALL FUNCTION conex
-                EXPORTING  input  = <value>
-                IMPORTING  output = <value>
-                EXCEPTIONS OTHERS = 99.
-              IF sy-subrc <> 0.
-              ENDIF.
-            CATCH cx_root.
-          ENDTRY.
+          convert( EXPORTING i_output = output
+                             i_layout = layout
+                   CHANGING  c_value  = <value> ).
 
       ENDCASE.
 
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD convert.
+
+    DATA(conex) = COND #( WHEN i_output = abap_true
+                          THEN |CONVERSION_EXIT_{ i_layout-convexit }_OUTPUT|
+                          ELSE |CONVERSION_EXIT_{ i_layout-convexit }_INPUT| ).
+
+    TRY.
+        IF i_layout-convexit = 'CUNIT'.
+
+          CALL FUNCTION conex
+            EXPORTING  input    = c_value
+                       language = sy-langu
+            IMPORTING  output   = c_value
+            EXCEPTIONS OTHERS   = 99.
+
+        ELSE.
+
+          CALL FUNCTION conex
+            EXPORTING  input  = c_value
+            IMPORTING  output = c_value
+            EXCEPTIONS OTHERS = 99.
+
+        ENDIF.
+
+      CATCH cx_root.
+    ENDTRY.
+
   ENDMETHOD.
 
   METHOD get_conversion_exit.

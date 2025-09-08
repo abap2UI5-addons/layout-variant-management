@@ -190,7 +190,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     METHODS convert
       IMPORTING
         i_output TYPE abap_bool
-        i_layout TYPE z2ui5_cl_layo_manager=>ty_s_positions
+        i_layout TYPE ty_s_positions
       CHANGING
         c_value  TYPE data.
 

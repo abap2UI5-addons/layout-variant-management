@@ -41,6 +41,11 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
 
     CASE client->get( )-event.
 
+      WHEN 'ROW_SELECT'.
+
+        mo_layout->set_selkz( t_event_arg = client->get( )-t_event_arg ).
+
+
       WHEN 'BACK'.
         client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
 
@@ -50,6 +55,10 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
                                             layout = mo_layout ).
 
     ENDCASE.
+
+
+    client->view_model_update( ).
+
   ENDMETHOD.
 
   METHOD on_init.
@@ -89,7 +98,7 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
 
     on_event( ).
 
-    mo_layout->sort(  ).
+    mo_layout->sort( ).
 
     IF client->get( )-check_on_navigated = abap_true.
       on_after_navigation( ).
@@ -164,7 +173,7 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
         mo_layout = app->mo_layout.
 
         IF app->mv_rerender = abap_true.
-          "e.g. subcolumns need rerendering to work ..
+          " e.g. subcolumns need rerendering to work ..
           render_main( ).
         ELSE.
           "  for all other changes in Layout View Model Update is enough.

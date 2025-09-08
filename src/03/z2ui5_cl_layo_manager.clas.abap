@@ -129,7 +129,19 @@ CLASS z2ui5_cl_layo_manager DEFINITION
 
     METHODS sort.
 
+    METHODS set_selektion_criteria
+      IMPORTING
+        sel_mode      TYPE string
+        sel_field     TYPE string
+        sel_key_field TYPE string.
+
+    METHODS set_selkz IMPORTING t_event_arg TYPE string_table.
+
   PROTECTED SECTION.
+    DATA mv_sel_mode      TYPE string.
+    DATA mv_sel_field     TYPE string.
+    DATA mv_sel_key_field TYPE string.
+
     CLASS-METHODS get_conversion_exit
       IMPORTING
         !type         TYPE REF TO cl_abap_datadescr
@@ -174,6 +186,13 @@ CLASS z2ui5_cl_layo_manager DEFINITION
         !position     TYPE  ty_s_positions
       RETURNING
         VALUE(result) TYPE  ty_s_positions.
+
+    METHODS convert
+      IMPORTING
+        i_output TYPE abap_bool
+        i_layout TYPE ty_s_positions
+      CHANGING
+        c_value  TYPE data.
 
 ENDCLASS.
 
@@ -321,7 +340,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     DATA(index) = 0.
 
-    DO 99 TIMES.
+    DO 999 TIMES.
 
       index = index + 1.
 
@@ -650,10 +669,62 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD data_conversion.
+  METHOD set_selkz.
 
-*    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
-*    FIELD-SYMBOLS <struc> TYPE any.
+    FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+
+    CHECK mv_sel_mode <> space.
+
+    ASSIGN mr_data->* TO <table>.
+
+    IF <table> IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    IF t_event_arg IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    DATA(id) = VALUE #( t_event_arg[ 1 ] OPTIONAL ).
+
+    LOOP AT <table> ASSIGNING FIELD-SYMBOL(<row>).
+
+      ASSIGN COMPONENT mv_sel_key_field OF STRUCTURE <row> TO FIELD-SYMBOL(<id>).
+
+      IF <id> IS NOT ASSIGNED.
+        CONTINUE.
+      ENDIF.
+
+      ASSIGN COMPONENT mv_sel_field OF STRUCTURE <row> TO FIELD-SYMBOL(<selkz>).
+      IF <selkz> IS NOT ASSIGNED.
+        CONTINUE.
+      ENDIF.
+
+      IF <id> = id.
+        <selkz> = COND #( WHEN <selkz> = abap_true THEN abap_false ELSE abap_true ).
+
+        IF mv_sel_mode = `M`.
+          EXIT.
+        ELSE.
+          " wenn deslektiert dann auch raus
+          IF <selkz> = abap_false.
+            EXIT.
+          ENDIF.
+        ENDIF.
+
+      ELSE.
+
+        IF mv_sel_mode <> `M`.
+          <selkz> = abap_false.
+        ENDIF.
+
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD data_conversion.
 
     ASSIGN mr_data->* TO FIELD-SYMBOL(<any>).
 
@@ -711,82 +782,91 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
               CONTINUE.
             ENDIF.
 
-            IF layout-convexit = 'CUNIT'.
-
-              CALL FUNCTION 'CONVERSION_EXIT_CUNIT_OUTPUT'
-                EXPORTING  input          = <value>
-                           language       = sy-langu
-                IMPORTING  output         = <value>
-                EXCEPTIONS unit_not_found = 1
-                           OTHERS         = 2.
-
-            ELSE.
-
-              DATA(conex) = COND #( WHEN output = abap_true
-                                    THEN |CONVERSION_EXIT_{ layout-convexit }_OUTPUT|
-                                    ELSE |CONVERSION_EXIT_{ layout-convexit }_INPUT| ).
-            ENDIF.
-
-            TRY.
-                CALL FUNCTION conex
-                  EXPORTING  input  = <value>
-                  IMPORTING  output = <value>
-                  EXCEPTIONS OTHERS = 99.
-                IF sy-subrc <> 0.
-                ENDIF.
-              CATCH cx_root.
-            ENDTRY.
+            convert( EXPORTING i_output = output
+                               i_layout = layout
+                     CHANGING  c_value  = <value> ).
 
           ENDLOOP.
 
         WHEN ui_simpleform.
-
-*          ASSIGN mr_data->* TO <struc>.
-*
-*          IF <struc> IS NOT ASSIGNED.
-*            CONTINUE.
-*          ENDIF.
 
           ASSIGN COMPONENT layout-fname OF STRUCTURE <any> TO <value>.
           IF <value> IS NOT ASSIGNED.
             CONTINUE.
           ENDIF.
 
-          conex = COND #( WHEN output = abap_true
-                          THEN |CONVERSION_EXIT_{ layout-convexit }_OUTPUT|
-                          ELSE |CONVERSION_EXIT_{ layout-convexit }_INPUT| ).
-
-          TRY.
-              CALL FUNCTION conex
-                EXPORTING  input  = <value>
-                IMPORTING  output = <value>
-                EXCEPTIONS OTHERS = 99.
-              IF sy-subrc <> 0.
-              ENDIF.
-            CATCH cx_root.
-          ENDTRY.
+          convert( EXPORTING i_output = output
+                             i_layout = layout
+                   CHANGING  c_value  = <value> ).
 
       ENDCASE.
 
     ENDLOOP.
   ENDMETHOD.
 
+  METHOD convert.
+
+    DATA(conex) = COND #( WHEN i_output = abap_true
+                          THEN |CONVERSION_EXIT_{ i_layout-convexit }_OUTPUT|
+                          ELSE |CONVERSION_EXIT_{ i_layout-convexit }_INPUT| ).
+
+    TRY.
+        IF i_layout-convexit = 'CUNIT'.
+
+          CALL FUNCTION conex
+            EXPORTING  input    = c_value
+                       language = sy-langu
+            IMPORTING  output   = c_value
+            EXCEPTIONS OTHERS   = 99.
+
+        ELSE.
+
+          CALL FUNCTION conex
+            EXPORTING  input  = c_value
+            IMPORTING  output = c_value
+            EXCEPTIONS OTHERS = 99.
+
+        ENDIF.
+
+      CATCH cx_root.
+    ENDTRY.
+
+  ENDMETHOD.
+
   METHOD get_conversion_exit.
+
+    DATA t_obj TYPE REF TO data.
+    DATA s_obj TYPE REF TO data.
+
+    FIELD-SYMBOLS <T_obj> TYPE STANDARD TABLE.
 
     result = layout.
 
+    CREATE DATA t_obj TYPE ('DD_X031L_TABLE').
+    CREATE DATA s_obj TYPE LINE OF ('DD_X031L_TABLE').
+    ASSIGN t_obj->* TO <T_obj>.
+    ASSIGN s_obj->* TO FIELD-SYMBOL(<obj>).
+
     TRY.
-        DATA t_obj TYPE dd_x031l_table.
-        type->get_ddic_object( RECEIVING  p_object     = t_obj
-                               EXCEPTIONS not_found    = 1
-                                          no_ddic_type = 2 ).
+        CALL METHOD type->('GET_DDIC_OBJECT')
+          RECEIVING  p_object     = <t_obj>
+          EXCEPTIONS not_found    = 1
+                     no_ddic_type = 2.
         IF sy-subrc <> 0.
           RETURN.
         ENDIF.
 
-        DATA ls_obj LIKE LINE OF t_obj.
-        ls_obj = VALUE #( t_obj[ 1 ] OPTIONAL ).
-        result-convexit = ls_obj-convexit.
+        ASSIGN <T_obj>[ 1 ] TO <obj>.
+        IF sy-subrc <> 0.
+          RETURN.
+        ENDIF.
+
+        ASSIGN COMPONENT 'CONVEXIT' OF STRUCTURE <obj> TO FIELD-SYMBOL(<conv>).
+        IF <conv> IS NOT ASSIGNED.
+          RETURN.
+        ENDIF.
+
+        result-convexit = <conv>.
 
         IF result-convexit <> space.
           result-show_convexit = abap_true.
@@ -804,6 +884,14 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       CATCH cx_root.
         RETURN.
     ENDTRY.
+
+  ENDMETHOD.
+
+  METHOD set_selektion_criteria.
+
+    mv_sel_mode      = sel_mode.
+    mv_sel_field     = sel_field.
+    mv_sel_key_field = sel_key_field.
 
   ENDMETHOD.
 

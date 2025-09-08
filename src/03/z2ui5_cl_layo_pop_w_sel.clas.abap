@@ -23,12 +23,12 @@ CLASS z2ui5_cl_layo_pop_w_sel DEFINITION
     CLASS-METHODS factory
       IMPORTING
         i_tab              TYPE STANDARD TABLE
-        i_title            TYPE clike                   OPTIONAL
-        i_sort_field       TYPE clike                   OPTIONAL
-        i_descending       TYPE abap_bool               OPTIONAL
-        i_contentwidth     TYPE clike                   OPTIONAL
-        i_contentheight    TYPE clike                   OPTIONAL
-        i_growingthreshold TYPE clike                   OPTIONAL
+        i_title            TYPE clike                         OPTIONAL
+        i_sort_field       TYPE clike                         OPTIONAL
+        i_descending       TYPE abap_bool                     OPTIONAL
+        i_contentwidth     TYPE clike                         OPTIONAL
+        i_contentheight    TYPE clike                         OPTIONAL
+        i_growingthreshold TYPE clike                         OPTIONAL
         i_handle01         TYPE z2ui5_cl_layo_manager=>handle OPTIONAL
         i_handle02         TYPE z2ui5_cl_layo_manager=>handle OPTIONAL
         i_handle03         TYPE z2ui5_cl_layo_manager=>handle OPTIONAL
@@ -85,11 +85,11 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
     CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.
 
     r_result->mo_layout = z2ui5_cl_layo_manager=>factory( data     = r_result->mr_tab
-                                                    control  = z2ui5_cl_layo_manager=>m_table
-                                                    handle01 = i_handle01
-                                                    handle02 = i_handle02
-                                                    handle03 = i_handle03
-                                                    handle04 = i_handle04 ).
+                                                          control  = z2ui5_cl_layo_manager=>m_table
+                                                          handle01 = i_handle01
+                                                          handle02 = i_handle02
+                                                          handle03 = i_handle03
+                                                          handle04 = i_handle04 ).
 
   ENDMETHOD.
 
@@ -99,12 +99,12 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
                                                                afterclose = client->_event( 'CANCEL' )  ).
 
     z2ui5_cl_layo_xml_builder=>xml_build_table( i_data         = mr_out
-                                           i_xml          = popup
-                                           i_client       = client
-                                           i_layout       = mo_layout
-                                           i_search_value = REF #( mv_search_value )
-                                           i_col_type     = 'Navigation'
-                                           i_col_bind_to  = 'ZZROW_ID' ).
+                                                i_xml          = popup
+                                                i_client       = client
+                                                i_layout       = mo_layout
+                                                i_search_value = REF #( mv_search_value )
+                                                i_col_type     = 'Navigation'
+                                                i_col_bind_to  = 'ZZROW_ID' ).
 
     client->popup_display( popup->stringify( ) ).
 
@@ -153,7 +153,7 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
       WHEN OTHERS.
 
         z2ui5_cl_layo_pop=>on_event_layout( client = client
-                                                      layout = mo_layout ).
+                                            layout = mo_layout ).
 
     ENDCASE.
 
@@ -228,11 +228,15 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
     ENDTRY.
 
-    mr_out->* = CORRESPONDING #( mr_tab->* ).
+    ASSIGN mr_out->* TO FIELD-SYMBOL(<t_out>).
+    ASSIGN mr_tab->* TO FIELD-SYMBOL(<t_tab>).
+    ASSIGN mr_out_tmp->* TO FIELD-SYMBOL(<t_out_tmp>).
+
+    <t_out> = <t_tab>.
 
     set_row_id( ).
 
-    mr_out_tmp->* = mr_out->*.
+    <t_out_tmp> = <t_out>.
 
   ENDMETHOD.
 

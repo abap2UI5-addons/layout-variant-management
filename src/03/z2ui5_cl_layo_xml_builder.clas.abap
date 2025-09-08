@@ -358,12 +358,14 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
   METHOD xml_build_table.
 
+  ASSIGN i_data->* to FIELD-SYMBOL(<tab>).
+
     DATA(table) = i_xml->table(
                       growing          = COND #( WHEN i_growingthreshold = space THEN abap_false ELSE abap_true  )
                       growingthreshold = i_growingthreshold
                       width            = 'auto'
                       mode             = COND #( WHEN i_sel_mode = space THEN `None` ELSE i_sel_mode  )
-                      items            = i_client->_bind_edit( i_data->* )
+                      items            = i_client->_bind_edit( <tab> )
                       selectionchange  = i_client->_event( 'SELECTION_CHANGE' ) ).
 
     DATA(toolbar) = table->header_toolbar(
@@ -377,7 +379,10 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
     toolbar->toolbar_spacer( ).
 
     IF i_search_value IS SUPPLIED.
-      toolbar->search_field( value  = i_client->_bind_edit( i_search_value->* )
+
+    ASSIGN i_search_value->* to FIELD-SYMBOL(<search>).
+
+      toolbar->search_field( value  = i_client->_bind_edit( <search> )
                              search = i_client->_event( 'SEARCH' )
                              change = i_client->_event( 'SEARCH' )
                              id     = `SEARCH`

@@ -837,17 +837,21 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     DATA t_obj TYPE REF TO data.
     DATA s_obj TYPE REF TO data.
+    DATA string type string.
 
     FIELD-SYMBOLS <T_obj> TYPE STANDARD TABLE.
 
     result = layout.
 
-    CREATE DATA t_obj TYPE ('DD_X031L_TABLE').
-    CREATE DATA s_obj TYPE LINE OF ('DD_X031L_TABLE').
+    TRY.
+
+    string = 'DD_X031L_TABLE'.
+
+    CREATE DATA t_obj TYPE (string).
+    CREATE DATA s_obj TYPE LINE OF (string).
     ASSIGN t_obj->* TO <T_obj>.
     ASSIGN s_obj->* TO FIELD-SYMBOL(<obj>).
 
-    TRY.
         CALL METHOD type->('GET_DDIC_OBJECT')
           RECEIVING  p_object     = <t_obj>
           EXCEPTIONS not_found    = 1

@@ -645,6 +645,10 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     ASSIGN mr_data->* TO <table>.
 
+    IF <table> IS NOT ASSIGNED.
+      RETURN.
+    ENDIF.
+
     IF <table> IS INITIAL.
       RETURN.
     ENDIF.
@@ -835,9 +839,9 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   METHOD get_conversion_exit.
 
-    DATA t_obj TYPE REF TO data.
-    DATA s_obj TYPE REF TO data.
-    DATA string type string.
+    DATA string TYPE string.
+    DATA t_obj  TYPE REF TO data.
+    DATA s_obj  TYPE REF TO data.
 
     FIELD-SYMBOLS <T_obj> TYPE STANDARD TABLE.
 
@@ -845,12 +849,12 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     TRY.
 
-    string = 'DD_X031L_TABLE'.
+        string = 'DD_X031L_TABLE'.
 
-    CREATE DATA t_obj TYPE (string).
-    CREATE DATA s_obj TYPE LINE OF (string).
-    ASSIGN t_obj->* TO <T_obj>.
-    ASSIGN s_obj->* TO FIELD-SYMBOL(<obj>).
+        CREATE DATA t_obj TYPE (string).
+        CREATE DATA s_obj TYPE LINE OF (string).
+        ASSIGN t_obj->* TO <T_obj>.
+        ASSIGN s_obj->* TO FIELD-SYMBOL(<obj>).
 
         CALL METHOD type->('GET_DDIC_OBJECT')
           RECEIVING  p_object     = <t_obj>

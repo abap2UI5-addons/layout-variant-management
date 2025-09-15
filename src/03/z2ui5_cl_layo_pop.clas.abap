@@ -19,6 +19,12 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     TYPES END OF ty_s_layo.
     TYPES ty_t_layo TYPE STANDARD TABLE OF ty_s_layo WITH EMPTY KEY.
 
+    TYPES: BEGIN OF ty_s_col,
+             col TYPE c LENGTH 2,
+           END OF ty_s_col.
+
+    DATA t_col          TYPE STANDARD TABLE OF ty_s_col.
+
     DATA mo_layout      TYPE REF TO z2ui5_cl_layo_manager.
     DATA mt_controls    TYPE z2ui5_cl_layo_manager=>ty_t_controls.
     DATA mt_layout      TYPE z2ui5_cl_layo_manager=>ty_t_positions.
@@ -117,7 +123,6 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     METHODS check_grid_sum
       IMPORTING
         !value        TYPE int4
-        !type         TYPE string
       RETURNING
         VALUE(result) TYPE abap_bool.
 
@@ -1095,14 +1100,10 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
       WHEN `GRIDLAYOUT_CONFIRM`.
 
-        IF    check_grid_sum( value = mv_xl_label + mv_xl_value
-                              type  = 'XL' )
-           OR check_grid_sum( value = mv_l_label + mv_l_value
-                              type  = 'L' )
-           OR check_grid_sum( value = mv_m_label + mv_m_value
-                              type  = 'M' )
-           OR check_grid_sum( value = mv_s_label + mv_s_value
-                              type  = 'S' ) = abap_true.
+        IF    check_grid_sum( value = mv_xl_label + mv_xl_value )
+           OR check_grid_sum( value = mv_l_label + mv_l_value )
+           OR check_grid_sum( value = mv_m_label + mv_m_value )
+           OR check_grid_sum( value = mv_s_label + mv_s_value ) = abap_true.
 
         ELSE.
 
@@ -1121,6 +1122,8 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
           layout->grid_label_m  = mv_m_label.
           layout->grid_label_s  = mv_s_label.
 
+          mt_layout = mo_layout->ms_layout-t_layout.
+
           init_edit( ).
           render_edit( ).
 
@@ -1136,26 +1139,18 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD check_grid_sum.
-    " TODO: parameter TYPE is never used (ABAP cleaner)
 
     IF ( value ) > 12.
-      DATA(msg) = z2ui5_cl_util=>msg_get_by_msg( id = '/scmtms/common'
-                                                 no = '154'
-                                                 v1 = '12' ).
-      result = abap_true.
-    ENDIF.
 
-    client->message_toast_display( msg-text ).
+      result = abap_true.
+
+      client->message_toast_display( 'Maximum number of columns (12) exceeded' ).
+
+    ENDIF.
 
   ENDMETHOD.
 
   METHOD render_add_gridlayout.
-
-    TYPES: BEGIN OF ty_s_col,
-             col TYPE c LENGTH 2,
-           END OF ty_s_col.
-
-    DATA t_col TYPE STANDARD TABLE OF ty_s_col.
 
     t_col = VALUE #( ( col = 1  )
                      ( col = 2  )

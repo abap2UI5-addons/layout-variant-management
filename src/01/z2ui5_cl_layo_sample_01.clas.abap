@@ -45,7 +45,6 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
 
         mo_layout->set_selkz( t_event_arg = client->get( )-t_event_arg ).
 
-
       WHEN 'BACK'.
         client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
 
@@ -55,7 +54,6 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
                                             layout = mo_layout ).
 
     ENDCASE.
-
 
     client->view_model_update( ).
 
@@ -172,13 +170,8 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
         DATA(app) = CAST z2ui5_cl_layo_pop( client->get_app( client->get( )-s_draft-id_prev_app ) ).
         mo_layout = app->mo_layout.
 
-        IF app->mv_rerender = abap_true.
-          " e.g. subcolumns need rerendering to work ..
-          render_main( ).
-        ELSE.
-          "  for all other changes in Layout View Model Update is enough.
-          client->view_model_update( ).
-        ENDIF.
+        render_main( ).
+
       CATCH cx_root.
     ENDTRY.
 

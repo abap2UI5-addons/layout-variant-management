@@ -874,6 +874,10 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
           RETURN.
         ENDIF.
 
+        IF <conv> = `MDLPD`. " GUID to Product works but the way back will fail (not in SAP GUI).
+          RETURN.
+        ENDIF.
+
         result-convexit = <conv>.
 
         IF result-convexit <> space.

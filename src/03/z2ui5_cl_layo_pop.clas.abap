@@ -642,6 +642,12 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
         CONTINUE.
       ENDIF.
 
+     " Sorting should be saved, sorty by invislbe field...
+      IF r_layout->sorting ne space.
+        APPEND position TO positions.
+        CONTINUE.
+      ENDIF.
+
       IF line_exists( mo_layout->ms_layout-t_layout[ reference_field = r_layout->fname ] ).
         APPEND position TO positions.
         CONTINUE.

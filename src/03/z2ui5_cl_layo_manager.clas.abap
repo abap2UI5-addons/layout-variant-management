@@ -127,7 +127,9 @@ CLASS z2ui5_cl_layo_manager DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_Layo_pop_w_sel.
 
-    METHODS sort.
+    METHODS sort
+      IMPORTING
+        no_selkz_sort TYPE abap_bool OPTIONAL.
 
     METHODS set_selektion_criteria
       IMPORTING
@@ -137,11 +139,11 @@ CLASS z2ui5_cl_layo_manager DEFINITION
 
     METHODS set_selkz IMPORTING t_event_arg TYPE string_table.
 
-  PROTECTED SECTION.
     DATA mv_sel_mode      TYPE string.
     DATA mv_sel_field     TYPE string.
     DATA mv_sel_key_field TYPE string.
 
+  PROTECTED SECTION.
     CLASS-METHODS get_conversion_exit
       IMPORTING
         !type         TYPE REF TO cl_abap_datadescr
@@ -653,10 +655,22 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(sortorder) = VALUE abap_sortorder_tab(
-                                FOR layout IN ms_layout-t_layout  WHERE ( sorting <> space )
-                                ( descending = COND #( WHEN layout-sorting = 'DESCENDING' THEN abap_true )
-                                  name       = layout-fname ) ).
+    IF no_selkz_sort = abap_false.
+      DATA(selkz) = VALUE #( ms_layout-t_layout[ fname = 'SELKZ' ] OPTIONAL ).
+
+      IF selkz-sorting = space.
+
+        DATA(sortorder) = VALUE abap_sortorder_tab( ( descending = abap_true
+                                                      name       = 'SELKZ'
+                                                      astext     = abap_true ) ).
+
+      ENDIF.
+    ENDIF.
+
+    sortorder = VALUE abap_sortorder_tab( BASE sortorder
+                                          FOR layout IN ms_layout-t_layout  WHERE ( sorting <> space )
+                                          ( descending = COND #( WHEN layout-sorting = 'DESCENDING' THEN abap_true )
+                                            name       = layout-fname ) ).
 
     IF sortorder IS INITIAL.
       RETURN.

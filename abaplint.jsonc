@@ -15,7 +15,7 @@
     }
   ],
   "syntax": {
-    "version": "v750",
+    "version": "v755",
     "errorNamespace": "."
   },
   "rules": {

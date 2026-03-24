@@ -642,7 +642,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
         CONTINUE.
       ENDIF.
 
-     " Sorting should be saved, sorty by invislbe field...
+     " Sorting should be saved, sort by invisible field...
       IF r_layout->sorting ne space.
         APPEND position TO positions.
         CONTINUE.
@@ -909,6 +909,11 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     IF result CO '0123456789. '.
       result = |{ result }rem|.
     ENDIF.
+
+    IF width NA '0123456789'.
+     clear result.
+    endif.
+
 
   ENDMETHOD.
 

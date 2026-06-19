@@ -34,6 +34,7 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     DATA mv_layout      TYPE string.
     DATA mv_def         TYPE abap_bool.
     DATA mv_usr         TYPE abap_bool.
+    DATA mv_format      TYPE string.
     DATA mv_open        TYPE abap_bool.
     DATA mv_delete      TYPE abap_bool.
     DATA mt_sorting     TYPE ty_t_sorting.
@@ -557,7 +558,17 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
                                       state = client->_bind_edit( mv_def )
                            )->label( 'User specific'
                            )->switch( type  = 'AcceptReject'
-                                      state = client->_bind_edit( mv_usr ) ).
+                                      state = client->_bind_edit( mv_usr )
+            )->label( 'Screen Size'
+            )->combobox( selectedkey = client->_bind_edit( mv_format )
+*             )->item( key  = `X`
+*                         text        = `XL - Large Desktop`
+             )->item( key  = z2ui5_cl_layo_manager=>screen_format_l
+                      text = `Large  - Terminal`
+*             )->item( key  = `M`
+*                      text = `M - Tablet`
+             )->item( key  = z2ui5_cl_layo_manager=>screen_format_S
+                      text = `Small - Handheld` ).
 
     dialog->buttons( )->button( text  = 'Back'
                                 icon  = 'sap-icon://nav-back'
@@ -585,16 +596,17 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
       DATA(user) = sy-uname.
     ENDIF.
 
-    DATA(head) = VALUE z2ui5_t_11( guid     = mo_layout->ms_layout-s_head-guid
-                                   layout   = mv_layout
-                                   control  = mo_layout->ms_layout-s_head-control
-                                   handle01 = mo_layout->ms_layout-s_head-handle01
-                                   handle02 = mo_layout->ms_layout-s_head-handle02
-                                   handle03 = mo_layout->ms_layout-s_head-handle03
-                                   handle04 = mo_layout->ms_layout-s_head-handle04
-                                   descr    = mv_descr
-                                   def      = mv_def
-                                   uname    = user ).
+    DATA(head) = VALUE z2ui5_t_11( guid          = mo_layout->ms_layout-s_head-guid
+                                   layout        = mv_layout
+                                   control       = mo_layout->ms_layout-s_head-control
+                                   handle01      = mo_layout->ms_layout-s_head-handle01
+                                   handle02      = mo_layout->ms_layout-s_head-handle02
+                                   handle03      = mo_layout->ms_layout-s_head-handle03
+                                   handle04      = mo_layout->ms_layout-s_head-handle04
+                                   screen_format = mv_format
+                                   descr         = mv_descr
+                                   def           = mv_def
+                                   uname         = user ).
 
     SELECT SINGLE guid,
                   layout,
@@ -674,14 +686,15 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     ENDIF.
 
     " Check Default
-    UPDATE z2ui5_t_11 SET def = @abap_false       WHERE control   = @mo_layout->ms_layout-s_head-control
-                                                    AND handle01  = @mo_layout->ms_layout-s_head-handle01
-                                                    AND handle02  = @mo_layout->ms_layout-s_head-handle02
-                                                    AND handle03  = @mo_layout->ms_layout-s_head-handle03
-                                                    AND handle04  = @mo_layout->ms_layout-s_head-handle04
-                                                    AND def       = @abap_true
-                                                    AND uname     = @user
-                                                    AND guid     <> @head-guid.
+    UPDATE z2ui5_t_11 SET def = @abap_false       WHERE control        = @mo_layout->ms_layout-s_head-control
+                                                    AND handle01       = @mo_layout->ms_layout-s_head-handle01
+                                                    AND handle02       = @mo_layout->ms_layout-s_head-handle02
+                                                    AND handle03       = @mo_layout->ms_layout-s_head-handle03
+                                                    AND handle04       = @mo_layout->ms_layout-s_head-handle04
+                                                    AND def            = @abap_true
+                                                    AND uname          = @user
+                                                    AND screen_format  = @mv_format
+                                                    AND guid          <> @head-guid.
     IF sy-subrc = 0.
       COMMIT WORK AND WAIT.
     ENDIF.
@@ -750,16 +763,18 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
                    items = client->_bind_edit( mt_head )
                 )->columns(
                     )->column( )->text( 'Layout' )->get_parent(
-                    )->column( )->text( 'Description' )->get_parent(
                     )->column( )->text( 'Active' )->get_parent(
+                    )->column( )->text( 'Description' )->get_parent(
+                    )->column( )->text( 'Screen Format' )->get_parent(
                     )->column( )->text( 'Default' )->get_parent(
                     )->get_parent(
                 )->items(
                     )->column_list_item( selected = '{SELKZ}'
                         )->cells(
                             )->text( '{LAYOUT}'
-                            )->text( '{DESCR}'
                             )->text( '{ACTIVE}'
+                            )->text( '{DESCR}'
+                            )->text( '{SCREEN_FORMAT}'
                             )->text( '{DEF}' ).
 
     dialog->buttons(
@@ -812,7 +827,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(head) = REF #( mt_head[ layout = mo_layout->ms_layout-s_head-layout ] OPTIONAL ).
+    DATA(head) = REF #( mt_head[ guid = mo_layout->ms_layout-s_head-guid ] OPTIONAL ).
     IF head IS BOUND.
       head->selkz  = abap_true.
       head->active = abap_true.
@@ -829,6 +844,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     mv_layout = mo_layout->ms_layout-s_head-layout.
     mv_descr  = mo_layout->ms_layout-s_head-descr.
     mv_def    = mo_layout->ms_layout-s_head-def.
+    mv_format = mo_layout->ms_layout-s_head-screen_format.
 
     mv_usr    = xsdbool( mo_layout->ms_layout-s_head-uname IS NOT INITIAL ).
 

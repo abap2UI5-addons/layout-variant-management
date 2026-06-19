@@ -421,7 +421,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                   uname
       FROM z2ui5_t_11
       WHERE guid = @layout_guid
-      INTO @DATA(head) ##SUBRC_OK.
+      INTO @DATA(head).
 
     IF sy-subrc <> 0.
       RETURN.
@@ -722,7 +722,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     sortorder = VALUE abap_sortorder_tab( BASE sortorder
                                           FOR layout IN ms_layout-t_layout  WHERE ( sorting <> space )
-                                          ( descending = COND #( WHEN layout-sorting = 'DESCENDING' THEN abap_true )
+                                          ( descending = xsdbool( layout-sorting = 'DESCENDING' )
                                             name       = layout-fname ) ).
 
     IF sortorder IS INITIAL.

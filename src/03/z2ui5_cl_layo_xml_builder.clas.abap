@@ -138,13 +138,11 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                                      singlecontainerfullsize = abap_false
                               )->content( ns = `form` ).
 
-    ASSIGN i_data->* TO FIELD-SYMBOL(<data>).
-
     LOOP AT i_layout->ms_layout-t_layout REFERENCE INTO DATA(layout).
 
       DATA(lv_index) = sy-tabix.
 
-      ASSIGN COMPONENT layout->fname OF STRUCTURE <data> TO FIELD-SYMBOL(<value>).
+      ASSIGN COMPONENT layout->fname OF STRUCTURE i_data->* TO FIELD-SYMBOL(<value>).
       IF <value> IS NOT ASSIGNED.
         CONTINUE.
       ENDIF.
@@ -255,7 +253,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
       IF layout->reference_field IS NOT INITIAL.
 
-        ASSIGN COMPONENT layout->reference_field OF STRUCTURE <data> TO FIELD-SYMBOL(<ref_value>).
+        ASSIGN COMPONENT layout->reference_field OF STRUCTURE i_data->* TO FIELD-SYMBOL(<ref_value>).
         IF <ref_value> IS NOT ASSIGNED.
           CONTINUE.
         ENDIF.
@@ -264,6 +262,9 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
         IF sy-subrc <> 0.
           CONTINUE.
         ENDIF.
+
+        " TODO: variable is assigned but never used (ABAP cleaner)
+        DATA(ref_f) = VALUE #( I_layout->ms_layout-t_layout[ fname = layout->reference_field ] OPTIONAL ).
 
         line->input( visible = I_client->_bind( val       = layout->visible
                                                 tab       = I_layout->ms_layout-t_layout
@@ -360,7 +361,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
   ASSIGN i_data->* to FIELD-SYMBOL(<tab>).
 
     DATA(table) = i_xml->table(
-                      growing          = xsdbool( i_growingthreshold <> space )
+                      growing          = COND #( WHEN i_growingthreshold = space THEN abap_false ELSE abap_true  )
                       growingthreshold = i_growingthreshold
                       width            = 'auto'
                       mode             = COND #( WHEN i_sel_mode = space THEN `None` ELSE i_sel_mode  )
@@ -538,14 +539,12 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
     ELSE.
 
-      ASSIGN i_data->* TO FIELD-SYMBOL(<data>).
-
-      ASSIGN COMPONENT |{ i_layout->fname }-SRC| OF STRUCTURE <data> TO FIELD-SYMBOL(<src>).
+      ASSIGN COMPONENT |{ i_layout->fname }-SRC| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<src>).
       IF <src> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
 
-      ASSIGN COMPONENT |{ i_layout->fname }-ICON_SIZE| OF STRUCTURE <data> TO FIELD-SYMBOL(<size>).
+      ASSIGN COMPONENT |{ i_layout->fname }-ICON_SIZE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<size>).
       IF <size> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
@@ -570,22 +569,20 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
     ELSE.
 
-      ASSIGN i_data->* TO FIELD-SYMBOL(<data>).
-
-      ASSIGN COMPONENT |{ i_layout->fname }-RADIALMICROCHART_SIZE| OF STRUCTURE <data> TO FIELD-SYMBOL(<size>).
+      ASSIGN COMPONENT |{ i_layout->fname }-RADIALMICROCHART_SIZE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<size>).
       IF <size> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
 
-      ASSIGN COMPONENT |{ i_layout->fname }-PERCENTAGE| OF STRUCTURE <data> TO FIELD-SYMBOL(<percentage>).
+      ASSIGN COMPONENT |{ i_layout->fname }-PERCENTAGE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<percentage>).
       IF <percentage> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
-      ASSIGN COMPONENT |{ i_layout->fname }-VALUECOLOR| OF STRUCTURE <data> TO FIELD-SYMBOL(<valuecolor>).
+      ASSIGN COMPONENT |{ i_layout->fname }-VALUECOLOR| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<valuecolor>).
       IF <valuecolor> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
-      ASSIGN COMPONENT |{ i_layout->fname }-HIDEONNODATA| OF STRUCTURE <data> TO FIELD-SYMBOL(<hideonnodata>).
+      ASSIGN COMPONENT |{ i_layout->fname }-HIDEONNODATA| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<hideonnodata>).
       IF <hideonnodata> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
@@ -616,26 +613,24 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
     ELSE.
 
-      ASSIGN i_data->* TO FIELD-SYMBOL(<data>).
-
-      ASSIGN COMPONENT |{ i_layout->fname }-PERCENTVALUE| OF STRUCTURE <data> TO FIELD-SYMBOL(<percentvalue>).
+      ASSIGN COMPONENT |{ i_layout->fname }-PERCENTVALUE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<percentvalue>).
       IF <percentvalue> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
 
-      ASSIGN COMPONENT |{ i_layout->fname }-DISPLAYVALUE| OF STRUCTURE <data> TO FIELD-SYMBOL(<displayvalue>).
+      ASSIGN COMPONENT |{ i_layout->fname }-DISPLAYVALUE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<displayvalue>).
       IF <displayvalue> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
-      ASSIGN COMPONENT |{ i_layout->fname }-SHOWVALUE| OF STRUCTURE <data> TO FIELD-SYMBOL(<showvalue>).
+      ASSIGN COMPONENT |{ i_layout->fname }-SHOWVALUE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<showvalue>).
       IF <showvalue> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
-      ASSIGN COMPONENT |{ i_layout->fname }-STATE| OF STRUCTURE <data> TO FIELD-SYMBOL(<state>).
+      ASSIGN COMPONENT |{ i_layout->fname }-STATE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<state>).
       IF <state> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
-*      ASSIGN COMPONENT |{ i_layout->visible }| OF STRUCTURE <data> TO FIELD-SYMBOL(<visible>).
+*      ASSIGN COMPONENT |{ i_layout->visible }| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<visible>).
 *      IF <visible> IS NOT ASSIGNED.
 *        RETURN.
 *      ENDIF.
@@ -676,19 +671,17 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
     ELSE.
 
-      ASSIGN i_data->* TO FIELD-SYMBOL(<data>).
-
-      ASSIGN COMPONENT |{ i_layout->fname }-VALUE| OF STRUCTURE <data> TO FIELD-SYMBOL(<value>).
+      ASSIGN COMPONENT |{ i_layout->fname }-VALUE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<value>).
       IF <value> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
 
-      ASSIGN COMPONENT |{ i_layout->fname }-CLASS| OF STRUCTURE <data> TO FIELD-SYMBOL(<class>).
+      ASSIGN COMPONENT |{ i_layout->fname }-CLASS| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<class>).
       IF <class> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
 
-      ASSIGN COMPONENT |{ i_layout->fname }-STATUSINDICATOR_SIZE| OF STRUCTURE <data> TO FIELD-SYMBOL(<size>).
+      ASSIGN COMPONENT |{ i_layout->fname }-STATUSINDICATOR_SIZE| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<size>).
       IF <size> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
@@ -700,19 +693,19 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
       thresholds = status_indicator->property_thresholds( ).
 
-      ASSIGN COMPONENT |{ i_layout->fname }-FILLCOLOR_GOOD| OF STRUCTURE <data> TO FIELD-SYMBOL(<fillcolor_good>).
+      ASSIGN COMPONENT |{ i_layout->fname }-FILLCOLOR_GOOD| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<fillcolor_good>).
       IF <fillcolor_good> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
-      ASSIGN COMPONENT |{ i_layout->fname }-FILLCOLOR_CRITICAL| OF STRUCTURE <data> TO FIELD-SYMBOL(<fillcolor_critical>).
+      ASSIGN COMPONENT |{ i_layout->fname }-FILLCOLOR_CRITICAL| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<fillcolor_critical>).
       IF <fillcolor_critical> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
-      ASSIGN COMPONENT |{ i_layout->fname }-FILLCOLOR_ERROR| OF STRUCTURE <data> TO FIELD-SYMBOL(<fillcolor_error>).
+      ASSIGN COMPONENT |{ i_layout->fname }-FILLCOLOR_ERROR| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<fillcolor_error>).
       IF <fillcolor_error> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
-      ASSIGN COMPONENT |{ i_layout->fname }-SHAPEID| OF STRUCTURE <data> TO FIELD-SYMBOL(<shapeid>).
+      ASSIGN COMPONENT |{ i_layout->fname }-SHAPEID| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<shapeid>).
       IF <shapeid> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
@@ -744,18 +737,16 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
     ELSE.
 
-      ASSIGN i_data->* TO FIELD-SYMBOL(<data>).
-
-      ASSIGN COMPONENT |{ i_layout->fname }-TEXT| OF STRUCTURE <data> TO FIELD-SYMBOL(<text>).
+      ASSIGN COMPONENT |{ i_layout->fname }-TEXT| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<text>).
       IF <text> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
 
-      ASSIGN COMPONENT |{ i_layout->fname }-DESIGN| OF STRUCTURE <data> TO FIELD-SYMBOL(<design>).
+      ASSIGN COMPONENT |{ i_layout->fname }-DESIGN| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<design>).
       IF <design> IS NOT ASSIGNED.
         RETURN.
       ENDIF.
-      ASSIGN COMPONENT |{ i_layout->fname }-STATUS| OF STRUCTURE <data> TO FIELD-SYMBOL(<status>).
+      ASSIGN COMPONENT |{ i_layout->fname }-STATUS| OF STRUCTURE i_data->* TO FIELD-SYMBOL(<status>).
       IF <status> IS NOT ASSIGNED.
         RETURN.
       ENDIF.

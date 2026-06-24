@@ -188,8 +188,10 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
                      )->toolbar_spacer(
                     )->search_field(
                         width       = `17.5rem`
-                        placeholder = |{ z2ui5_cl_util=>rtti_get_data_element_texts( 'ROLLNAME' )-short }/{ z2ui5_cl_util=>rtti_get_data_element_texts(
-                                                                                                                'NAME_FELD' )-short }|
+                        placeholder = |{ z2ui5_cl_util=>rtti_get_data_element_texts( 'ROLLNAME' )-long
+                                       }/{
+                                         z2ui5_cl_util=>rtti_get_data_element_texts( 'NAME_FELD' )-long }|
+
                         livechange  = client->_event( val    = 'BUTTON_SEARCH'
                                                       t_arg  = VALUE #( ( `${$source>/value}` ) )
                                                       s_ctrl = VALUE #( check_allow_multi_req = abap_true ) )  ).
@@ -478,12 +480,12 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
   METHOD Edit_okay.
 
     LOOP AT mo_layout->ms_layout-t_layout REFERENCE INTO DATA(layout).
-      layout->tlabel           = z2ui5_cl_layo_manager=>set_text( layout->* ).
+      layout->tlabel           = mo_layout->set_text( layout->* ).
       layout->alternative_text = to_upper( layout->alternative_text ).
       layout->width            = check_width_unit( layout->width ).
     ENDLOOP.
 
-    mo_layout->ms_layout-t_layout = z2ui5_cl_layo_manager=>sort_by_seqence( mo_layout->ms_layout-t_layout ).
+    mo_layout->ms_layout-t_layout = mo_layout->sort_by_seqence( mo_layout->ms_layout-t_layout ).
 
     check_rerender_necessary( ).
 
@@ -817,11 +819,11 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
   METHOD get_layouts.
 
-    mt_head = z2ui5_cl_layo_manager=>select_layouts( control  = mo_layout->ms_layout-s_head-control
-                                                     handle01 = mo_layout->ms_layout-s_head-handle01
-                                                     handle02 = mo_layout->ms_layout-s_head-handle02
-                                                     handle03 = mo_layout->ms_layout-s_head-handle03
-                                                     handle04 = mo_layout->ms_layout-s_head-handle04 ).
+    mt_head = mo_layout->select_layouts( control  = mo_layout->ms_layout-s_head-control
+                                         handle01 = mo_layout->ms_layout-s_head-handle01
+                                         handle02 = mo_layout->ms_layout-s_head-handle02
+                                         handle03 = mo_layout->ms_layout-s_head-handle03
+                                         handle04 = mo_layout->ms_layout-s_head-handle04 ).
 
     IF mt_head IS INITIAL.
       RETURN.

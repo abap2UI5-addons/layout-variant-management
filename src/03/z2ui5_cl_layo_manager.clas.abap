@@ -334,9 +334,9 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
   METHOD set_text.
 
     IF layout-alternative_text IS INITIAL.
-      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-rollname  )-short.
+      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-rollname  )-long.
     ELSE.
-      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-alternative_text )-short.
+      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-alternative_text )-long.
     ENDIF.
 
     IF result IS INITIAL.
@@ -421,7 +421,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                   uname
       FROM z2ui5_t_11
       WHERE guid = @layout_guid
-      INTO @DATA(head).
+      INTO @DATA(head) ##SUBRC_OK.
 
     IF sy-subrc <> 0.
       RETURN.
@@ -722,7 +722,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     sortorder = VALUE abap_sortorder_tab( BASE sortorder
                                           FOR layout IN ms_layout-t_layout  WHERE ( sorting <> space )
-                                          ( descending = xsdbool( layout-sorting = 'DESCENDING' )
+                                          ( descending = COND #( WHEN layout-sorting = 'DESCENDING' THEN abap_true )
                                             name       = layout-fname ) ).
 
     IF sortorder IS INITIAL.

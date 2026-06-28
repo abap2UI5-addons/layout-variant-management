@@ -1,0 +1,31 @@
+name: ABAP_702
+
+on:
+  push:
+    branches: [702]
+  workflow_run:
+    workflows: [auto_downport]
+    types: [completed]
+
+concurrency:
+  group: ABAP_702-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ABAP_702:
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: 702
+    - uses: actions/setup-node@v5
+      with:
+        node-version: '20'
+        cache: 'npm'
+    - run: npm ci
+    - run: npx abaplint .github/abaplint/abap_702.jsonc

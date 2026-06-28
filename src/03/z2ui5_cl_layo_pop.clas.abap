@@ -114,12 +114,6 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     METHODS render_add_gridlayout.
     METHODS update_values.
 
-    CLASS-METHODS get_relative_name_of_table
-      IMPORTING
-        !table        TYPE any
-      RETURNING
-        VALUE(result) TYPE string.
-
   PRIVATE SECTION.
     METHODS check_grid_sum
       IMPORTING
@@ -877,32 +871,6 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     IF sy-subrc = 0.
       COMMIT WORK AND WAIT.
     ENDIF.
-
-  ENDMETHOD.
-
-  METHOD get_relative_name_of_table.
-
-    FIELD-SYMBOLS <table> TYPE any.
-
-    TRY.
-        DATA(typedesc) = cl_abap_typedescr=>describe_by_data( table ).
-
-        CASE typedesc->kind.
-
-          WHEN cl_abap_typedescr=>kind_table.
-            DATA(tabledesc) = CAST cl_abap_tabledescr( typedesc ).
-            DATA(structdesc) = CAST cl_abap_structdescr( tabledesc->get_table_line_type( ) ).
-            result = structdesc->get_relative_name( ).
-            RETURN.
-
-          WHEN typedesc->kind_ref.
-
-            ASSIGN table->* TO <table>.
-            result = get_relative_name_of_table( <table> ).
-
-        ENDCASE.
-      CATCH cx_root.
-    ENDTRY.
 
   ENDMETHOD.
 

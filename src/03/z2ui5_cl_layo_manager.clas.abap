@@ -734,7 +734,6 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
         SORT <table>
              BY (sortorder).
 
-      CATCH cx_sy_dyn_table_ill_comp_val. "##NO_HANDLER
       CATCH cx_root.
     ENDTRY.
 
@@ -797,6 +796,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   METHOD data_conversion.
 
+    FIELD-SYMBOLS <tab> TYPE ANY TABLE.
+
     ASSIGN mr_data->* TO FIELD-SYMBOL(<any>).
 
     IF <any> IS NOT ASSIGNED.
@@ -846,7 +847,12 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       CASE ms_layout-s_head-control.
         WHEN ui_table OR m_table.
 
-          LOOP AT <any> ASSIGNING FIELD-SYMBOL(<line>).
+          ASSIGN mr_data->* TO <tab>.
+          IF <tab> IS NOT ASSIGNED.
+            CONTINUE.
+          ENDIF.
+
+          LOOP AT <tab> ASSIGNING FIELD-SYMBOL(<line>).
 
             ASSIGN COMPONENT layout-fname OF STRUCTURE <line> TO FIELD-SYMBOL(<value>).
             IF <value> IS NOT ASSIGNED.

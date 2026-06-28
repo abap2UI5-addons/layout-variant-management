@@ -5,6 +5,9 @@ CLASS z2ui5_cl_layo_manager DEFINITION
   PUBLIC SECTION.
     INTERFACES if_serializable_object.
 
+    CONSTANTS screen_format_l TYPE string VALUE 'L' ##NO_TEXT.
+    CONSTANTS screen_format_s TYPE string VALUE 'S' ##NO_TEXT.
+
     TYPES handle  TYPE c LENGTH 40.
     TYPES control TYPE c LENGTH 15.
 
@@ -64,6 +67,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
         handle02      TYPE clike OPTIONAL
         handle03      TYPE clike OPTIONAL
         handle04      TYPE clike OPTIONAL
+        !format       TYPE clike OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_layo_manager.
 
@@ -127,7 +131,9 @@ CLASS z2ui5_cl_layo_manager DEFINITION
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_Layo_pop_w_sel.
 
-    METHODS sort.
+    METHODS sort
+      IMPORTING
+        no_selkz_sort TYPE abap_bool OPTIONAL.
 
     METHODS set_selektion_criteria
       IMPORTING
@@ -137,11 +143,11 @@ CLASS z2ui5_cl_layo_manager DEFINITION
 
     METHODS set_selkz IMPORTING t_event_arg TYPE string_table.
 
-  PROTECTED SECTION.
     DATA mv_sel_mode      TYPE string.
     DATA mv_sel_field     TYPE string.
     DATA mv_sel_key_field TYPE string.
 
+  PROTECTED SECTION.
     CLASS-METHODS get_conversion_exit
       IMPORTING
         !type         TYPE REF TO cl_abap_datadescr
@@ -159,6 +165,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
         handle02      TYPE clike       OPTIONAL
         handle03      TYPE clike       OPTIONAL
         handle04      TYPE clike       OPTIONAL
+        !format       TYPE clike       OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_layo_manager.
 
@@ -169,6 +176,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
         handle02      TYPE clike
         handle01      TYPE clike
         layout_guid   TYPE clike
+        !format       TYPE clike OPTIONAL
         !head         TYPE  ty_t_head
       RETURNING
         VALUE(result) TYPE  ty_s_head.
@@ -238,7 +246,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                                 handle01 = handle01
                                 handle02 = handle02
                                 handle03 = handle03
-                                handle04 = handle04 ).
+                                handle04 = handle04
+                                format   = format  ).
 
   ENDMETHOD.
 
@@ -253,6 +262,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
              handle02,
              handle03,
              handle04,
+             screen_format,
              descr,
              def,
              uname
@@ -269,6 +279,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
              handle02,
              handle03,
              handle04,
+             screen_format,
              descr,
              def,
              uname
@@ -281,6 +292,11 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
         INTO CORRESPONDING FIELDS OF TABLE @result ##SUBRC_OK.
 
     ENDIF.
+
+    " FALLBACK - Screenformat was added! We are changing empty Format to L.
+    LOOP AT result REFERENCE INTO DATA(line) WHERE screen_format IS INITIAL.
+      line->screen_format = screen_format_l.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -318,9 +334,9 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
   METHOD set_text.
 
     IF layout-alternative_text IS INITIAL.
-      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-rollname  )-short.
+      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-rollname  )-long.
     ELSE.
-      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-alternative_text )-short.
+      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-alternative_text )-long.
     ENDIF.
 
     IF result IS INITIAL.
@@ -399,6 +415,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                   handle02,
                   handle03,
                   handle04,
+                  screen_format,
                   descr,
                   def,
                   uname
@@ -478,12 +495,24 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                                  handle03    = handle03
                                  handle04    = handle04 ).
 
+*    IF format IS NOT INITIAL.
     DATA(def) = get_default_layout( handle04    = handle04
                                     handle03    = handle03
                                     handle02    = handle02
                                     handle01    = handle01
                                     layout_guid = layout_guid
+                                    format      = format
                                     head        = head ).
+*    ENDIF.
+
+*    IF def IS INITIAL.
+*      def = get_default_layout( handle04    = handle04
+*                                handle03    = handle03
+*                                handle02    = handle02
+*                                handle01    = handle01
+*                                layout_guid = layout_guid
+*                                head        = head ).
+*    ENDIF.
 
     IF def-layout IS NOT INITIAL.
 
@@ -546,15 +575,16 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
       ENDLOOP.
 
-      result->ms_layout-s_head-guid     = guid.
-      result->ms_layout-s_head-layout   = 'DEFAULT'.
-      result->ms_layout-s_head-control  = control.
-      result->ms_layout-s_head-descr    = 'System generated Layout'.
-      result->ms_layout-s_head-def      = abap_true.
-      result->ms_layout-s_head-handle01 = handle01.
-      result->ms_layout-s_head-handle02 = handle02.
-      result->ms_layout-s_head-handle03 = handle03.
-      result->ms_layout-s_head-handle04 = handle04.
+      result->ms_layout-s_head-guid          = guid.
+      result->ms_layout-s_head-layout        = 'DEFAULT'.
+      result->ms_layout-s_head-control       = control.
+      result->ms_layout-s_head-descr         = |{ handle04 } - { handle03 } - { format }|.
+      result->ms_layout-s_head-def           = abap_true.
+      result->ms_layout-s_head-handle01      = handle01.
+      result->ms_layout-s_head-handle02      = handle02.
+      result->ms_layout-s_head-handle03      = handle03.
+      result->ms_layout-s_head-handle04      = handle04.
+      result->ms_layout-s_head-screen_format = format.
 
     ENDIF.
 
@@ -618,24 +648,49 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    " Default all Handles + User
-    result = VALUE #( head[ handle01 = handle01
-                            handle02 = handle02
-                            handle03 = handle03
-                            handle04 = handle04
-                            def      = abap_true
-                            uname    = sy-uname ] OPTIONAL ).
+    " Default all Handles + User and Format
+    result = VALUE #( head[ handle01      = handle01
+                            handle02      = handle02
+                            handle03      = handle03
+                            handle04      = handle04
+                            screen_format = format
+                            def           = abap_true
+                            uname         = sy-uname ] OPTIONAL ).
 
     IF result IS NOT INITIAL.
       RETURN.
     ENDIF.
 
-    " Default frist 4 Handles + no User
-    result = VALUE #( head[ handle01 = handle01
-                            handle02 = handle02
-                            handle03 = handle03
-                            handle04 = handle04
-                            def      = abap_true ] OPTIONAL ).
+    " Default first 4 Handles + no User and Format
+    result = VALUE #( head[ handle01      = handle01
+                            handle02      = handle02
+                            handle03      = handle03
+                            handle04      = handle04
+                            screen_format = format
+                            def           = abap_true ] OPTIONAL ).
+
+    IF result IS NOT INITIAL.
+      RETURN.
+    ENDIF.
+
+    " Default all Handles + User
+    " result = VALUE #( head[ handle01 = handle01
+    " handle02 = handle02
+    " handle03 = handle03
+    " handle04 = handle04
+    " def      = abap_true
+    " uname    = sy-uname ] OPTIONAL ).
+    " --
+    " IF result IS NOT INITIAL.
+    " RETURN.
+    " ENDIF.
+    " --
+    " Default first 4 Handles + no User
+    " result = VALUE #( head[ handle01 = handle01
+    " handle02 = handle02
+    " handle03 = handle03
+    " handle04 = handle04
+    " def      = abap_true ] OPTIONAL ).
 
   ENDMETHOD.
 
@@ -653,10 +708,22 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(sortorder) = VALUE abap_sortorder_tab(
-                                FOR layout IN ms_layout-t_layout  WHERE ( sorting <> space )
-                                ( descending = COND #( WHEN layout-sorting = 'DESCENDING' THEN abap_true )
-                                  name       = layout-fname ) ).
+    IF no_selkz_sort = abap_false.
+      DATA(selkz) = VALUE #( ms_layout-t_layout[ fname = 'SELKZ' ] OPTIONAL ).
+
+      IF selkz-sorting = space.
+
+        DATA(sortorder) = VALUE abap_sortorder_tab( ( descending = abap_true
+                                                      name       = 'SELKZ'
+                                                      astext     = abap_true ) ).
+
+      ENDIF.
+    ENDIF.
+
+    sortorder = VALUE abap_sortorder_tab( BASE sortorder
+                                          FOR layout IN ms_layout-t_layout  WHERE ( sorting <> space )
+                                          ( descending = COND #( WHEN layout-sorting = 'DESCENDING' THEN abap_true )
+                                            name       = layout-fname ) ).
 
     IF sortorder IS INITIAL.
       RETURN.
@@ -871,6 +938,10 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
         ASSIGN COMPONENT 'CONVEXIT' OF STRUCTURE <obj> TO FIELD-SYMBOL(<conv>).
         IF <conv> IS NOT ASSIGNED.
+          RETURN.
+        ENDIF.
+
+        IF <conv> = `MDLPD`. " GUID to Product works but the way back will fail (not in SAP GUI).
           RETURN.
         ENDIF.
 

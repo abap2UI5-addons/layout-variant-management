@@ -877,30 +877,12 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   METHOD convert.
 
-    DATA(conex) = COND #( WHEN i_output = abap_true
-                          THEN |CONVERSION_EXIT_{ i_layout-convexit }_OUTPUT|
-                          ELSE |CONVERSION_EXIT_{ i_layout-convexit }_INPUT| ).
-
-    TRY.
-        IF i_layout-convexit = 'CUNIT'.
-
-          CALL FUNCTION conex
-            EXPORTING  input    = c_value
-                       language = sy-langu
-            IMPORTING  output   = c_value
-            EXCEPTIONS OTHERS   = 99.
-
-        ELSE.
-
-          CALL FUNCTION conex
-            EXPORTING  input  = c_value
-            IMPORTING  output = c_value
-            EXCEPTIONS OTHERS = 99.
-
-        ENDIF.
-
-      CATCH cx_root.
-    ENDTRY.
+    z2ui5_cl_util=>conv_exit(
+      EXPORTING
+        convexit = i_layout-convexit
+        output   = i_output
+      CHANGING
+        value    = c_value ).
 
   ENDMETHOD.
 

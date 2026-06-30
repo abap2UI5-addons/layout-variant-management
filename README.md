@@ -2,6 +2,7 @@
 [![ABAP_CLOUD](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_CLOUD.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/ABAP_CLOUD.yaml)
 <br>
 [![auto_rename](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/rename_test.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-variant-management/actions/workflows/rename_test.yaml)
+[![auto_downport](https://github.com/abap2UI5-addons/layout-management/actions/workflows/auto_downport.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-management/actions/workflows/auto_downport.yaml)
 
 # layout-management
 An addon for customizable table and form layouts with persistent variant management.

@@ -21,13 +21,13 @@
     },
     "homepage": "https://github.com/abap2UI5-addons/layout-management#readme",
     "devDependencies": {
-      "@abaplint/cli": "^2.113.86",
-      "@abaplint/database-sqlite": "^2.10.20",
-      "@abaplint/runtime": "^2.10.23",
-      "@abaplint/transpiler-cli": "^2.10.23",
-      "@types/node": "^22.10.5"
+      "@abaplint/cli": "^2.119.49",
+      "@abaplint/database-sqlite": "^2.11.78",
+      "@abaplint/runtime": "^2.13.31",
+      "@abaplint/transpiler-cli": "^2.13.31",
+      "@types/node": "^26.0.1"
     },
     "dependencies": {
-      "npm-check-updates": "^17.1.13"
+      "npm-check-updates": "^22.2.9"
     }
   }

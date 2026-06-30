@@ -26,15 +26,15 @@ An addon for customizable table and form layouts with persistent variant managem
 
 ###### Tables
 <img width="700" alt="Google Chrome 2024-09-09 12 14 58" src="https://github.com/user-attachments/assets/5e5f9291-3817-4a66-a886-cd0ac0c6e175">
-<img width="700" height="341" alt="image" src="https://github.com/user-attachments/assets/fb2347d8-3ef9-4c33-aaf0-4af419f993b7" />
+<img width="700" height="241" alt="image" src="https://github.com/user-attachments/assets/fb2347d8-3ef9-4c33-aaf0-4af419f993b7" />
 
 ###### Forms
-<img width="700" height="403" alt="image" src="https://github.com/user-attachments/assets/ec161092-7a99-4b99-be36-41866d1a3735" />
-<img width="700" height="941" alt="image" src="https://github.com/user-attachments/assets/ec24438e-110c-4061-b7b1-49ab61c98760" />
+<img width="700" height="203" alt="image" src="https://github.com/user-attachments/assets/ec161092-7a99-4b99-be36-41866d1a3735" />
+<img width="700" height="441" alt="image" src="https://github.com/user-attachments/assets/ec24438e-110c-4061-b7b1-49ab61c98760" />
 
 ###### Charts & Indicators
-<img width="700" height="367" alt="image" src="https://github.com/user-attachments/assets/023d07da-bf62-44e4-8b6f-e05608150bf8" />
-<img width="700" height="427" alt="image" src="https://github.com/user-attachments/assets/75eedb06-6c24-48c3-b0ab-f0a66dbd625e" />
+<img width="700" height="167" alt="image" src="https://github.com/user-attachments/assets/023d07da-bf62-44e4-8b6f-e05608150bf8" />
+<img width="700" height="227" alt="image" src="https://github.com/user-attachments/assets/75eedb06-6c24-48c3-b0ab-f0a66dbd625e" />
 
 
 ###### Persistence

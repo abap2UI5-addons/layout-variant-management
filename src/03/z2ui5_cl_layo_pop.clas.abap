@@ -439,33 +439,14 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
   METHOD Search.
 
-    FIELD-SYMBOLS <row> TYPE any.
-
     mt_layout = mo_layout->ms_layout-t_layout.
 
-    LOOP AT mt_layout ASSIGNING <row>.
-      DATA(lv_row) = ``.
-
-      ASSIGN COMPONENT 'FNAME' OF STRUCTURE <row> TO FIELD-SYMBOL(<fname>).
-      IF sy-subrc <> 0.
-        EXIT.
-      ENDIF.
-      ASSIGN COMPONENT 'ROLLNAME' OF STRUCTURE <row> TO FIELD-SYMBOL(<rollname>).
-      IF sy-subrc <> 0.
-        EXIT.
-      ENDIF.
-      ASSIGN COMPONENT 'TLABEL' OF STRUCTURE <row> TO FIELD-SYMBOL(<tlabel>).
-      IF sy-subrc <> 0.
-        EXIT.
-      ENDIF.
-
-      lv_row = lv_row && <fname> && <rollname> && <tlabel>.
-
-      IF lv_row NS client->get_event_arg( 1 ).
-        DELETE mt_layout.
-      ENDIF.
-
-    ENDLOOP.
+    z2ui5_cl_util=>itab_filter_by_val(
+      EXPORTING
+        val    = client->get_event_arg( 1 )
+        fields = VALUE #( ( `FNAME` ) ( `ROLLNAME` ) ( `TLABEL` ) )
+      CHANGING
+        tab    = mt_layout ).
 
     client->popup_model_update( ).
 

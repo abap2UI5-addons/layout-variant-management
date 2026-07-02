@@ -298,22 +298,8 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    LOOP AT <tab> ASSIGNING FIELD-SYMBOL(<f_row>).
-      DATA(lv_row) = ``.
-      DATA(lv_index) = 1.
-      DO.
-        ASSIGN COMPONENT lv_index OF STRUCTURE <f_row> TO FIELD-SYMBOL(<field>).
-        IF sy-subrc <> 0.
-          EXIT.
-        ENDIF.
-        lv_row = lv_row && <field>.
-        lv_index = lv_index + 1.
-      ENDDO.
-
-      IF lv_row NS mv_search_value.
-        DELETE <tab>.
-      ENDIF.
-    ENDLOOP.
+    z2ui5_cl_util=>itab_filter_by_val( EXPORTING val = mv_search_value
+                                       CHANGING  tab = <tab> ).
 
   ENDMETHOD.
 

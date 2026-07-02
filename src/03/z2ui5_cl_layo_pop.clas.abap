@@ -441,7 +441,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
     mt_layout = mo_layout->ms_layout-t_layout.
 
-    z2ui5_cl_util=>itab_filter_by_search_string(
+    z2ui5_cl_util=>itab_filter_by_val(
       EXPORTING
         val    = client->get_event_arg( 1 )
         fields = VALUE #( ( `FNAME` ) ( `ROLLNAME` ) ( `TLABEL` ) )

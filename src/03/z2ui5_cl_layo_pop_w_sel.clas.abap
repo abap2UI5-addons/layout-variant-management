@@ -298,8 +298,8 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    z2ui5_cl_util=>itab_filter_by_search_string( EXPORTING val = mv_search_value
-                                                 CHANGING  tab = <tab> ).
+    z2ui5_cl_util=>itab_filter_by_val( EXPORTING val = mv_search_value
+                                       CHANGING  tab = <tab> ).
 
   ENDMETHOD.
 

@@ -25,7 +25,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     CLASS-DATA ui_simpleform TYPE control VALUE 'UI.SIMPLEFORM' ##NO_TEXT.
     CLASS-DATA others        TYPE control VALUE '' ##NO_TEXT.
 
-    TYPES ty_s_Head TYPE z2ui5_t_11.
+    TYPES ty_s_head TYPE z2ui5_t_11.
     TYPES ty_t_head TYPE STANDARD TABLE OF ty_s_head WITH EMPTY KEY.
 
     TYPES:
@@ -57,7 +57,6 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     DATA mt_comps      TYPE ty_t_positions.
     DATA mt_sub_cols   TYPE ty_t_sub_columns.
     DATA mr_data       TYPE REF TO data.
-*    DATA mr_data_tmp   TYPE REF TO data.
 
     CLASS-METHODS factory
       IMPORTING
@@ -74,7 +73,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     CLASS-METHODS factory_by_guid
       IMPORTING
         layout_guid   TYPE clike
-        t_comps       TYPE Ty_t_positions
+        t_comps       TYPE ty_t_positions
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_layo_manager.
 
@@ -107,7 +106,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
 
     CLASS-METHODS sort_by_seqence
       IMPORTING
-        !Pos          TYPE  ty_t_positions
+        !pos          TYPE  ty_t_positions
       RETURNING
         VALUE(result) TYPE  ty_t_positions.
 
@@ -129,7 +128,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
         handle03      TYPE clike   OPTIONAL
         handle04      TYPE clike   OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5_cl_Layo_pop_w_sel.
+        VALUE(result) TYPE REF TO z2ui5_cl_layo_pop_w_sel.
 
     METHODS sort
       IMPORTING
@@ -293,7 +292,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     ENDIF.
 
-    " FALLBACK - Screenformat was added! We are changing empty Format to L.
+    " FALLBACK - Screen format was added later! We are changing an empty format to L.
     LOOP AT result REFERENCE INTO DATA(line) WHERE screen_format IS INITIAL.
       line->screen_format = screen_format_l.
     ENDLOOP.
@@ -351,7 +350,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   METHOD sort_by_seqence.
 
-    " First all wit a seqence then the rest
+    " First all with a sequence, then the rest
     DATA(tab) = pos.
 
     DATA(index) = 0.
@@ -396,7 +395,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                                     handle03 = handle03
                                     handle04 = handle04  ).
 
-    result = z2ui5_cl_Layo_pop_w_sel=>factory( i_tab   = layouts
+    result = z2ui5_cl_layo_pop_w_sel=>factory( i_tab   = layouts
                                                i_title = 'Layouts' ).
 
   ENDMETHOD.
@@ -442,13 +441,11 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
       ELSE.
 
-*        DATA(no_zero) = layout->no_leading_zero.
         DATA(fname) = layout->fname.
         DATA(rollname) = layout->rollname.
 
         CLEAR layout->*.
 
-*        layout->no_leading_zero = no_zero.
         layout->fname    = fname.
         layout->rollname = rollname.
 
@@ -488,14 +485,13 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     ENDLOOP.
 
     " Select Layout Heads
-    DATA(Head) = select_layouts( layout_guid = layout_guid
+    DATA(head) = select_layouts( layout_guid = layout_guid
                                  control     = control
                                  handle01    = handle01
                                  handle02    = handle02
                                  handle03    = handle03
                                  handle04    = handle04 ).
 
-*    IF format IS NOT INITIAL.
     DATA(def) = get_default_layout( handle04    = handle04
                                     handle03    = handle03
                                     handle02    = handle02
@@ -503,16 +499,6 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                                     layout_guid = layout_guid
                                     format      = format
                                     head        = head ).
-*    ENDIF.
-
-*    IF def IS INITIAL.
-*      def = get_default_layout( handle04    = handle04
-*                                handle03    = handle03
-*                                handle02    = handle02
-*                                handle01    = handle01
-*                                layout_guid = layout_guid
-*                                head        = head ).
-*    ENDIF.
 
     IF def-layout IS NOT INITIAL.
 
@@ -776,7 +762,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
         IF mv_sel_mode = `M`.
           EXIT.
         ELSE.
-          " wenn deslektiert dann auch raus
+          " if deselected, exit as well
           IF <selkz> = abap_false.
             EXIT.
           ENDIF.
@@ -814,7 +800,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
       IF layout-visible = abap_false.
 
-        " are you an ref field?
+        " is this a reference field?
         IF line_exists( ms_layout-t_layout[ reference_field = layout-fname
                                             visible         = abap_true ] ).
           DATA(ref) = abap_true.
@@ -898,7 +884,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     DATA t_obj  TYPE REF TO data.
     DATA s_obj  TYPE REF TO data.
 
-    FIELD-SYMBOLS <T_obj> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <t_obj> TYPE STANDARD TABLE.
 
     result = layout.
 
@@ -908,7 +894,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
         CREATE DATA t_obj TYPE (string).
         CREATE DATA s_obj TYPE LINE OF (string).
-        ASSIGN t_obj->* TO <T_obj>.
+        ASSIGN t_obj->* TO <t_obj>.
         ASSIGN s_obj->* TO FIELD-SYMBOL(<obj>).
 
         CALL METHOD type->('GET_DDIC_OBJECT')
@@ -919,7 +905,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
           RETURN.
         ENDIF.
 
-        ASSIGN <T_obj>[ 1 ] TO <obj>.
+        ASSIGN <t_obj>[ 1 ] TO <obj>.
         IF sy-subrc <> 0.
           RETURN.
         ENDIF.

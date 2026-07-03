@@ -51,7 +51,7 @@ CLASS z2ui5_cl_layo_pop_w_sel DEFINITION
     DATA descending        TYPE abap_bool.
 
     METHODS on_event.
-    METHODS Render_main.
+    METHODS render_main.
     METHODS set_output_table.
 
     METHODS on_event_search.
@@ -93,7 +93,7 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD Render_main.
+  METHOD render_main.
 
     DATA(popup) = z2ui5_cl_xml_view=>factory_popup( )->dialog( title      = title
                                                                afterclose = client->_event( 'CANCEL' )  ).
@@ -119,7 +119,7 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
       set_output_table( ).
 
-      Render_main( ).
+      render_main( ).
 
       RETURN.
 
@@ -171,7 +171,7 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
         mo_layout = app->mo_layout.
 
-        Render_main( ).
+        render_main( ).
 
       CATCH cx_root.
     ENDTRY.
@@ -258,8 +258,6 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
   METHOD get_comp.
     DATA index TYPE int4.
 
-*    DATA selkz TYPE abap_bool.
-
     TRY.
 
         DATA(comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( mr_tab ).
@@ -269,12 +267,6 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
                                     ( name = 'ZZROW_ID'
                                       type = CAST #( cl_abap_datadescr=>describe_by_data( index ) ) ) ) TO result.
         ENDIF.
-*        IF xsdbool( line_exists( comp[ name = 'SELKZ' ] ) ) = abap_false.
-*          APPEND LINES OF VALUE cl_abap_structdescr=>component_table(
-*                                    ( name = 'SELKZ'
-*                                      type = CAST #( cl_abap_datadescr=>describe_by_data( selkz ) ) ) ) TO result.
-*
-*        ENDIF.
 
         APPEND LINES OF comp TO result.
 

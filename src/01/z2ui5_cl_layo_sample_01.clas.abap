@@ -6,7 +6,7 @@ CLASS z2ui5_cl_layo_sample_01 DEFINITION
     INTERFACES z2ui5_if_app.
 
     TYPES  BEGIN OF ty_s_tab.
-    TYPES:   Names             TYPE string,
+    TYPES:   names             TYPE string,
              icon              TYPE z2ui5_xml_s_icon,
              generictag        TYPE z2ui5_xml_s_generictag,
              progressindicator TYPE z2ui5_xml_s_progressind,

@@ -6,7 +6,7 @@ CLASS z2ui5_cl_layo_sample_02 DEFINITION
     INTERFACES z2ui5_if_app.
 
     TYPES  BEGIN OF ty_s_tab.
-    TYPES:   Names             TYPE string,
+    TYPES:   names             TYPE string,
              icon              TYPE z2ui5_xml_s_icon,
              generictag        TYPE z2ui5_xml_s_generictag,
              progressindicator TYPE z2ui5_xml_s_progressind,
@@ -60,7 +60,6 @@ CLASS z2ui5_cl_layo_sample_02 IMPLEMENTATION.
     render_main( ).
   ENDMETHOD.
 
-
   METHOD render_main.
 
     DATA(view) = z2ui5_cl_xml_view=>factory( )->shell( ).
@@ -73,8 +72,7 @@ CLASS z2ui5_cl_layo_sample_02 IMPLEMENTATION.
     z2ui5_cl_layo_xml_builder=>xml_build_simple_form( i_data   = REF #( ms_data )
                                                       i_xml    = page
                                                       i_client = client
-                                                      i_layout = mo_layout
-    ).
+                                                      i_layout = mo_layout ).
 
     client->view_display( view->stringify( ) ).
 
@@ -106,15 +104,15 @@ CLASS z2ui5_cl_layo_sample_02 IMPLEMENTATION.
                                                     design = 'StatusIconHidden' )
                        progressindicator = VALUE #( percentvalue = '70'
                                                     state        = 'Warning'  )
-                       radialmicrochart  = VALUE #( percentage = '70'
-                                                    valuecolor = 'Critical'
-                                                    radialmicrochart_size       = 'S' )
-                       statusindicator   = VALUE #( value              = '70'
-                                                    fillcolor_error    = '100'
-                                                    fillcolor_critical = '80'
-                                                    fillcolor_good     = '40'
-                                                    shapeid            = 'tool'
-                                                    statusindicator_size               = 'Medium' ) ).
+                       radialmicrochart  = VALUE #( percentage            = '70'
+                                                    valuecolor            = 'Critical'
+                                                    radialmicrochart_size = 'S' )
+                       statusindicator   = VALUE #( value                = '70'
+                                                    fillcolor_error      = '100'
+                                                    fillcolor_critical   = '80'
+                                                    fillcolor_good       = '40'
+                                                    shapeid              = 'tool'
+                                                    statusindicator_size = 'Medium' ) ).
 
   ENDMETHOD.
 

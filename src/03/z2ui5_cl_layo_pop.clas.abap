@@ -83,14 +83,12 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     METHODS init_edit.
     METHODS render_delete.
     METHODS render_add_subcolumn.
-    METHODS on_event_subcoloumns.
+    METHODS on_event_subcolumns.
     METHODS check_rerender_necessary.
 
     METHODS on_init.
 
-    METHODS render_open
-      IMPORTING
-        external_call TYPE abap_bool OPTIONAL.
+    METHODS render_open.
 
     METHODS get_selected_layout
       RETURNING
@@ -121,8 +119,8 @@ CLASS z2ui5_cl_layo_pop DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool.
 
-    METHODS Edit_okay.
-    METHODS Search.
+    METHODS edit_okay.
+    METHODS search.
 
 ENDCLASS.
 
@@ -379,11 +377,11 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
       WHEN 'EDIT_OKAY'.
 
-        Edit_okay( ).
+        edit_okay( ).
 
       WHEN 'BUTTON_SEARCH'.
 
-        Search( ).
+        search( ).
 
       WHEN 'CLOSE'.
 
@@ -407,7 +405,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
         save_layout( ).
 
-        Edit_okay( ).
+        edit_okay( ).
 
       WHEN 'OPEN_SELECT'.
 
@@ -429,7 +427,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
       WHEN OTHERS.
 
-        on_event_subcoloumns( ).
+        on_event_subcolumns( ).
 
         on_event_gridlayout( ).
 
@@ -437,7 +435,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD Search.
+  METHOD search.
 
     mt_layout = mo_layout->ms_layout-t_layout.
 
@@ -452,7 +450,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD Edit_okay.
+  METHOD edit_okay.
 
     LOOP AT mo_layout->ms_layout-t_layout REFERENCE INTO DATA(layout).
       layout->tlabel           = mo_layout->set_text( layout->* ).
@@ -541,10 +539,10 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 *             )->item( key  = `X`
 *                         text        = `XL - Large Desktop`
              )->item( key  = z2ui5_cl_layo_manager=>screen_format_l
-                      text = `Large  - Terminal`
+                      text = `Large - Terminal`
 *             )->item( key  = `M`
 *                      text = `M - Tablet`
-             )->item( key  = z2ui5_cl_layo_manager=>screen_format_S
+             )->item( key  = z2ui5_cl_layo_manager=>screen_format_s
                       text = `Small - Handheld` ).
 
     dialog->buttons( )->button( text  = 'Back'
@@ -565,7 +563,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     DATA positions TYPE STANDARD TABLE OF z2ui5_t_12 WITH EMPTY KEY.
 
     IF mv_layout IS INITIAL.
-      client->message_toast_display( 'Layoutname missing.' ).
+      client->message_toast_display( 'Layout name missing.' ).
       RETURN.
     ENDIF.
 
@@ -727,7 +725,6 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD render_open.
-    " TODO: parameter EXTERNAL_CALL is never used (ABAP cleaner)
 
     DATA(popup) = z2ui5_cl_xml_view=>factory_popup( ).
 
@@ -862,7 +859,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     ENDIF.
 
     IF width CA '.'.
-      FIND REGEX '([0-9]{1,4}.[0-9]{1})' IN width SUBMATCHES result.
+      FIND REGEX '([0-9]{1,4}\.[0-9]{1})' IN width SUBMATCHES result.
     ELSE.
       FIND REGEX '([0-9]{1,4})' IN width SUBMATCHES result.
     ENDIF.
@@ -879,11 +876,11 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
     lo_popup = lo_popup->dialog( afterclose   = client->_event( 'SUBCOLUMN_CANCEL' )
                                  contentwidth = `50%`
-                                 title        = 'Define Sub Coloumns' ).
+                                 title        = 'Define Subcolumns' ).
 
     DATA(vbox) = lo_popup->vbox( justifycontent = 'SpaceBetween' ).
 
-    DATA(item) = vbox->list( nodata          = `no Subcolumns defined`
+    DATA(item) = vbox->list( nodata          = `No subcolumns defined`
                              items           = client->_bind_edit( mo_layout->mt_sub_cols )
                              selectionchange = client->_event( 'SELCHANGE' )
                 )->custom_list_item( ).
@@ -916,7 +913,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD on_event_subcoloumns.
+  METHOD on_event_subcolumns.
 
     CASE client->get( )-event.
 
@@ -931,7 +928,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
         ENDIF.
 
         mo_layout->mt_comps    = mo_layout->ms_layout-t_layout.   " Components for DropDownList
-        mo_layout->mt_sub_cols = layout->t_sub_col.               " Defined Sub Col´s
+        mo_layout->mt_sub_cols = layout->t_sub_col.               " Defined subcolumns
 
         render_add_subcolumn( ).
 
@@ -1067,10 +1064,10 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
       WHEN `GRIDLAYOUT_CONFIRM`.
 
-        IF    check_grid_sum( value = mv_xl_label + mv_xl_value )
-           OR check_grid_sum( value = mv_l_label + mv_l_value )
-           OR check_grid_sum( value = mv_m_label + mv_m_value )
-           OR check_grid_sum( value = mv_s_label + mv_s_value ) = abap_true.
+        IF    check_grid_sum( value = mv_xl_label + mv_xl_value ) = abap_true
+           OR check_grid_sum( value = mv_l_label + mv_l_value )  = abap_true
+           OR check_grid_sum( value = mv_m_label + mv_m_value )  = abap_true
+           OR check_grid_sum( value = mv_s_label + mv_s_value )  = abap_true.
 
         ELSE.
 
@@ -1107,7 +1104,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
   METHOD check_grid_sum.
 
-    IF ( value ) > 12.
+    IF value > 12.
 
       result = abap_true.
 
@@ -1141,38 +1138,38 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     DATA(form) = lo_popup->simple_form( editable = abap_true
                                         title    = 'Define Label and Value Span' )->content( ns = `form` ).
 
-    " TODO: variable is assigned but never used (ABAP cleaner)
-    DATA(line) = form->label( text = 'XL'
-                 )->combobox( selectedkey = client->_bind_edit( mv_xl_label )
-                              width       = `7rem`
-                              items       = client->_bind( t_col  )
-                   )->item( key  = '{COL}'
-                            text = '{COL} Label Span' ).
+    form->label( text = 'XL'
+    )->combobox( selectedkey = client->_bind_edit( mv_xl_label )
+                 width       = `7rem`
+                 items       = client->_bind( t_col  )
+      )->item( key  = '{COL}'
+               text = '{COL} Label Span' ).
 
     form->combobox( selectedkey = client->_bind_edit( mv_xl_value )
                     width       = `7rem`
                     items       = client->_bind( t_col  )
-)->item( key  = '{COL}'
-         text = '{COL} Value Span' ).
+      )->item( key  = '{COL}'
+               text = '{COL} Value Span' ).
 
-    line = form->label( text = 'L'
-                  )->combobox( selectedkey = client->_bind_edit( mv_l_label )
-                               width       = `7rem`
-                               items       = client->_bind( t_col  )
-                    )->item( key  = '{COL}'
-                             text = '{COL} Label Span' ).
+    form->label( text = 'L'
+    )->combobox( selectedkey = client->_bind_edit( mv_l_label )
+                 width       = `7rem`
+                 items       = client->_bind( t_col  )
+      )->item( key  = '{COL}'
+               text = '{COL} Label Span' ).
+
     form->combobox( selectedkey = client->_bind_edit( mv_l_value )
-
+                    width       = `7rem`
                     items       = client->_bind( t_col  )
-)->item( key  = '{COL}'
-         text = '{COL} Value Span' ).
+      )->item( key  = '{COL}'
+               text = '{COL} Value Span' ).
 
-    line = form->label( text = 'M'
-                  )->combobox( selectedkey = client->_bind_edit( mv_m_label )
-                               width       = `7rem`
-                               items       = client->_bind( t_col  )
-                    )->item( key  = '{COL}'
-                             text = '{COL} Label Span' ).
+    form->label( text = 'M'
+    )->combobox( selectedkey = client->_bind_edit( mv_m_label )
+                 width       = `7rem`
+                 items       = client->_bind( t_col  )
+      )->item( key  = '{COL}'
+               text = '{COL} Label Span' ).
 
     form->combobox( selectedkey = client->_bind_edit( mv_m_value )
                     width       = `7rem`
@@ -1180,12 +1177,12 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
       )->item( key  = '{COL}'
                text = '{COL} Value Span' ).
 
-    line = form->label( text = 'S'
-                  )->combobox( selectedkey = client->_bind_edit( mv_s_label )
-                               width       = `7rem`
-                               items       = client->_bind( t_col  )
-                    )->item( key  = '{COL}'
-                             text = '{COL} Label Span' ).
+    form->label( text = 'S'
+    )->combobox( selectedkey = client->_bind_edit( mv_s_label )
+                 width       = `7rem`
+                 items       = client->_bind( t_col  )
+      )->item( key  = '{COL}'
+               text = '{COL} Label Span' ).
 
     form->combobox( selectedkey = client->_bind_edit( mv_s_value )
                     width       = `7rem`

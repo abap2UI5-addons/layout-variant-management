@@ -6,7 +6,7 @@ CLASS z2ui5_cl_layo_sample_01 DEFINITION
     INTERFACES z2ui5_if_app.
 
     TYPES  BEGIN OF ty_s_tab.
-    TYPES:   Names             TYPE string,
+    TYPES:   names             TYPE string,
              icon              TYPE z2ui5_xml_s_icon,
              generictag        TYPE z2ui5_xml_s_generictag,
              progressindicator TYPE z2ui5_xml_s_progressind,
@@ -21,7 +21,6 @@ CLASS z2ui5_cl_layo_sample_01 DEFINITION
 
   PROTECTED SECTION.
     DATA client            TYPE REF TO z2ui5_if_client.
-    DATA check_initialized TYPE abap_bool.
 
     METHODS on_init.
     METHODS on_event.
@@ -89,8 +88,7 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
   METHOD z2ui5_if_app~main.
     me->client = client.
 
-    IF check_initialized = abap_false.
-      check_initialized = abap_true.
+    IF client->check_on_init( ).
       on_init( ).
     ENDIF.
 

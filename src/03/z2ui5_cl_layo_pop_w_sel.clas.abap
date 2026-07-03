@@ -262,7 +262,7 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
         DATA(comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( mr_tab ).
 
-        IF xsdbool( line_exists( comp[ name = 'ZZROW_ID' ] ) ) = abap_false.
+        IF NOT line_exists( comp[ name = 'ZZROW_ID' ] ).
           APPEND LINES OF VALUE cl_abap_structdescr=>component_table(
                                     ( name = 'ZZROW_ID'
                                       type = CAST #( cl_abap_datadescr=>describe_by_data( index ) ) ) ) TO result.

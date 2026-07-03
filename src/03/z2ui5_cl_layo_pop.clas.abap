@@ -637,7 +637,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
       LOOP AT mo_layout->ms_layout-t_layout INTO DATA(layout) WHERE t_sub_col IS NOT INITIAL.
         IF line_exists( layout-t_sub_col[ fname = r_layout->fname ] ).
           APPEND position TO positions.
-          CONTINUE.
+          EXIT.
         ENDIF.
       ENDLOOP.
 

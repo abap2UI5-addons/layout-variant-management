@@ -25,20 +25,20 @@ An addon for customizable table and form layouts with persistent variant managem
 #### Demo
 
 ###### Tables
-<img width="700" alt="Google Chrome 2024-09-09 12 14 58" src="https://github.com/user-attachments/assets/5e5f9291-3817-4a66-a886-cd0ac0c6e175">
-<img width="700" height="241" alt="image" src="https://github.com/user-attachments/assets/fb2347d8-3ef9-4c33-aaf0-4af419f993b7" />
+<img width="700" alt="Table output with layout customization popup" src="https://github.com/user-attachments/assets/5e5f9291-3817-4a66-a886-cd0ac0c6e175">
+<img width="700" height="241" alt="Table output rendered with a customized layout" src="https://github.com/user-attachments/assets/fb2347d8-3ef9-4c33-aaf0-4af419f993b7" />
 
 ###### Forms
-<img width="700" height="203" alt="image" src="https://github.com/user-attachments/assets/ec161092-7a99-4b99-be36-41866d1a3735" />
-<img width="700" height="441" alt="image" src="https://github.com/user-attachments/assets/ec24438e-110c-4061-b7b1-49ab61c98760" />
+<img width="700" height="203" alt="Simple form output rendered with a customized layout" src="https://github.com/user-attachments/assets/ec161092-7a99-4b99-be36-41866d1a3735" />
+<img width="700" height="441" alt="Form layout customization popup with label and value spans" src="https://github.com/user-attachments/assets/ec24438e-110c-4061-b7b1-49ab61c98760" />
 
 ###### Charts & Indicators
-<img width="700" height="167" alt="image" src="https://github.com/user-attachments/assets/023d07da-bf62-44e4-8b6f-e05608150bf8" />
-<img width="700" height="227" alt="image" src="https://github.com/user-attachments/assets/75eedb06-6c24-48c3-b0ab-f0a66dbd625e" />
+<img width="700" height="167" alt="Table with chart and indicator columns" src="https://github.com/user-attachments/assets/023d07da-bf62-44e4-8b6f-e05608150bf8" />
+<img width="700" height="227" alt="Form with progress indicator, radial chart and status indicator" src="https://github.com/user-attachments/assets/75eedb06-6c24-48c3-b0ab-f0a66dbd625e" />
 
 
 ###### Persistence
-<img width="700" alt="Google Chrome 2024-09-09 12 15 32" src="https://github.com/user-attachments/assets/d7f39663-d864-4737-89e4-8e925e54bc2d">
+<img width="700" alt="Popup for saving and selecting persisted layout variants" src="https://github.com/user-attachments/assets/d7f39663-d864-4737-89e4-8e925e54bc2d">
 
 #### Contribution & Support
 We welcome contributions! Whether you're:

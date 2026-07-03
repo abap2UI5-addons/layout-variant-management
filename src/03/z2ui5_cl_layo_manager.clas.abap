@@ -745,14 +745,16 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     LOOP AT <table> ASSIGNING FIELD-SYMBOL(<row>).
 
+      " check sy-subrc instead of IS ASSIGNED - a field symbol stays
+      " assigned from the previous loop iteration
       ASSIGN COMPONENT mv_sel_key_field OF STRUCTURE <row> TO FIELD-SYMBOL(<id>).
 
-      IF <id> IS NOT ASSIGNED.
+      IF sy-subrc <> 0.
         CONTINUE.
       ENDIF.
 
       ASSIGN COMPONENT mv_sel_field OF STRUCTURE <row> TO FIELD-SYMBOL(<selkz>).
-      IF <selkz> IS NOT ASSIGNED.
+      IF sy-subrc <> 0.
         CONTINUE.
       ENDIF.
 
@@ -841,7 +843,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
           LOOP AT <tab> ASSIGNING FIELD-SYMBOL(<line>).
 
             ASSIGN COMPONENT layout-fname OF STRUCTURE <line> TO FIELD-SYMBOL(<value>).
-            IF <value> IS NOT ASSIGNED.
+            IF sy-subrc <> 0.
               CONTINUE.
             ENDIF.
 
@@ -854,7 +856,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
         WHEN ui_simpleform.
 
           ASSIGN COMPONENT layout-fname OF STRUCTURE <any> TO <value>.
-          IF <value> IS NOT ASSIGNED.
+          IF sy-subrc <> 0.
             CONTINUE.
           ENDIF.
 

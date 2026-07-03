@@ -20,7 +20,6 @@ CLASS z2ui5_cl_layo_sample_05 DEFINITION
 
   PROTECTED SECTION.
     DATA client            TYPE REF TO z2ui5_if_client.
-    DATA check_initialized TYPE abap_bool.
 
     METHODS on_init.
     METHODS on_event.
@@ -95,8 +94,7 @@ CLASS z2ui5_cl_layo_sample_05 IMPLEMENTATION.
   METHOD z2ui5_if_app~main.
     me->client = client.
 
-    IF check_initialized = abap_false.
-      check_initialized = abap_true.
+    IF client->check_on_init( ).
       on_init( ).
     ENDIF.
 

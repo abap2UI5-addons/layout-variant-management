@@ -1,3 +1,5 @@
-downport
 node_modules
 output
+.github/out/
+.github/abaplint/output/
+.github/abaplint/rename_run.json

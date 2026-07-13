@@ -178,9 +178,9 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
                      )->toolbar_spacer(
                     )->search_field(
                         width       = `17.5rem`
-                        placeholder = |{ z2ui5_cl_util=>rtti_get_data_element_texts( 'ROLLNAME' )-long
+                        placeholder = |{ z2ui5_cl_layo_context=>rtti_get_data_element_texts( 'ROLLNAME' )-long
                                        }/{
-                                         z2ui5_cl_util=>rtti_get_data_element_texts( 'NAME_FELD' )-long }|
+                                         z2ui5_cl_layo_context=>rtti_get_data_element_texts( 'NAME_FELD' )-long }|
 
                         livechange  = client->_event( val    = 'BUTTON_SEARCH'
                                                       t_arg  = VALUE #( ( `${$source>/value}` ) )
@@ -197,7 +197,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     SORT t_layout BY visible DESCENDING
                      fname ASCENDING.
 
-    DATA(lt_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( t_layout ).
+    DATA(lt_comp) = z2ui5_cl_layo_context=>rtti_get_t_attri_by_any( t_layout ).
 
     LOOP AT mt_controls REFERENCE INTO DATA(control) WHERE control = mo_layout->ms_layout-s_head-control.
 
@@ -437,7 +437,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
     mt_layout = mo_layout->ms_layout-t_layout.
 
-    z2ui5_cl_util=>itab_filter_by_val(
+    z2ui5_cl_layo_context=>itab_filter_by_val(
       EXPORTING
         val    = client->get_event_arg( 1 )
         fields = VALUE #( ( `FNAME` ) ( `ROLLNAME` ) ( `TLABEL` ) )
@@ -963,7 +963,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
         render_edit( ).
 
       WHEN `SUBCOLUMN_ADD`.
-        INSERT VALUE #( key = z2ui5_cl_util=>uuid_get_c32( ) ) INTO TABLE mo_layout->mt_sub_cols.
+        INSERT VALUE #( key = z2ui5_cl_layo_context=>uuid_get_c32( ) ) INTO TABLE mo_layout->mt_sub_cols.
         client->popup_model_update( ).
 
       WHEN `SUBCOLUMN_DELETE`.

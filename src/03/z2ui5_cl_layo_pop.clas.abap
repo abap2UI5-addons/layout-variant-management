@@ -1062,10 +1062,10 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
       WHEN `GRIDLAYOUT_CONFIRM`.
 
-        IF    check_grid_sum( value = mv_xl_label + mv_xl_value ) = abap_true
-           OR check_grid_sum( value = mv_l_label + mv_l_value )  = abap_true
-           OR check_grid_sum( value = mv_m_label + mv_m_value )  = abap_true
-           OR check_grid_sum( value = mv_s_label + mv_s_value )  = abap_true.
+        IF    check_grid_sum( mv_xl_label + mv_xl_value ) = abap_true
+           OR check_grid_sum( mv_l_label + mv_l_value )  = abap_true
+           OR check_grid_sum( mv_m_label + mv_m_value )  = abap_true
+           OR check_grid_sum( mv_s_label + mv_s_value )  = abap_true.
 
         ELSE.
 
@@ -1134,9 +1134,9 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
                                  title        = 'Grid Layout' ).
 
     DATA(form) = lo_popup->simple_form( editable = abap_true
-                                        title    = 'Define Label and Value Span' )->content( ns = `form` ).
+                                        title    = 'Define Label and Value Span' )->content( `form` ).
 
-    form->label( text = 'XL'
+    form->label( 'XL'
     )->combobox( selectedkey = client->_bind_edit( mv_xl_label )
                  width       = `7rem`
                  items       = client->_bind( t_col  )
@@ -1149,7 +1149,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
       )->item( key  = '{COL}'
                text = '{COL} Value Span' ).
 
-    form->label( text = 'L'
+    form->label( 'L'
     )->combobox( selectedkey = client->_bind_edit( mv_l_label )
                  width       = `7rem`
                  items       = client->_bind( t_col  )
@@ -1162,7 +1162,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
       )->item( key  = '{COL}'
                text = '{COL} Value Span' ).
 
-    form->label( text = 'M'
+    form->label( 'M'
     )->combobox( selectedkey = client->_bind_edit( mv_m_label )
                  width       = `7rem`
                  items       = client->_bind( t_col  )
@@ -1175,7 +1175,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
       )->item( key  = '{COL}'
                text = '{COL} Value Span' ).
 
-    form->label( text = 'S'
+    form->label( 'S'
     )->combobox( selectedkey = client->_bind_edit( mv_s_label )
                  width       = `7rem`
                  items       = client->_bind( t_col  )

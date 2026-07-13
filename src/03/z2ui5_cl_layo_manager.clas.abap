@@ -454,7 +454,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
           CATCH cx_root.
         ENDTRY.
 
-        layout->* = default_grid_layout( position = layout->* ).
+        layout->* = default_grid_layout( layout->* ).
 
       ENDIF.
 
@@ -659,25 +659,6 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    " Default all Handles + User
-    " result = VALUE #( head[ handle01 = handle01
-    " handle02 = handle02
-    " handle03 = handle03
-    " handle04 = handle04
-    " def      = abap_true
-    " uname    = sy-uname ] OPTIONAL ).
-    " --
-    " IF result IS NOT INITIAL.
-    " RETURN.
-    " ENDIF.
-    " --
-    " Default first 4 Handles + no User
-    " result = VALUE #( head[ handle01 = handle01
-    " handle02 = handle02
-    " handle03 = handle03
-    " handle04 = handle04
-    " def      = abap_true ] OPTIONAL ).
-
   ENDMETHOD.
 
   METHOD sort.
@@ -720,7 +701,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
         SORT <table>
              BY (sortorder).
 
-      CATCH cx_root.
+      CATCH cx_root ##NO_HANDLER.
+        " invalid dynamic sort spec: leave the table in its current order
     ENDTRY.
 
   ENDMETHOD.

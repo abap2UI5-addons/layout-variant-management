@@ -133,7 +133,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                                      columnsl                = '1'
                                      columnsm                = '1'
                                      singlecontainerfullsize = abap_false
-                              )->content( ns = `form` ).
+                              )->content( `form` ).
 
     ASSIGN i_data->* TO FIELD-SYMBOL(<data>).
 
@@ -349,7 +349,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    i_xml->get_child( mv_element_counter )->layout_data( )->grid_data( span = span ).
+    i_xml->get_child( mv_element_counter )->layout_data( )->grid_data( span ).
 
   ENDMETHOD.
 

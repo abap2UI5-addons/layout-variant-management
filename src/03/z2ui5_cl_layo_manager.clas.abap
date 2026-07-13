@@ -647,7 +647,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    " Default first 4 Handles + no User and Format
+    " Default: first 4 handles + format, without the user restriction
     result = VALUE #( head[ handle01      = handle01
                             handle02      = handle02
                             handle03      = handle03

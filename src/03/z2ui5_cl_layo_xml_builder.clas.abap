@@ -309,6 +309,8 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
     IF layout->reference_field IS NOT INITIAL.
 
       DATA(ref_size) = 1.
+      " the reference field occupies two columns on the S breakpoint (S2)
+      DATA(ref_size_s) = 2.
       result-ref_field = |XL1 L1 M1 S2|.
 
     ENDIF.
@@ -323,7 +325,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
       DATA(value_m) = |M{ layout->grid_value_m - ref_size }|.
     ENDIF.
     IF layout->grid_value_s > 0.
-      DATA(value_s) = |S{ layout->grid_value_s - ref_size - 1 }|.
+      DATA(value_s) = |S{ layout->grid_value_s - ref_size_s }|.
     ENDIF.
 
     IF value_xl IS NOT INITIAL.

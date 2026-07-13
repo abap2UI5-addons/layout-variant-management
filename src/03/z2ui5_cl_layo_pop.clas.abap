@@ -456,7 +456,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
       layout->width            = check_width_unit( layout->width ).
     ENDLOOP.
 
-    mo_layout->ms_layout-t_layout = mo_layout->sort_by_seqence( mo_layout->ms_layout-t_layout ).
+    mo_layout->ms_layout-t_layout = mo_layout->sort_by_sequence( mo_layout->ms_layout-t_layout ).
 
     check_rerender_necessary( ).
 

@@ -104,7 +104,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
       RETURNING
         VALUE(result) TYPE string.
 
-    CLASS-METHODS sort_by_seqence
+    CLASS-METHODS sort_by_sequence
       IMPORTING
         !pos          TYPE  ty_t_positions
       RETURNING
@@ -348,7 +348,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD sort_by_seqence.
+  METHOD sort_by_sequence.
 
     " First all with a sequence, then the rest
     DATA(tab) = pos.
@@ -464,7 +464,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     ENDLOOP.
 
     result->ms_layout-s_head   = CORRESPONDING #( head ).
-    result->ms_layout-t_layout = sort_by_seqence( result->ms_layout-t_layout ).
+    result->ms_layout-t_layout = sort_by_sequence( result->ms_layout-t_layout ).
     result->ms_layout-t_layout = set_sub_columns( result->ms_layout-t_layout ).
 
   ENDMETHOD.
@@ -538,7 +538,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       ENDLOOP.
 
       result->ms_layout-s_head   = CORRESPONDING #( def ).
-      result->ms_layout-t_layout = sort_by_seqence( result->ms_layout-t_layout ).
+      result->ms_layout-t_layout = sort_by_sequence( result->ms_layout-t_layout ).
       result->ms_layout-t_layout = set_sub_columns( result->ms_layout-t_layout ).
 
     ELSE.

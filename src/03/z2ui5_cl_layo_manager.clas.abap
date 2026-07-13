@@ -647,13 +647,15 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    " Default: first 4 handles + format, without the user restriction
+    " Fall back to a global default (blank user) - never another user's
+    " personal default
     result = VALUE #( head[ handle01      = handle01
                             handle02      = handle02
                             handle03      = handle03
                             handle04      = handle04
                             screen_format = format
-                            def           = abap_true ] OPTIONAL ).
+                            def           = abap_true
+                            uname         = space ] OPTIONAL ).
 
     IF result IS NOT INITIAL.
       RETURN.

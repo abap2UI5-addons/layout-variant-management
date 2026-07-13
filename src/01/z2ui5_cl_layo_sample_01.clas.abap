@@ -42,7 +42,7 @@ CLASS z2ui5_cl_layo_sample_01 IMPLEMENTATION.
 
       WHEN 'ROW_SELECT'.
 
-        mo_layout->set_selkz( t_event_arg = client->get( )-t_event_arg ).
+        mo_layout->set_selkz( client->get( )-t_event_arg ).
 
       WHEN 'BACK'.
         client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).

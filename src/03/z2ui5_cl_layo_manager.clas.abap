@@ -104,7 +104,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
       RETURNING
         VALUE(result) TYPE string.
 
-    CLASS-METHODS sort_by_seqence
+    CLASS-METHODS sort_by_sequence
       IMPORTING
         !pos          TYPE  ty_t_positions
       RETURNING
@@ -333,9 +333,9 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
   METHOD set_text.
 
     IF layout-alternative_text IS INITIAL.
-      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-rollname  )-long.
+      result = z2ui5_cl_layo_context=>rtti_get_data_element_texts( layout-rollname  )-long.
     ELSE.
-      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-alternative_text )-long.
+      result = z2ui5_cl_layo_context=>rtti_get_data_element_texts( layout-alternative_text )-long.
     ENDIF.
 
     IF result IS INITIAL.
@@ -348,7 +348,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD sort_by_seqence.
+  METHOD sort_by_sequence.
 
     " First all with a sequence, then the rest
     DATA(tab) = pos.
@@ -360,11 +360,11 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       index = index + 1.
 
       LOOP AT tab INTO DATA(line) WHERE sequence = index.
-
         APPEND line TO result.
-        DELETE tab.
-
       ENDLOOP.
+      " delete after the loop: deleting inside LOOP AT ... WHERE skips the
+      " row that shifts into the current position, dropping duplicates
+      DELETE tab WHERE sequence = index.
 
     ENDDO.
 
@@ -381,7 +381,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       SPLIT line->subcolumn AT ` ` INTO TABLE DATA(tab).
 
       line->t_sub_col = VALUE #( FOR t IN tab
-                                 ( key = z2ui5_cl_util=>uuid_get_c32( ) fname = t ) ).
+                                 ( key = z2ui5_cl_layo_context=>uuid_get_c32( ) fname = t ) ).
 
     ENDLOOP.
 
@@ -428,7 +428,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     DATA(t_pos) = select_layout_components( layout_guid ).
 
-    IF sy-subrc <> 0.
+    IF t_pos IS INITIAL.
       RETURN.
     ENDIF.
 
@@ -454,7 +454,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
           CATCH cx_root.
         ENDTRY.
 
-        layout->* = default_grid_layout( position = layout->* ).
+        layout->* = default_grid_layout( layout->* ).
 
       ENDIF.
 
@@ -464,7 +464,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     ENDLOOP.
 
     result->ms_layout-s_head   = CORRESPONDING #( head ).
-    result->ms_layout-t_layout = sort_by_seqence( result->ms_layout-t_layout ).
+    result->ms_layout-t_layout = sort_by_sequence( result->ms_layout-t_layout ).
     result->ms_layout-t_layout = set_sub_columns( result->ms_layout-t_layout ).
 
   ENDMETHOD.
@@ -476,7 +476,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     " Save Ref for Sorting and Conversions
     result->mr_data = data.
 
-    DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
+    DATA(t_comp) = z2ui5_cl_layo_context=>rtti_get_t_attri_by_any( data ).
 
     LOOP AT t_comp INTO DATA(comp).
       IF comp-type->type_kind = cl_abap_elemdescr=>typekind_oref.
@@ -538,7 +538,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       ENDLOOP.
 
       result->ms_layout-s_head   = CORRESPONDING #( def ).
-      result->ms_layout-t_layout = sort_by_seqence( result->ms_layout-t_layout ).
+      result->ms_layout-t_layout = sort_by_sequence( result->ms_layout-t_layout ).
       result->ms_layout-t_layout = set_sub_columns( result->ms_layout-t_layout ).
 
     ELSE.
@@ -647,36 +647,19 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    " Default first 4 Handles + no User and Format
+    " Fall back to a global default (blank user) - never another user's
+    " personal default
     result = VALUE #( head[ handle01      = handle01
                             handle02      = handle02
                             handle03      = handle03
                             handle04      = handle04
                             screen_format = format
-                            def           = abap_true ] OPTIONAL ).
+                            def           = abap_true
+                            uname         = space ] OPTIONAL ).
 
     IF result IS NOT INITIAL.
       RETURN.
     ENDIF.
-
-    " Default all Handles + User
-    " result = VALUE #( head[ handle01 = handle01
-    " handle02 = handle02
-    " handle03 = handle03
-    " handle04 = handle04
-    " def      = abap_true
-    " uname    = sy-uname ] OPTIONAL ).
-    " --
-    " IF result IS NOT INITIAL.
-    " RETURN.
-    " ENDIF.
-    " --
-    " Default first 4 Handles + no User
-    " result = VALUE #( head[ handle01 = handle01
-    " handle02 = handle02
-    " handle03 = handle03
-    " handle04 = handle04
-    " def      = abap_true ] OPTIONAL ).
 
   ENDMETHOD.
 
@@ -720,7 +703,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
         SORT <table>
              BY (sortorder).
 
-      CATCH cx_root.
+      CATCH cx_root ##NO_HANDLER.
+        " invalid dynamic sort spec: leave the table in its current order
     ENDTRY.
 
   ENDMETHOD.
@@ -871,7 +855,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   METHOD convert.
 
-    z2ui5_cl_util=>conv_exit(
+    z2ui5_cl_layo_context=>conv_exit(
       EXPORTING
         convexit = i_layout-convexit
         output   = i_output

@@ -133,7 +133,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
                                      columnsl                = '1'
                                      columnsm                = '1'
                                      singlecontainerfullsize = abap_false
-                              )->content( ns = `form` ).
+                              )->content( `form` ).
 
     ASSIGN i_data->* TO FIELD-SYMBOL(<data>).
 
@@ -309,6 +309,8 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
     IF layout->reference_field IS NOT INITIAL.
 
       DATA(ref_size) = 1.
+      " the reference field occupies two columns on the S breakpoint (S2)
+      DATA(ref_size_s) = 2.
       result-ref_field = |XL1 L1 M1 S2|.
 
     ENDIF.
@@ -323,7 +325,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
       DATA(value_m) = |M{ layout->grid_value_m - ref_size }|.
     ENDIF.
     IF layout->grid_value_s > 0.
-      DATA(value_s) = |S{ layout->grid_value_s - ref_size - 1 }|.
+      DATA(value_s) = |S{ layout->grid_value_s - ref_size_s }|.
     ENDIF.
 
     IF value_xl IS NOT INITIAL.
@@ -349,7 +351,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    i_xml->get_child( mv_element_counter )->layout_data( )->grid_data( span = span ).
+    i_xml->get_child( mv_element_counter )->layout_data( )->grid_data( span ).
 
   ENDMETHOD.
 
@@ -477,7 +479,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
               READ TABLE i_layout->ms_layout-t_layout INTO DATA(ref) WITH KEY fname = line-reference_field.
 
-              column = |{ line-tlabel }:  { table_value_formatter( line ) } { table_value_formatter( ref ) }|.
+              column = |{ line-tlabel }: { table_value_formatter( line ) } { table_value_formatter( ref ) }|.
             ENDIF.
 
             IF index = 1.

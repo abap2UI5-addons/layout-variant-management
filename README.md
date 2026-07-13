@@ -2,22 +2,27 @@
 [![ABAP_CLOUD](https://github.com/abap2UI5-addons/layout-management/actions/workflows/ABAP_CLOUD.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-management/actions/workflows/ABAP_CLOUD.yaml)
 [![ABAP_702](https://github.com/abap2UI5-addons/layout-management/actions/workflows/ABAP_702.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-management/actions/workflows/ABAP_702.yaml)
 <br>
-[![auto_rename](https://github.com/abap2UI5-addons/layout-management/actions/workflows/rename_test.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-management/actions/workflows/rename_test.yaml)
+[![auto_cloud](https://github.com/abap2UI5-addons/layout-management/actions/workflows/auto_cloud.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-management/actions/workflows/auto_cloud.yaml)
 [![auto_downport](https://github.com/abap2UI5-addons/layout-management/actions/workflows/auto_downport.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-management/actions/workflows/auto_downport.yaml)
+<br>
+[![renaming](https://github.com/abap2UI5-addons/layout-management/actions/workflows/rename_test.yaml/badge.svg)](https://github.com/abap2UI5-addons/layout-management/actions/workflows/rename_test.yaml)
 
 # layout-management
 An addon for customizable table and form layouts with persistent variant management.
 
 #### Key Features
-- **Generic Output** - Universal table and form rendering
-- **Layout Customization** - Flexible customization of table and form outputs  
-- **Variant Persistence** - Save layout variants to database
-- **Auto-Loading** - Load default layouts automatically at startup
-  
+* **Generic Output** - Universal table and form rendering
+* **Layout Customization** - Flexible customization of table and form outputs
+* **Variant Persistence** - Save layout variants to database
+* **Auto-Loading** - Load default layouts automatically at startup
+
 #### Compatibility
 * S/4 Public Cloud and BTP ABAP Environment (ABAP for Cloud)
 * S/4 Private Cloud or On-Premise (ABAP for Cloud, Standard ABAP)
 * SAP NetWeaver AS ABAP 7.50 or higher (Standard ABAP)
+
+#### Security
+This library persists layout variants to its own database tables and has no authorization check of its own for who may create, edit or read layouts. Add your own checks if that matters in your scenario.
 
 #### Dependencies
 * [abap2UI5](https://github.com/abap2UI5/abap2UI5)
@@ -41,10 +46,4 @@ An addon for customizable table and form layouts with persistent variant managem
 <img width="700" alt="Popup for saving and selecting persisted layout variants" src="https://github.com/user-attachments/assets/d7f39663-d864-4737-89e4-8e925e54bc2d">
 
 #### Contribution & Support
-We welcome contributions! Whether you're:
-- 🐛 Fixing bugs
-- ✨ Adding new features  
-- 📚 Improving documentation
-- 🧪 Writing tests
-
-Please feel free to open a pull request or issue.
+Pull requests are welcome! Whether you're fixing bugs, adding new functionality, or improving documentation, your contributions are highly appreciated. If you encounter any issues, feel free to open an issue.

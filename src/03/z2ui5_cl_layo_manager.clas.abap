@@ -428,7 +428,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     DATA(t_pos) = select_layout_components( layout_guid ).
 
-    IF sy-subrc <> 0.
+    IF t_pos IS INITIAL.
       RETURN.
     ENDIF.
 

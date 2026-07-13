@@ -477,7 +477,7 @@ CLASS z2ui5_cl_layo_xml_builder IMPLEMENTATION.
 
               READ TABLE i_layout->ms_layout-t_layout INTO DATA(ref) WITH KEY fname = line-reference_field.
 
-              column = |{ line-tlabel }:  { table_value_formatter( line ) } { table_value_formatter( ref ) }|.
+              column = |{ line-tlabel }: { table_value_formatter( line ) } { table_value_formatter( ref ) }|.
             ENDIF.
 
             IF index = 1.

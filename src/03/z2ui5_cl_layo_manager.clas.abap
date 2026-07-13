@@ -360,11 +360,11 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       index = index + 1.
 
       LOOP AT tab INTO DATA(line) WHERE sequence = index.
-
         APPEND line TO result.
-        DELETE tab.
-
       ENDLOOP.
+      " delete after the loop: deleting inside LOOP AT ... WHERE skips the
+      " row that shifts into the current position, dropping duplicates
+      DELETE tab WHERE sequence = index.
 
     ENDDO.
 

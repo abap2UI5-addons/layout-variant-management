@@ -40,6 +40,7 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     DATA mt_sorting     TYPE ty_t_sorting.
     DATA mv_active_line TYPE string.
     DATA mv_rerender    TYPE abap_bool.
+    DATA mv_tab         TYPE string.
 
     DATA mv_xl_label    TYPE int4.
     DATA mv_xl_value    TYPE int4.
@@ -84,6 +85,12 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     METHODS get_layouts.
     METHODS init_edit.
     METHODS render_delete.
+    METHODS render_tabstrip
+      IMPORTING
+        !dialog       TYPE REF TO z2ui5_cl_xml_view
+        !active       TYPE string
+      RETURNING
+        VALUE(result) TYPE REF TO z2ui5_cl_xml_view.
     METHODS render_add_subcolumn.
     METHODS on_event_subcoloumns.
     METHODS check_rerender_necessary.
@@ -182,10 +189,13 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
                                   contentheight = '80%'
                                   afterclose    = client->_event( 'CLOSE' ) ).
 
-    DATA(tab) = dialog->table( growing          = abap_true
-                               growingthreshold = '80'
-                               sticky           = `ColumnHeaders`
-                               items            = client->_bind_edit( mt_layout ) ).
+    DATA(content) = render_tabstrip( dialog = dialog
+                                     active = 'EDIT' ).
+
+    DATA(tab) = content->table( growing          = abap_true
+                                growingthreshold = '80'
+                                sticky           = `ColumnHeaders`
+                                items            = client->_bind_edit( mt_layout ) ).
 
     tab->header_toolbar(
                   )->overflow_toolbar(
@@ -338,18 +348,6 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     ENDLOOP.
 
     dialog->buttons(
-          )->button( press = ''
-                     icon  = 'sap-icon://edit'
-                     type  = 'Emphasized'
-          )->button( press = client->_event( 'LAYOUT_LOAD' )
-                     icon  = 'sap-icon://open-folder'
-                     type  = 'Ghost'
-          )->button( press = client->_event( 'LAYOUT_DELETE' )
-                     icon  = 'sap-icon://delete'
-                     type  = 'Ghost'
-          )->button( type    = 'Transparent'
-                     enabled = abap_false
-                     text    = `               `
          )->button( text  = 'Close'
                     icon  = 'sap-icon://sys-cancel-2'
                     press = client->_event( 'CLOSE' )
@@ -369,23 +367,21 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
     CASE client->get( )-event.
 
-      WHEN 'LAYOUT_EDIT'.
+      WHEN 'TAB_SELECT'.
 
-        init_edit( ).
-
-        render_edit( ).
-
-      WHEN 'LAYOUT_LOAD'.
-
-        get_layouts( ).
-
-        render_open( ).
-
-      WHEN 'LAYOUT_DELETE'.
-
-        get_layouts( ).
-
-        render_delete( ).
+        " mv_tab is two-way bound to the IconTabBar selectedKey and already
+        " carries the newly selected tab here.
+        CASE mv_tab.
+          WHEN 'SELECT'.
+            get_layouts( ).
+            render_open( ).
+          WHEN 'DELETE'.
+            get_layouts( ).
+            render_delete( ).
+          WHEN OTHERS.
+            init_edit( ).
+            render_edit( ).
+        ENDCASE.
 
       WHEN 'EDIT_OKAY'.
 
@@ -733,6 +729,36 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD render_tabstrip.
+
+    " Remember the active tab - it is two-way bound to the IconTabBar
+    " selectedKey, so a tab click sends the new key back in mv_tab.
+    mv_tab = active.
+
+    DATA(bar) = dialog->icon_tab_bar( selectedkey          = client->_bind_edit( mv_tab )
+                                      select               = client->_event( 'TAB_SELECT' )
+                                      stretchcontentheight = abap_true
+                                      expandable           = abap_false ).
+
+    bar->items(
+           )->icon_tab_filter( key  = 'EDIT'
+                               text = 'Edit'
+                               icon = 'sap-icon://edit'
+           )->get_parent(
+           )->icon_tab_filter( key  = 'SELECT'
+                               text = 'Select'
+                               icon = 'sap-icon://open-folder'
+           )->get_parent(
+           )->icon_tab_filter( key  = 'DELETE'
+                               text = 'Delete'
+                               icon = 'sap-icon://delete' ).
+
+    " The screen content lives in the bar-level content aggregation and is
+    " swapped by the server when a different tab is selected.
+    result = bar->content( ).
+
+  ENDMETHOD.
+
   METHOD render_delete.
 
     DATA(popup) = z2ui5_cl_xml_view=>factory_popup( ).
@@ -742,33 +768,24 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
                                   contentheight = '80%'
                                   afterclose    = client->_event( 'CLOSE' ) ).
 
-    dialog->table( mode  = 'SingleSelectLeft'
-                   items = client->_bind_edit( mt_head )
-                )->columns(
-                    )->column( )->text( 'Layout' )->get_parent(
-                    )->column( )->text( 'Description' )->get_parent(
-                    )->column( )->text( 'Active'
-                    )->get_parent( )->get_parent(
-                )->items(
-                    )->column_list_item( selected = '{SELKZ}'
-                        )->cells(
-                            )->text( '{LAYOUT}'
-                            )->text( '{DESCR}'
-                            )->text( '{ACTIVE}' ).
+    DATA(content) = render_tabstrip( dialog = dialog
+                                     active = 'DELETE' ).
+
+    content->table( mode  = 'SingleSelectLeft'
+                    items = client->_bind_edit( mt_head )
+                 )->columns(
+                     )->column( )->text( 'Layout' )->get_parent(
+                     )->column( )->text( 'Description' )->get_parent(
+                     )->column( )->text( 'Active'
+                     )->get_parent( )->get_parent(
+                 )->items(
+                     )->column_list_item( selected = '{SELKZ}'
+                         )->cells(
+                             )->text( '{LAYOUT}'
+                             )->text( '{DESCR}'
+                             )->text( '{ACTIVE}' ).
 
     dialog->buttons(
-          )->button( press = client->_event( 'LAYOUT_EDIT' )
-                     icon  = 'sap-icon://edit'
-                     type  = 'Ghost'
-          )->button( press = client->_event( 'LAYOUT_LOAD' )
-                     icon  = 'sap-icon://open-folder'
-                     type  = 'Ghost'
-          )->button( press = ''
-                     icon  = 'sap-icon://delete'
-                     type  = 'Emphasized'
-          )->button( type    = 'Transparent'
-                     enabled = abap_false
-                     text    = `               `
          )->button( text  = 'Close'
                     icon  = 'sap-icon://sys-cancel-2'
                     press = client->_event( 'CLOSE' )
@@ -791,37 +808,28 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
                                   contentheight = '80%'
                                   afterclose    = client->_event( 'CLOSE' ) ).
 
-    dialog->table( mode  = 'SingleSelectLeft'
-                   items = client->_bind_edit( mt_head )
-                )->columns(
-                    )->column( )->text( 'Layout' )->get_parent(
-                    )->column( )->text( 'Active' )->get_parent(
-                    )->column( )->text( 'Description' )->get_parent(
-                    )->column( )->text( 'Screen Format' )->get_parent(
-                    )->column( )->text( 'Default' )->get_parent(
-                    )->get_parent(
-                )->items(
-                    )->column_list_item( selected = '{SELKZ}'
-                        )->cells(
-                            )->text( '{LAYOUT}'
-                            )->text( '{ACTIVE}'
-                            )->text( '{DESCR}'
-                            )->text( '{SCREEN_FORMAT}'
-                            )->text( '{DEF}' ).
+    DATA(content) = render_tabstrip( dialog = dialog
+                                     active = 'SELECT' ).
+
+    content->table( mode  = 'SingleSelectLeft'
+                    items = client->_bind_edit( mt_head )
+                 )->columns(
+                     )->column( )->text( 'Layout' )->get_parent(
+                     )->column( )->text( 'Active' )->get_parent(
+                     )->column( )->text( 'Description' )->get_parent(
+                     )->column( )->text( 'Screen Format' )->get_parent(
+                     )->column( )->text( 'Default' )->get_parent(
+                     )->get_parent(
+                 )->items(
+                     )->column_list_item( selected = '{SELKZ}'
+                         )->cells(
+                             )->text( '{LAYOUT}'
+                             )->text( '{ACTIVE}'
+                             )->text( '{DESCR}'
+                             )->text( '{SCREEN_FORMAT}'
+                             )->text( '{DEF}' ).
 
     dialog->buttons(
-          )->button( press = client->_event( 'LAYOUT_EDIT' )
-                     icon  = 'sap-icon://edit'
-                     type  = 'Ghost'
-          )->button( press = ''
-                     icon  = 'sap-icon://open-folder'
-                     type  = 'Emphasized'
-          )->button( press = client->_event( 'LAYOUT_DELETE' )
-                     icon  = 'sap-icon://delete'
-                     type  = 'Ghost'
-          )->button( type    = 'Transparent'
-                     enabled = abap_false
-                     text    = `               `
          )->button( text  = 'Close'
                     icon  = 'sap-icon://sys-cancel-2'
                     press = client->_event( 'CLOSE' )

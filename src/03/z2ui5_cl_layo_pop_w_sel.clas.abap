@@ -41,6 +41,7 @@ CLASS z2ui5_cl_layo_pop_w_sel DEFINITION
         VALUE(result) TYPE ty_s_result.
 
   PROTECTED SECTION.
+    DATA check_initialized TYPE abap_bool.
     DATA client            TYPE REF TO z2ui5_if_client.
     DATA title             TYPE string.
     DATA sort_field        TYPE string.
@@ -50,7 +51,7 @@ CLASS z2ui5_cl_layo_pop_w_sel DEFINITION
     DATA descending        TYPE abap_bool.
 
     METHODS on_event.
-    METHODS render_main.
+    METHODS Render_main.
     METHODS set_output_table.
 
     METHODS on_event_search.
@@ -79,7 +80,7 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
     r_result->content_width     = i_contentwidth.
     r_result->growing_threshold = i_growingthreshold.
 
-    r_result->mr_tab            = z2ui5_cl_layo_context=>conv_copy_ref_data( i_tab ).
+    r_result->mr_tab            = z2ui5_cl_util=>conv_copy_ref_data( i_tab ).
 
     CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.
 
@@ -92,7 +93,7 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD render_main.
+  METHOD Render_main.
 
     DATA(popup) = z2ui5_cl_xml_view=>factory_popup( )->dialog( title      = title
                                                                afterclose = client->_event( 'CANCEL' )  ).
@@ -113,11 +114,12 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
     me->client = client.
 
-    IF client->check_on_init( ).
+    IF check_initialized = abap_false.
+      check_initialized = abap_true.
 
       set_output_table( ).
 
-      render_main( ).
+      Render_main( ).
 
       RETURN.
 
@@ -169,7 +171,7 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
         mo_layout = app->mo_layout.
 
-        render_main( ).
+        Render_main( ).
 
       CATCH cx_root.
     ENDTRY.
@@ -256,15 +258,23 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
   METHOD get_comp.
     DATA index TYPE int4.
 
+*    DATA selkz TYPE abap_bool.
+
     TRY.
 
-        DATA(comp) = z2ui5_cl_layo_context=>rtti_get_t_attri_by_any( mr_tab ).
+        DATA(comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( mr_tab ).
 
-        IF NOT line_exists( comp[ name = 'ZZROW_ID' ] ).
+        IF xsdbool( line_exists( comp[ name = 'ZZROW_ID' ] ) ) = abap_false.
           APPEND LINES OF VALUE cl_abap_structdescr=>component_table(
                                     ( name = 'ZZROW_ID'
                                       type = CAST #( cl_abap_datadescr=>describe_by_data( index ) ) ) ) TO result.
         ENDIF.
+*        IF xsdbool( line_exists( comp[ name = 'SELKZ' ] ) ) = abap_false.
+*          APPEND LINES OF VALUE cl_abap_structdescr=>component_table(
+*                                    ( name = 'SELKZ'
+*                                      type = CAST #( cl_abap_datadescr=>describe_by_data( selkz ) ) ) ) TO result.
+*
+*        ENDIF.
 
         APPEND LINES OF comp TO result.
 
@@ -288,8 +298,22 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    z2ui5_cl_layo_context=>itab_filter_by_val( EXPORTING val = mv_search_value
-                                       CHANGING  tab = <tab> ).
+    LOOP AT <tab> ASSIGNING FIELD-SYMBOL(<f_row>).
+      DATA(lv_row) = ``.
+      DATA(lv_index) = 1.
+      DO.
+        ASSIGN COMPONENT lv_index OF STRUCTURE <f_row> TO FIELD-SYMBOL(<field>).
+        IF sy-subrc <> 0.
+          EXIT.
+        ENDIF.
+        lv_row = lv_row && <field>.
+        lv_index = lv_index + 1.
+      ENDDO.
+
+      IF lv_row NS mv_search_value.
+        DELETE <tab>.
+      ENDIF.
+    ENDLOOP.
 
   ENDMETHOD.
 

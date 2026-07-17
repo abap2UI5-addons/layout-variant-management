@@ -20,6 +20,7 @@ CLASS z2ui5_cl_layo_sample_05 DEFINITION
 
   PROTECTED SECTION.
     DATA client            TYPE REF TO z2ui5_if_client.
+    DATA check_initialized TYPE abap_bool.
 
     METHODS on_init.
     METHODS on_event.
@@ -80,12 +81,14 @@ CLASS z2ui5_cl_layo_sample_05 IMPLEMENTATION.
     z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = REF #( mt_table )
                                                 i_xml    = page
                                                 i_client = client
-                                                i_layout = mo_table_layout ).
+                                                i_layout = mo_Table_layout ).
 
     z2ui5_cl_layo_xml_builder=>xml_build_simple_form( i_data   = REF #( ms_struc )
                                                       i_xml    = page
                                                       i_client = client
-                                                      i_layout = mo_layout ).
+                                                      i_layout = mo_layout
+*                                                      i_title  =
+    ).
 
     client->view_display( view->stringify( ) ).
 
@@ -94,7 +97,8 @@ CLASS z2ui5_cl_layo_sample_05 IMPLEMENTATION.
   METHOD z2ui5_if_app~main.
     me->client = client.
 
-    IF client->check_on_init( ).
+    IF check_initialized = abap_false.
+      check_initialized = abap_true.
       on_init( ).
     ENDIF.
 
@@ -124,18 +128,18 @@ CLASS z2ui5_cl_layo_sample_05 IMPLEMENTATION.
     SHIFT class LEFT DELETING LEADING '\CLASS='.
 
     mo_table_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>m_table
-                                                      data     = REF #( mt_table )
-                                                      handle01 = class
-                                                      handle02 = 'Z2UI5_T_01'
-                                                      handle03 = ''
-                                                      handle04 = '' ).
-
-    mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>ui_simpleform
-                                                data     = REF #( ms_struc )
+                                                data     = REF #( mt_table )
                                                 handle01 = class
-                                                handle02 = 'Z2UI5_S_01'
+                                                handle02 = 'Z2UI5_T_01'
                                                 handle03 = ''
                                                 handle04 = '' ).
+
+    mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>ui_simpleform
+                                                      data     = REF #( ms_struc )
+                                                      handle01 = class
+                                                      handle02 = 'Z2UI5_S_01'
+                                                      handle03 = ''
+                                                      handle04 = '' ).
 
   ENDMETHOD.
 

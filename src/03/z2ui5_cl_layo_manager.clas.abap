@@ -25,7 +25,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     CLASS-DATA ui_simpleform TYPE control VALUE 'UI.SIMPLEFORM' ##NO_TEXT.
     CLASS-DATA others        TYPE control VALUE '' ##NO_TEXT.
 
-    TYPES ty_s_head TYPE z2ui5_t_11.
+    TYPES ty_s_Head TYPE z2ui5_t_11.
     TYPES ty_t_head TYPE STANDARD TABLE OF ty_s_head WITH EMPTY KEY.
 
     TYPES:
@@ -57,6 +57,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     DATA mt_comps      TYPE ty_t_positions.
     DATA mt_sub_cols   TYPE ty_t_sub_columns.
     DATA mr_data       TYPE REF TO data.
+*    DATA mr_data_tmp   TYPE REF TO data.
 
     CLASS-METHODS factory
       IMPORTING
@@ -73,7 +74,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
     CLASS-METHODS factory_by_guid
       IMPORTING
         layout_guid   TYPE clike
-        t_comps       TYPE ty_t_positions
+        t_comps       TYPE Ty_t_positions
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_layo_manager.
 
@@ -85,6 +86,7 @@ CLASS z2ui5_cl_layo_manager DEFINITION
         handle02      TYPE clike OPTIONAL
         handle03      TYPE clike OPTIONAL
         handle04      TYPE clike OPTIONAL
+        !format       TYPE clike OPTIONAL
       RETURNING
         VALUE(result) TYPE  ty_t_head.
 
@@ -104,9 +106,9 @@ CLASS z2ui5_cl_layo_manager DEFINITION
       RETURNING
         VALUE(result) TYPE string.
 
-    CLASS-METHODS sort_by_sequence
+    CLASS-METHODS sort_by_seqence
       IMPORTING
-        !pos          TYPE  ty_t_positions
+        !Pos          TYPE  ty_t_positions
       RETURNING
         VALUE(result) TYPE  ty_t_positions.
 
@@ -127,8 +129,9 @@ CLASS z2ui5_cl_layo_manager DEFINITION
         handle02      TYPE clike   OPTIONAL
         handle03      TYPE clike   OPTIONAL
         handle04      TYPE clike   OPTIONAL
+        !format       TYPE clike   OPTIONAL
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5_cl_layo_pop_w_sel.
+        VALUE(result) TYPE REF TO z2ui5_cl_Layo_pop_w_sel.
 
     METHODS sort
       IMPORTING
@@ -292,9 +295,26 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     ENDIF.
 
-    " FALLBACK - Screen format was added later! We are changing an empty format to L.
+    " FALLBACK - Screenformat was added! We are changing empty Format.
+    " Set Default Layout
+
+    IF line_exists( result[ screen_format = format
+                            def           = abap_true ] ).
+      DATA(no_default) = abap_true.
+    ENDIF.
+
     LOOP AT result REFERENCE INTO DATA(line) WHERE screen_format IS INITIAL.
-      line->screen_format = screen_format_l.
+
+      IF no_default = abap_true.
+        line->def = abap_false.
+      ENDIF.
+
+      IF format IS SUPPLIED AND format IS NOT INITIAL.
+        line->screen_format = format.
+      ELSE.
+        line->screen_format = screen_format_l.
+      ENDIF.
+
     ENDLOOP.
 
   ENDMETHOD.
@@ -333,9 +353,9 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
   METHOD set_text.
 
     IF layout-alternative_text IS INITIAL.
-      result = z2ui5_cl_layo_context=>rtti_get_data_element_texts( layout-rollname  )-long.
+      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-rollname  )-long.
     ELSE.
-      result = z2ui5_cl_layo_context=>rtti_get_data_element_texts( layout-alternative_text )-long.
+      result = z2ui5_cl_util=>rtti_get_data_element_texts( layout-alternative_text )-long.
     ENDIF.
 
     IF result IS INITIAL.
@@ -348,9 +368,9 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD sort_by_sequence.
+  METHOD sort_by_seqence.
 
-    " First all with a sequence, then the rest
+    " First all wit a seqence then the rest
     DATA(tab) = pos.
 
     DATA(index) = 0.
@@ -360,11 +380,11 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       index = index + 1.
 
       LOOP AT tab INTO DATA(line) WHERE sequence = index.
+
         APPEND line TO result.
+        DELETE tab.
+
       ENDLOOP.
-      " delete after the loop: deleting inside LOOP AT ... WHERE skips the
-      " row that shifts into the current position, dropping duplicates
-      DELETE tab WHERE sequence = index.
 
     ENDDO.
 
@@ -381,7 +401,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       SPLIT line->subcolumn AT ` ` INTO TABLE DATA(tab).
 
       line->t_sub_col = VALUE #( FOR t IN tab
-                                 ( key = z2ui5_cl_layo_context=>uuid_get_c32( ) fname = t ) ).
+                                 ( key = z2ui5_cl_util=>uuid_get_c32( ) fname = t ) ).
 
     ENDLOOP.
 
@@ -393,9 +413,10 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
                                     handle01 = handle01
                                     handle02 = handle02
                                     handle03 = handle03
-                                    handle04 = handle04  ).
+                                    handle04 = handle04
+                                    format   = format  ).
 
-    result = z2ui5_cl_layo_pop_w_sel=>factory( i_tab   = layouts
+    result = z2ui5_cl_Layo_pop_w_sel=>factory( i_tab   = layouts
                                                i_title = 'Layouts' ).
 
   ENDMETHOD.
@@ -428,7 +449,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     DATA(t_pos) = select_layout_components( layout_guid ).
 
-    IF t_pos IS INITIAL.
+    IF sy-subrc <> 0.
       RETURN.
     ENDIF.
 
@@ -441,11 +462,13 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
       ELSE.
 
+*        DATA(no_zero) = layout->no_leading_zero.
         DATA(fname) = layout->fname.
         DATA(rollname) = layout->rollname.
 
         CLEAR layout->*.
 
+*        layout->no_leading_zero = no_zero.
         layout->fname    = fname.
         layout->rollname = rollname.
 
@@ -454,7 +477,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
           CATCH cx_root.
         ENDTRY.
 
-        layout->* = default_grid_layout( layout->* ).
+        layout->* = default_grid_layout( position = layout->* ).
 
       ENDIF.
 
@@ -464,7 +487,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     ENDLOOP.
 
     result->ms_layout-s_head   = CORRESPONDING #( head ).
-    result->ms_layout-t_layout = sort_by_sequence( result->ms_layout-t_layout ).
+    result->ms_layout-t_layout = sort_by_seqence( result->ms_layout-t_layout ).
     result->ms_layout-t_layout = set_sub_columns( result->ms_layout-t_layout ).
 
   ENDMETHOD.
@@ -476,7 +499,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     " Save Ref for Sorting and Conversions
     result->mr_data = data.
 
-    DATA(t_comp) = z2ui5_cl_layo_context=>rtti_get_t_attri_by_any( data ).
+    DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( data ).
 
     LOOP AT t_comp INTO DATA(comp).
       IF comp-type->type_kind = cl_abap_elemdescr=>typekind_oref.
@@ -485,12 +508,13 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     ENDLOOP.
 
     " Select Layout Heads
-    DATA(head) = select_layouts( layout_guid = layout_guid
+    DATA(Head) = select_layouts( layout_guid = layout_guid
                                  control     = control
                                  handle01    = handle01
                                  handle02    = handle02
                                  handle03    = handle03
-                                 handle04    = handle04 ).
+                                 handle04    = handle04
+                                 format      = format  ).
 
     DATA(def) = get_default_layout( handle04    = handle04
                                     handle03    = handle03
@@ -538,7 +562,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       ENDLOOP.
 
       result->ms_layout-s_head   = CORRESPONDING #( def ).
-      result->ms_layout-t_layout = sort_by_sequence( result->ms_layout-t_layout ).
+      result->ms_layout-t_layout = sort_by_seqence( result->ms_layout-t_layout ).
       result->ms_layout-t_layout = set_sub_columns( result->ms_layout-t_layout ).
 
     ELSE.
@@ -634,7 +658,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    " Default all Handles + User and Format
+    " all Handles + Default + User + Format
     result = VALUE #( head[ handle01      = handle01
                             handle02      = handle02
                             handle03      = handle03
@@ -647,8 +671,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    " Fall back to a global default (blank user) - never another user's
-    " personal default
+    " first 4 Handles + Default  + no User + Format
     result = VALUE #( head[ handle01      = handle01
                             handle02      = handle02
                             handle03      = handle03
@@ -660,6 +683,37 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     IF result IS NOT INITIAL.
       RETURN.
     ENDIF.
+
+    " first 4 Handles + no User and Format
+    result = VALUE #( head[ handle01      = handle01
+                            handle02      = handle02
+                            handle03      = handle03
+                            handle04      = handle04
+                            screen_format = format
+                            uname         = space ] OPTIONAL ).
+
+    IF result IS NOT INITIAL.
+      RETURN.
+    ENDIF.
+
+    " Default all Handles + User
+    " result = VALUE #( head[ handle01 = handle01
+    " handle02 = handle02
+    " handle03 = handle03
+    " handle04 = handle04
+    " def      = abap_true
+    " uname    = sy-uname ] OPTIONAL ).
+    " --
+    " IF result IS NOT INITIAL.
+    " RETURN.
+    " ENDIF.
+    " --
+    " Default first 4 Handles + no User
+    " result = VALUE #( head[ handle01 = handle01
+    " handle02 = handle02
+    " handle03 = handle03
+    " handle04 = handle04
+    " def      = abap_true ] OPTIONAL ).
 
   ENDMETHOD.
 
@@ -703,8 +757,8 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
         SORT <table>
              BY (sortorder).
 
-      CATCH cx_root ##NO_HANDLER.
-        " invalid dynamic sort spec: leave the table in its current order
+      CATCH cx_sy_dyn_table_ill_comp_val. "##NO_HANDLER
+      CATCH cx_root.
     ENDTRY.
 
   ENDMETHOD.
@@ -729,16 +783,14 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
     LOOP AT <table> ASSIGNING FIELD-SYMBOL(<row>).
 
-      " check sy-subrc instead of IS ASSIGNED - a field symbol stays
-      " assigned from the previous loop iteration
       ASSIGN COMPONENT mv_sel_key_field OF STRUCTURE <row> TO FIELD-SYMBOL(<id>).
 
-      IF sy-subrc <> 0.
+      IF <id> IS NOT ASSIGNED.
         CONTINUE.
       ENDIF.
 
       ASSIGN COMPONENT mv_sel_field OF STRUCTURE <row> TO FIELD-SYMBOL(<selkz>).
-      IF sy-subrc <> 0.
+      IF <selkz> IS NOT ASSIGNED.
         CONTINUE.
       ENDIF.
 
@@ -748,7 +800,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
         IF mv_sel_mode = `M`.
           EXIT.
         ELSE.
-          " if deselected, exit as well
+          " wenn deslektiert dann auch raus
           IF <selkz> = abap_false.
             EXIT.
           ENDIF.
@@ -768,8 +820,6 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   METHOD data_conversion.
 
-    FIELD-SYMBOLS <tab> TYPE ANY TABLE.
-
     ASSIGN mr_data->* TO FIELD-SYMBOL(<any>).
 
     IF <any> IS NOT ASSIGNED.
@@ -786,7 +836,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
       IF layout-visible = abap_false.
 
-        " is this a reference field?
+        " are you an ref field?
         IF line_exists( ms_layout-t_layout[ reference_field = layout-fname
                                             visible         = abap_true ] ).
           DATA(ref) = abap_true.
@@ -819,15 +869,10 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
       CASE ms_layout-s_head-control.
         WHEN ui_table OR m_table.
 
-          ASSIGN mr_data->* TO <tab>.
-          IF <tab> IS NOT ASSIGNED.
-            CONTINUE.
-          ENDIF.
-
-          LOOP AT <tab> ASSIGNING FIELD-SYMBOL(<line>).
+          LOOP AT <any> ASSIGNING FIELD-SYMBOL(<line>).
 
             ASSIGN COMPONENT layout-fname OF STRUCTURE <line> TO FIELD-SYMBOL(<value>).
-            IF sy-subrc <> 0.
+            IF <value> IS NOT ASSIGNED.
               CONTINUE.
             ENDIF.
 
@@ -840,7 +885,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
         WHEN ui_simpleform.
 
           ASSIGN COMPONENT layout-fname OF STRUCTURE <any> TO <value>.
-          IF sy-subrc <> 0.
+          IF <value> IS NOT ASSIGNED.
             CONTINUE.
           ENDIF.
 
@@ -855,12 +900,30 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
   METHOD convert.
 
-    z2ui5_cl_layo_context=>conv_exit(
-      EXPORTING
-        convexit = i_layout-convexit
-        output   = i_output
-      CHANGING
-        value    = c_value ).
+    DATA(conex) = COND #( WHEN i_output = abap_true
+                          THEN |CONVERSION_EXIT_{ i_layout-convexit }_OUTPUT|
+                          ELSE |CONVERSION_EXIT_{ i_layout-convexit }_INPUT| ).
+
+    TRY.
+        IF i_layout-convexit = 'CUNIT'.
+
+          CALL FUNCTION conex
+            EXPORTING  input    = c_value
+                       language = sy-langu
+            IMPORTING  output   = c_value
+            EXCEPTIONS OTHERS   = 99.
+
+        ELSE.
+
+          CALL FUNCTION conex
+            EXPORTING  input  = c_value
+            IMPORTING  output = c_value
+            EXCEPTIONS OTHERS = 99.
+
+        ENDIF.
+
+      CATCH cx_root.
+    ENDTRY.
 
   ENDMETHOD.
 
@@ -870,7 +933,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
     DATA t_obj  TYPE REF TO data.
     DATA s_obj  TYPE REF TO data.
 
-    FIELD-SYMBOLS <t_obj> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <T_obj> TYPE STANDARD TABLE.
 
     result = layout.
 
@@ -880,7 +943,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
 
         CREATE DATA t_obj TYPE (string).
         CREATE DATA s_obj TYPE LINE OF (string).
-        ASSIGN t_obj->* TO <t_obj>.
+        ASSIGN t_obj->* TO <T_obj>.
         ASSIGN s_obj->* TO FIELD-SYMBOL(<obj>).
 
         CALL METHOD type->('GET_DDIC_OBJECT')
@@ -891,7 +954,7 @@ CLASS z2ui5_cl_layo_manager IMPLEMENTATION.
           RETURN.
         ENDIF.
 
-        ASSIGN <t_obj>[ 1 ] TO <obj>.
+        ASSIGN <T_obj>[ 1 ] TO <obj>.
         IF sy-subrc <> 0.
           RETURN.
         ENDIF.

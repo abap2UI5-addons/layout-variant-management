@@ -19,19 +19,13 @@ documentation must be in English.
 | Package | Content |
 |---|---|
 | `src/01/`, `src/02/`, `src/03/` | Layout classes and samples (`z2ui5_cl_layo_*`) |
-| `src/03/z2ui5_cl_layo_context` | Vendored utility copy — **see below** |
 
-## The Utility Copy Principle
+## Utility Access
 
-`z2ui5_cl_layo_context` is a **trimmed, renamed copy** of the abap2UI5 utility
-class (`z2ui5_cl_util` in the core), carrying only the methods this addon uses
-plus the private helpers those need. The app calls `z2ui5_cl_layo_context=>…`,
-never `z2ui5_cl_util=>…` directly. This keeps the install dependency-free
-(abapGit has no dependency management, so utilities are vendored). The core and
-the other addons use the same pattern (`z2ui5_cl_a2ui5_context`,
-`z2ui5_cl_popup_context`, `z2ui5_cl_tcl_context`, …). When a new utility method
-is needed, copy it from the core utility class (with its private helpers) into
-the context copy rather than adding a dependency.
+The addon uses the abap2UI5 core utility class `z2ui5_cl_util` directly
+(`z2ui5_cl_util=>…`). abap2UI5 is a hard dependency of this addon (installed
+alongside via abapGit and declared in the abaplint configs), so no vendored
+utility copy is kept.
 
 ## Dependencies
 

@@ -40,6 +40,7 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     DATA mt_sorting     TYPE ty_t_sorting.
     DATA mv_active_line TYPE string.
     DATA mv_rerender    TYPE abap_bool.
+    DATA mv_tab         TYPE string.
 
     DATA mv_xl_label    TYPE int4.
     DATA mv_xl_value    TYPE int4.
@@ -77,10 +78,18 @@ CLASS z2ui5_cl_layo_pop DEFINITION
     METHODS render_edit.
     METHODS on_event.
     METHODS render_save.
-    METHODS save_layout.
+    METHODS save_layout
+      RETURNING
+        VALUE(result) TYPE abap_bool.
     METHODS get_layouts.
     METHODS init_edit.
     METHODS render_delete.
+    METHODS render_tabstrip
+      IMPORTING
+        !dialog       TYPE REF TO z2ui5_cl_xml_view
+        !active       TYPE string
+      RETURNING
+        VALUE(result) TYPE REF TO z2ui5_cl_xml_view.
     METHODS render_add_subcolumn.
     METHODS on_event_subcolumns.
     METHODS check_rerender_necessary.
@@ -95,7 +104,9 @@ CLASS z2ui5_cl_layo_pop DEFINITION
 
     METHODS delete_selected_layout
       IMPORTING
-        !head TYPE ty_s_layo.
+        !head         TYPE ty_s_layo
+      RETURNING
+        VALUE(result) TYPE abap_bool.
 
     METHODS set_selected_layout
       IMPORTING
@@ -168,19 +179,22 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
                                   contentheight = '80%'
                                   afterclose    = client->_event( 'CLOSE' ) ).
 
-    DATA(tab) = dialog->table( growing          = abap_true
-                               growingthreshold = '80'
-                               sticky           = `ColumnHeaders`
-                               items            = client->_bind_edit( mt_layout ) ).
+    DATA(content) = render_tabstrip( dialog = dialog
+                                     active = 'EDIT' ).
+
+    DATA(tab) = content->table( growing          = abap_true
+                                growingthreshold = '80'
+                                sticky           = `ColumnHeaders`
+                                items            = client->_bind_edit( mt_layout ) ).
 
     tab->header_toolbar(
                   )->overflow_toolbar(
                      )->toolbar_spacer(
                     )->search_field(
                         width       = `17.5rem`
-                        placeholder = |{ z2ui5_cl_layo_context=>rtti_get_data_element_texts( 'ROLLNAME' )-long
+                        placeholder = |{ z2ui5_cl_util=>rtti_get_data_element_texts( 'ROLLNAME' )-long
                                        }/{
-                                         z2ui5_cl_layo_context=>rtti_get_data_element_texts( 'NAME_FELD' )-long }|
+                                         z2ui5_cl_util=>rtti_get_data_element_texts( 'NAME_FELD' )-long }|
 
                         livechange  = client->_event( val    = 'BUTTON_SEARCH'
                                                       t_arg  = VALUE #( ( `${$source>/value}` ) )
@@ -197,7 +211,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     SORT t_layout BY visible DESCENDING
                      fname ASCENDING.
 
-    DATA(lt_comp) = z2ui5_cl_layo_context=>rtti_get_t_attri_by_any( t_layout ).
+    DATA(lt_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( t_layout ).
 
     LOOP AT mt_controls REFERENCE INTO DATA(control) WHERE control = mo_layout->ms_layout-s_head-control.
 
@@ -324,18 +338,6 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
     ENDLOOP.
 
     dialog->buttons(
-          )->button( press = ''
-                     icon  = 'sap-icon://edit'
-                     type  = 'Emphasized'
-          )->button( press = client->_event( 'LAYOUT_LOAD' )
-                     icon  = 'sap-icon://open-folder'
-                     type  = 'Ghost'
-          )->button( press = client->_event( 'LAYOUT_DELETE' )
-                     icon  = 'sap-icon://delete'
-                     type  = 'Ghost'
-          )->button( type    = 'Transparent'
-                     enabled = abap_false
-                     text    = `               `
          )->button( text  = 'Close'
                     icon  = 'sap-icon://sys-cancel-2'
                     press = client->_event( 'CLOSE' )
@@ -355,23 +357,21 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
     CASE client->get( )-event.
 
-      WHEN 'LAYOUT_EDIT'.
+      WHEN 'TAB_SELECT'.
 
-        init_edit( ).
-
-        render_edit( ).
-
-      WHEN 'LAYOUT_LOAD'.
-
-        get_layouts( ).
-
-        render_open( ).
-
-      WHEN 'LAYOUT_DELETE'.
-
-        get_layouts( ).
-
-        render_delete( ).
+        " mv_tab is two-way bound to the IconTabBar selectedKey and already
+        " carries the newly selected tab here.
+        CASE mv_tab.
+          WHEN 'SELECT'.
+            get_layouts( ).
+            render_open( ).
+          WHEN 'DELETE'.
+            get_layouts( ).
+            render_delete( ).
+          WHEN OTHERS.
+            init_edit( ).
+            render_edit( ).
+        ENDCASE.
 
       WHEN 'EDIT_OKAY'.
 
@@ -401,9 +401,11 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
       WHEN 'SAVE_SAVE'.
 
-        save_layout( ).
-
-        edit_okay( ).
+        " Only leave the save dialog when the layout was really persisted,
+        " so a failed save (e.g. missing name) keeps the dialog open.
+        IF save_layout( ) = abap_true.
+          edit_okay( ).
+        ENDIF.
 
       WHEN 'OPEN_SELECT'.
 
@@ -417,9 +419,11 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
       WHEN 'DELETE_SELECT'.
 
-        delete_selected_layout( get_selected_layout( ) ).
-
-        DELETE mt_head WHERE selkz = abap_true.
+        " Only remove the row from the list when the delete was committed,
+        " otherwise the layout would reappear on the next selection.
+        IF delete_selected_layout( get_selected_layout( ) ) = abap_true.
+          DELETE mt_head WHERE selkz = abap_true.
+        ENDIF.
 
         client->popup_model_update( ).
 
@@ -437,7 +441,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
     mt_layout = mo_layout->ms_layout-t_layout.
 
-    z2ui5_cl_layo_context=>itab_filter_by_val(
+    z2ui5_cl_util=>itab_filter_by_val(
       EXPORTING
         val    = client->get_event_arg( 1 )
         fields = VALUE #( ( `FNAME` ) ( `ROLLNAME` ) ( `TLABEL` ) )
@@ -641,36 +645,86 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
     ENDLOOP.
 
+    " Persist head and positions in a single LUW. Do not rely on the
+    " array-MODIFY sy-subrc for the commit decision: it is 4 for an empty
+    " position table, which would silently skip the COMMIT.
     MODIFY z2ui5_t_11 FROM @head.
+    IF sy-subrc <> 0.
+      ROLLBACK WORK.
+      client->message_toast_display( 'Layout could not be saved.' ).
+      RETURN.
+    ENDIF.
 
-    IF sy-subrc = 0.
+    DELETE FROM z2ui5_t_12 WHERE guid = @head-guid.
 
-      DELETE FROM z2ui5_t_12 WHERE guid = @head-guid.
-
+    IF positions IS NOT INITIAL.
       MODIFY z2ui5_t_12 FROM TABLE @positions.
-
-      IF sy-subrc = 0.
-
-        COMMIT WORK AND WAIT.
-
-        client->message_toast_display( 'Data saved.' ).
-
+      IF sy-subrc <> 0.
+        ROLLBACK WORK.
+        client->message_toast_display( 'Layout could not be saved.' ).
+        RETURN.
       ENDIF.
     ENDIF.
 
-    " Check Default
-    UPDATE z2ui5_t_11 SET def = @abap_false       WHERE control        = @mo_layout->ms_layout-s_head-control
-                                                    AND handle01       = @mo_layout->ms_layout-s_head-handle01
-                                                    AND handle02       = @mo_layout->ms_layout-s_head-handle02
-                                                    AND handle03       = @mo_layout->ms_layout-s_head-handle03
-                                                    AND handle04       = @mo_layout->ms_layout-s_head-handle04
-                                                    AND def            = @abap_true
-                                                    AND uname          = @user
-                                                    AND screen_format  = @mv_format
-                                                    AND guid          <> @head-guid.
-    IF sy-subrc = 0.
-      COMMIT WORK AND WAIT.
+    " Only when this layout is the default, demote the other defaults of the
+    " same scope. Saving a non-default layout must not touch the current
+    " default - otherwise auto-loading silently stops working.
+    IF head-def = abap_true.
+      UPDATE z2ui5_t_11 SET def = @abap_false WHERE control       = @head-control
+                                                AND handle01      = @head-handle01
+                                                AND handle02      = @head-handle02
+                                                AND handle03      = @head-handle03
+                                                AND handle04      = @head-handle04
+                                                AND screen_format = @head-screen_format
+                                                AND uname         = @head-uname
+                                                AND def           = @abap_true
+                                                AND guid         <> @head-guid.
     ENDIF.
+
+    COMMIT WORK AND WAIT.
+
+    " Keep the in-memory head in sync with what was persisted, so a second
+    " save in the same session compares against the right identity.
+    mo_layout->ms_layout-s_head-guid          = head-guid.
+    mo_layout->ms_layout-s_head-layout        = head-layout.
+    mo_layout->ms_layout-s_head-descr         = head-descr.
+    mo_layout->ms_layout-s_head-def           = head-def.
+    mo_layout->ms_layout-s_head-screen_format = head-screen_format.
+    mo_layout->ms_layout-s_head-uname         = head-uname.
+
+    result = abap_true.
+
+    client->message_toast_display( 'Data saved.' ).
+
+  ENDMETHOD.
+
+  METHOD render_tabstrip.
+
+    " Remember the active tab - it is two-way bound to the IconTabBar
+    " selectedKey, so a tab click sends the new key back in mv_tab.
+    mv_tab = active.
+
+    DATA(bar) = dialog->icon_tab_bar( selectedkey          = client->_bind_edit( mv_tab )
+                                      select               = client->_event( 'TAB_SELECT' )
+                                      stretchcontentheight = abap_true
+                                      expandable           = abap_false ).
+
+    bar->items(
+           )->icon_tab_filter( key  = 'EDIT'
+                               text = 'Edit'
+                               icon = 'sap-icon://edit'
+           )->get_parent(
+           )->icon_tab_filter( key  = 'SELECT'
+                               text = 'Select'
+                               icon = 'sap-icon://open-folder'
+           )->get_parent(
+           )->icon_tab_filter( key  = 'DELETE'
+                               text = 'Delete'
+                               icon = 'sap-icon://delete' ).
+
+    " The screen content lives in the bar-level content aggregation and is
+    " swapped by the server when a different tab is selected.
+    result = bar->content( ).
 
   ENDMETHOD.
 
@@ -683,33 +737,24 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
                                   contentheight = '80%'
                                   afterclose    = client->_event( 'CLOSE' ) ).
 
-    dialog->table( mode  = 'SingleSelectLeft'
-                   items = client->_bind_edit( mt_head )
-                )->columns(
-                    )->column( )->text( 'Layout' )->get_parent(
-                    )->column( )->text( 'Description' )->get_parent(
-                    )->column( )->text( 'Active'
-                    )->get_parent( )->get_parent(
-                )->items(
-                    )->column_list_item( selected = '{SELKZ}'
-                        )->cells(
-                            )->text( '{LAYOUT}'
-                            )->text( '{DESCR}'
-                            )->text( '{ACTIVE}' ).
+    DATA(content) = render_tabstrip( dialog = dialog
+                                     active = 'DELETE' ).
+
+    content->table( mode  = 'SingleSelectLeft'
+                    items = client->_bind_edit( mt_head )
+                 )->columns(
+                     )->column( )->text( 'Layout' )->get_parent(
+                     )->column( )->text( 'Description' )->get_parent(
+                     )->column( )->text( 'Active'
+                     )->get_parent( )->get_parent(
+                 )->items(
+                     )->column_list_item( selected = '{SELKZ}'
+                         )->cells(
+                             )->text( '{LAYOUT}'
+                             )->text( '{DESCR}'
+                             )->text( '{ACTIVE}' ).
 
     dialog->buttons(
-          )->button( press = client->_event( 'LAYOUT_EDIT' )
-                     icon  = 'sap-icon://edit'
-                     type  = 'Ghost'
-          )->button( press = client->_event( 'LAYOUT_LOAD' )
-                     icon  = 'sap-icon://open-folder'
-                     type  = 'Ghost'
-          )->button( press = ''
-                     icon  = 'sap-icon://delete'
-                     type  = 'Emphasized'
-          )->button( type    = 'Transparent'
-                     enabled = abap_false
-                     text    = `               `
          )->button( text  = 'Close'
                     icon  = 'sap-icon://sys-cancel-2'
                     press = client->_event( 'CLOSE' )
@@ -731,37 +776,28 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
                                   contentheight = '80%'
                                   afterclose    = client->_event( 'CLOSE' ) ).
 
-    dialog->table( mode  = 'SingleSelectLeft'
-                   items = client->_bind_edit( mt_head )
-                )->columns(
-                    )->column( )->text( 'Layout' )->get_parent(
-                    )->column( )->text( 'Active' )->get_parent(
-                    )->column( )->text( 'Description' )->get_parent(
-                    )->column( )->text( 'Screen Format' )->get_parent(
-                    )->column( )->text( 'Default' )->get_parent(
-                    )->get_parent(
-                )->items(
-                    )->column_list_item( selected = '{SELKZ}'
-                        )->cells(
-                            )->text( '{LAYOUT}'
-                            )->text( '{ACTIVE}'
-                            )->text( '{DESCR}'
-                            )->text( '{SCREEN_FORMAT}'
-                            )->text( '{DEF}' ).
+    DATA(content) = render_tabstrip( dialog = dialog
+                                     active = 'SELECT' ).
+
+    content->table( mode  = 'SingleSelectLeft'
+                    items = client->_bind_edit( mt_head )
+                 )->columns(
+                     )->column( )->text( 'Layout' )->get_parent(
+                     )->column( )->text( 'Active' )->get_parent(
+                     )->column( )->text( 'Description' )->get_parent(
+                     )->column( )->text( 'Screen Format' )->get_parent(
+                     )->column( )->text( 'Default' )->get_parent(
+                     )->get_parent(
+                 )->items(
+                     )->column_list_item( selected = '{SELKZ}'
+                         )->cells(
+                             )->text( '{LAYOUT}'
+                             )->text( '{ACTIVE}'
+                             )->text( '{DESCR}'
+                             )->text( '{SCREEN_FORMAT}'
+                             )->text( '{DEF}' ).
 
     dialog->buttons(
-          )->button( press = client->_event( 'LAYOUT_EDIT' )
-                     icon  = 'sap-icon://edit'
-                     type  = 'Ghost'
-          )->button( press = ''
-                     icon  = 'sap-icon://open-folder'
-                     type  = 'Emphasized'
-          )->button( press = client->_event( 'LAYOUT_DELETE' )
-                     icon  = 'sap-icon://delete'
-                     type  = 'Ghost'
-          )->button( type    = 'Transparent'
-                     enabled = abap_false
-                     text    = `               `
          )->button( text  = 'Close'
                     icon  = 'sap-icon://sys-cancel-2'
                     press = client->_event( 'CLOSE' )
@@ -840,13 +876,30 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
 
   METHOD delete_selected_layout.
 
+    " Nothing selected - guid initial would delete unrelated blank-guid rows.
+    IF head-guid IS INITIAL.
+      client->message_toast_display( 'No layout selected.' ).
+      RETURN.
+    ENDIF.
+
     DELETE FROM z2ui5_t_11 WHERE guid = @head-guid.
+    " Base the outcome on the header delete. The old code only checked the
+    " sy-subrc of the position delete, so a layout without position rows
+    " (e.g. all columns hidden) was never committed and reappeared.
+    DATA(head_deleted) = xsdbool( sy-subrc = 0 ).
 
     DELETE FROM z2ui5_t_12 WHERE guid = @head-guid.
 
-    IF sy-subrc = 0.
-      COMMIT WORK AND WAIT.
+    IF head_deleted = abap_false.
+      client->message_toast_display( 'Layout could not be deleted.' ).
+      RETURN.
     ENDIF.
+
+    COMMIT WORK AND WAIT.
+
+    result = abap_true.
+
+    client->message_toast_display( 'Layout deleted.' ).
 
   ENDMETHOD.
 
@@ -963,7 +1016,7 @@ CLASS z2ui5_cl_layo_pop IMPLEMENTATION.
         render_edit( ).
 
       WHEN `SUBCOLUMN_ADD`.
-        INSERT VALUE #( key = z2ui5_cl_layo_context=>uuid_get_c32( ) ) INTO TABLE mo_layout->mt_sub_cols.
+        INSERT VALUE #( key = z2ui5_cl_util=>uuid_get_c32( ) ) INTO TABLE mo_layout->mt_sub_cols.
         client->popup_model_update( ).
 
       WHEN `SUBCOLUMN_DELETE`.

@@ -9,7 +9,12 @@
     "abaplintpathfix": "sed -i 's|\"files\": \"/\\.\\.\\/\\.\\.\\/src\\/\\*\\*\\/\\*\\.\\*\"|\"files\": \"/src/**/*.*\"|g' abaplint.jsonc",
     "downport": "abaplint --fix .github/abaplint/abap_702.jsonc && npm run syfixes",
     "auto_downport": "abaplint --fix .github/abaplint/abap_702.jsonc && npm run syfixes && npm run strip_trailing_ws && cp -f .github/abaplint/abap_702.jsonc abaplint.jsonc && npm run abaplintpathfix",
-    "rename": "abaplint .github/abaplint/rename.json --rename"
+    "rename": "abaplint .github/abaplint/rename.json --rename",
+    "lint": "abaplint ./abaplint.jsonc",
+    "check:cloud": "abaplint .github/abaplint/abap_cloud.jsonc",
+    "check:abap2ui5": "abap2ui5lint",
+    "check": "npm run lint && npm run check:cloud && npm run check:abap2ui5 && npm run rename",
+    "test": "npm run check"
   },
   "repository": {
     "type": "git",
@@ -21,7 +26,9 @@
   },
   "homepage": "https://github.com/abap2UI5-addons/layout-management#readme",
   "devDependencies": {
-    "@abaplint/cli": "^2.119.66"
+    "@abaplint/cli": "^2.119.66",
+    "@abap2ui5/linter": "^0.2.1",
+    "@abap2ui5/render-runtime": "^0.1.1"
   },
   "engines": {
     "node": ">=22"

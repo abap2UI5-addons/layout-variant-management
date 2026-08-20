@@ -94,8 +94,16 @@ CLASS z2ui5_cl_layo_pop_w_sel IMPLEMENTATION.
 
   METHOD render_main.
 
-    DATA(popup) = z2ui5_cl_xml_view=>factory_popup( )->dialog( title      = title
-                                                               afterclose = client->_event( 'CANCEL' )  ).
+    DATA(popup) = z2ui5_cl_ui5_view_builder=>factory( 
+                      )->ele( n = `FragmentDefinition` ns = `core` 
+                      )->a( n = `xmlns` v = `sap.m` 
+                      )->a( n = `xmlns:core` v = `sap.ui.core` 
+                      )->a( n = `xmlns:form` v = `sap.ui.layout.form` 
+                      )->a( n = `xmlns:mchart` v = `sap.suite.ui.microchart` 
+                      )->a( n = `xmlns:si` v = `sap.suite.ui.commons.statusindicator` 
+                      )->ele( `Dialog` 
+                      )->a( n = `title` v = title 
+                      )->a( n = `afterClose` v = client->_event( 'CANCEL' ) ).
 
     z2ui5_cl_layo_xml_builder=>xml_build_table( i_data         = mr_out
                                                 i_xml          = popup

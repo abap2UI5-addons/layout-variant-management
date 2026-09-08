@@ -11,7 +11,7 @@ CLASS z2ui5_cl_layo_sample_05 DEFINITION
     TYPES:
         selkz TYPE abap_bool,
       END OF ty_s_data.
-    TYPES ty_t_data TYPE STANDARD TABLE OF ty_s_data WITH EMPTY KEY.
+    TYPES ty_t_data TYPE STANDARD TABLE OF ty_s_data WITH DEFAULT KEY.
 
     DATA mt_table        TYPE ty_t_data.
     DATA ms_struc        TYPE ty_s_data.
@@ -70,30 +70,42 @@ CLASS z2ui5_cl_layo_sample_05 IMPLEMENTATION.
 
   METHOD render_main.
 
-    DATA(view) = z2ui5_cl_ui5_view_builder=>factory( 
-                     )->ele( n = `View` ns = `mvc` 
-                     )->a( n = `xmlns` v = `sap.m` 
-                     )->a( n = `xmlns:mvc` v = `sap.ui.core.mvc` 
-                     )->a( n = `xmlns:core` v = `sap.ui.core` 
-                     )->a( n = `xmlns:form` v = `sap.ui.layout.form` 
-                     )->a( n = `xmlns:mchart` v = `sap.suite.ui.microchart` 
-                     )->a( n = `xmlns:si` v = `sap.suite.ui.commons.statusindicator` 
-                     )->a( n = `displayBlock` v = `true` 
-                     )->a( n = `height` v = `100%` 
+    DATA view TYPE REF TO z2ui5_cl_ui5_view_builder.
+    DATA page TYPE REF TO z2ui5_cl_ui5_view_builder.
+    DATA temp3 TYPE xsdboolean.
+    DATA temp1 LIKE REF TO mt_table.
+    DATA temp2 LIKE REF TO ms_struc.
+    view = z2ui5_cl_ui5_view_builder=>factory(
+                     )->ele( n = `View` ns = `mvc`
+                     )->a( n = `xmlns` v = `sap.m`
+                     )->a( n = `xmlns:mvc` v = `sap.ui.core.mvc`
+                     )->a( n = `xmlns:core` v = `sap.ui.core`
+                     )->a( n = `xmlns:form` v = `sap.ui.layout.form`
+                     )->a( n = `xmlns:mchart` v = `sap.suite.ui.microchart`
+                     )->a( n = `xmlns:si` v = `sap.suite.ui.commons.statusindicator`
+                     )->a( n = `displayBlock` v = `true`
+                     )->a( n = `height` v = `100%`
                      )->ele( `Shell` ).
 
-    DATA(page) = view->ele( `Page` 
-                     )->a( n = `title` v = 'Layout' 
-                     )->a( n = `navButtonPress` v = client->_event( 'BACK' ) 
-                     )->a( n = `showNavButton` b = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL ) 
+
+
+    temp3 = boolc( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL ).
+    page = view->ele( `Page`
+                     )->a( n = `title` v = 'Layout'
+                     )->a( n = `navButtonPress` v = client->_event( 'BACK' )
+                     )->a( n = `showNavButton` b = temp3
                      )->a( n = `class` v = 'sapUiContentPadding' ).
 
-    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = REF #( mt_table )
+
+    GET REFERENCE OF mt_table INTO temp1.
+z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = temp1
                                                 i_xml    = page
                                                 i_client = client
                                                 i_layout = mo_table_layout ).
 
-    z2ui5_cl_layo_xml_builder=>xml_build_simple_form( i_data   = REF #( ms_struc )
+
+    GET REFERENCE OF ms_struc INTO temp2.
+z2ui5_cl_layo_xml_builder=>xml_build_simple_form( i_data   = temp2
                                                       i_xml    = page
                                                       i_client = client
                                                       i_layout = mo_layout ).
@@ -105,7 +117,7 @@ CLASS z2ui5_cl_layo_sample_05 IMPLEMENTATION.
   METHOD z2ui5_if_app~main.
     me->client = client.
 
-    IF client->check_on_init( ).
+    IF client->check_on_init( ) IS NOT INITIAL.
       on_init( ).
     ENDIF.
 
@@ -118,31 +130,48 @@ CLASS z2ui5_cl_layo_sample_05 IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_data.
+    DATA temp3 TYPE z2ui5_cl_layo_sample_05=>ty_s_data.
+    DATA temp4 TYPE z2ui5_cl_layo_sample_05=>ty_s_data.
 
-    SELECT * FROM z2ui5_t_11 INTO TABLE @mt_table UP TO 5 ROWS.
+    SELECT * FROM z2ui5_t_11 INTO TABLE mt_table UP TO 5 ROWS.
 
-    ms_struc = VALUE #( mt_table[ 1 ] OPTIONAL ).
+
+    CLEAR temp3.
+
+    READ TABLE mt_table INTO temp4 INDEX 1.
+    IF sy-subrc = 0.
+      temp3 = temp4.
+    ENDIF.
+    ms_struc = temp3.
 
   ENDMETHOD.
 
   METHOD init_layout.
+    DATA class TYPE abap_abstypename.
+    DATA temp5 LIKE REF TO mt_table.
+    DATA temp6 LIKE REF TO ms_struc.
 
     IF mo_layout IS BOUND.
       RETURN.
     ENDIF.
 
-    DATA(class) = cl_abap_classdescr=>get_class_name( me ).
+
+    class = cl_abap_classdescr=>get_class_name( me ).
     SHIFT class LEFT DELETING LEADING '\CLASS='.
 
-    mo_table_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>m_table
-                                                      data     = REF #( mt_table )
+
+    GET REFERENCE OF mt_table INTO temp5.
+mo_table_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>m_table
+                                                      data     = temp5
                                                       handle01 = class
                                                       handle02 = 'Z2UI5_T_01'
                                                       handle03 = ''
                                                       handle04 = '' ).
 
-    mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>ui_simpleform
-                                                data     = REF #( ms_struc )
+
+    GET REFERENCE OF ms_struc INTO temp6.
+mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>ui_simpleform
+                                                data     = temp6
                                                 handle01 = class
                                                 handle02 = 'Z2UI5_S_01'
                                                 handle03 = ''
@@ -151,10 +180,15 @@ CLASS z2ui5_cl_layo_sample_05 IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD on_after_navigation.
+        DATA temp7 TYPE REF TO z2ui5_cl_layo_pop.
+        DATA app LIKE temp7.
 
     TRY.
 
-        DATA(app) = CAST z2ui5_cl_layo_pop( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+
+        temp7 ?= client->get_app( client->get( )-s_draft-id_prev_app ).
+
+        app = temp7.
 
         IF     mo_layout->ms_layout-s_head-control  = app->mo_layout->ms_layout-s_head-control
            AND mo_layout->ms_layout-s_head-handle01 = app->mo_layout->ms_layout-s_head-handle01

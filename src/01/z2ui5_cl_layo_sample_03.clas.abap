@@ -11,7 +11,7 @@ CLASS z2ui5_cl_layo_sample_03 DEFINITION
     TYPES:
         selkz TYPE abap_bool,
       END OF ty_s_tab.
-    TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
+    TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH DEFAULT KEY.
 
     DATA mt_table  TYPE ty_t_table.
     DATA mo_layout TYPE REF TO z2ui5_cl_layo_manager.
@@ -59,25 +59,34 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
 
   METHOD render_main.
 
-    DATA(view) = z2ui5_cl_ui5_view_builder=>factory( 
-                     )->ele( n = `View` ns = `mvc` 
-                     )->a( n = `xmlns` v = `sap.m` 
-                     )->a( n = `xmlns:mvc` v = `sap.ui.core.mvc` 
-                     )->a( n = `xmlns:core` v = `sap.ui.core` 
-                     )->a( n = `xmlns:form` v = `sap.ui.layout.form` 
-                     )->a( n = `xmlns:mchart` v = `sap.suite.ui.microchart` 
-                     )->a( n = `xmlns:si` v = `sap.suite.ui.commons.statusindicator` 
-                     )->a( n = `displayBlock` v = `true` 
-                     )->a( n = `height` v = `100%` 
+    DATA view TYPE REF TO z2ui5_cl_ui5_view_builder.
+    DATA page TYPE REF TO z2ui5_cl_ui5_view_builder.
+    DATA temp2 TYPE xsdboolean.
+    DATA temp1 LIKE REF TO mt_table.
+    view = z2ui5_cl_ui5_view_builder=>factory(
+                     )->ele( n = `View` ns = `mvc`
+                     )->a( n = `xmlns` v = `sap.m`
+                     )->a( n = `xmlns:mvc` v = `sap.ui.core.mvc`
+                     )->a( n = `xmlns:core` v = `sap.ui.core`
+                     )->a( n = `xmlns:form` v = `sap.ui.layout.form`
+                     )->a( n = `xmlns:mchart` v = `sap.suite.ui.microchart`
+                     )->a( n = `xmlns:si` v = `sap.suite.ui.commons.statusindicator`
+                     )->a( n = `displayBlock` v = `true`
+                     )->a( n = `height` v = `100%`
                      )->ele( `Shell` ).
 
-    DATA(page) = view->ele( `Page` 
-                     )->a( n = `title` v = 'Layout' 
-                     )->a( n = `navButtonPress` v = client->_event( 'BACK' ) 
-                     )->a( n = `showNavButton` b = xsdbool( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL ) 
+
+
+    temp2 = boolc( client->get( )-s_draft-id_prev_app_stack IS NOT INITIAL ).
+    page = view->ele( `Page`
+                     )->a( n = `title` v = 'Layout'
+                     )->a( n = `navButtonPress` v = client->_event( 'BACK' )
+                     )->a( n = `showNavButton` b = temp2
                      )->a( n = `class` v = 'sapUiContentPadding' ).
 
-    z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = REF #( mt_table )
+
+    GET REFERENCE OF mt_table INTO temp1.
+z2ui5_cl_layo_xml_builder=>xml_build_table( i_data   = temp1
                                                 i_xml    = page
                                                 i_client = client
                                                 i_layout = mo_layout ).
@@ -89,7 +98,7 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
   METHOD z2ui5_if_app~main.
     me->client = client.
 
-    IF client->check_on_init( ).
+    IF client->check_on_init( ) IS NOT INITIAL.
       on_init( ).
     ENDIF.
 
@@ -103,21 +112,26 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
 
   METHOD get_data.
 
-    SELECT * FROM z2ui5_t_11 INTO TABLE @mt_table UP TO 10 ROWS.
+    SELECT * FROM z2ui5_t_11 INTO TABLE mt_table UP TO 10 ROWS.
 
   ENDMETHOD.
 
   METHOD init_layout.
+    DATA class TYPE abap_abstypename.
+    DATA temp2 LIKE REF TO mt_table.
 
     IF mo_layout IS BOUND.
       RETURN.
     ENDIF.
 
-    DATA(class) = cl_abap_classdescr=>get_class_name( me ).
+
+    class = cl_abap_classdescr=>get_class_name( me ).
     SHIFT class LEFT DELETING LEADING '\CLASS='.
 
-    mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>m_table
-                                                data     = REF #( mt_table )
+
+    GET REFERENCE OF mt_table INTO temp2.
+mo_layout = z2ui5_cl_layo_manager=>factory( control  = z2ui5_cl_layo_manager=>m_table
+                                                data     = temp2
                                                 handle01 = class
                                                 handle02 = 'Z2UI5_T_01'
                                                 handle03 = ''
@@ -126,10 +140,15 @@ CLASS z2ui5_cl_layo_sample_03 IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD on_after_navigation.
+        DATA temp3 TYPE REF TO z2ui5_cl_layo_pop.
+        DATA app LIKE temp3.
 
     TRY.
 
-        DATA(app) = CAST z2ui5_cl_layo_pop( client->get_app( client->get( )-s_draft-id_prev_app ) ).
+
+        temp3 ?= client->get_app( client->get( )-s_draft-id_prev_app ).
+
+        app = temp3.
         mo_layout = app->mo_layout.
 
         IF app->mv_rerender = abap_true.
